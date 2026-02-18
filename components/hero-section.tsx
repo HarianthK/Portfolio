@@ -46,7 +46,7 @@ export function HeroSection() {
               </Link>
             </Button>
             <Button size="lg" variant="outline" className="gap-2 bg-transparent group" asChild>
-              <a href="https://drive.google.com/file/d/1oB0gJgwCJ4UPWV2GfZoqP7unmwRXth4R/view?usp=sharing" target="_blank" rel="noopener noreferrer">
+              <a href="https://docs.google.com/document/d/1X2O3feHQPyQT1o_o69aiHgsjgKTi88jh/edit?usp=sharing&ouid=101771936241422952180&rtpof=true&sd=true" target="_blank" rel="noopener noreferrer">
                 <ExternalLink className="h-4 w-4 group-hover:translate-y-1 transition-transform" />
                 View Resume
               </a>
