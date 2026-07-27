@@ -26,14 +26,14 @@ export function Footer() {
               <span className="sr-only">LinkedIn</span>
             </Link>
             <Link
-              href="mailto:harianth.kalavala@asu.edu"
+              href="mailto:hkalaval@asu.edu"
               className="text-muted-foreground hover:text-primary transition-colors"
             >
               <Mail className="h-6 w-6" />
               <span className="sr-only">Email</span>
             </Link>
           </div>
-          <p className="text-muted-foreground text-sm">© 2025 Harianth Kalavala. All rights reserved.</p>
+          <p className="text-muted-foreground text-sm">© {new Date().getFullYear()} Harianth Kalavala. All rights reserved.</p>
         </div>
       </div>
     </footer>
