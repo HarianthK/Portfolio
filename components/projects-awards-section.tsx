@@ -120,24 +120,30 @@ export function ProjectsAwardsSection() {
             </div>
             <div className="grid md:grid-cols-1 gap-6">
               {awards.map((award, index) => (
-                <Card
+                <Link
                   key={index}
-                  className="p-8 border-primary/20 bg-card/50 backdrop-blur-xl hover:border-primary/40 transition-all duration-500 hover:shadow-2xl hover:shadow-primary/20 group cursor-pointer"
-                  style={{ animationDelay: `${(index + 3) * 100}ms` }}
-                  onClick={() => window.open('https://lib.asu.edu/news/library-student-workers-honored-libaid-fall-2024', '_blank')}
+                  href="https://lib.asu.edu/news/library-student-workers-honored-libaid-fall-2024"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
                 >
-                  <div className="flex items-start gap-6">
-                    <div className="p-4 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
-                      <Award className="h-8 w-8 text-primary" />
+                  <Card
+                    className="p-8 border-primary/20 bg-card/50 backdrop-blur-xl hover:border-primary/40 transition-all duration-500 hover:shadow-2xl hover:shadow-primary/20 group cursor-pointer"
+                    style={{ animationDelay: `${(index + 3) * 100}ms` }}
+                  >
+                    <div className="flex items-start gap-6">
+                      <div className="p-4 rounded-lg bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                        <Award className="h-8 w-8 text-primary" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-2xl font-semibold mb-2 group-hover:text-accent transition-colors">{award.title}</h3>
+                        <p className="text-muted-foreground mb-2 font-medium">{award.organization} • {award.period}</p>
+                        <p className="text-muted-foreground leading-relaxed">{award.description}</p>
+                        <p className="text-primary text-sm mt-3 group-hover:text-accent transition-colors">Click to read more about this award →</p>
+                      </div>
                     </div>
-                    <div className="flex-1">
-                      <h3 className="text-2xl font-semibold mb-2 group-hover:text-accent transition-colors">{award.title}</h3>
-                      <p className="text-muted-foreground mb-2 font-medium">{award.organization} • {award.period}</p>
-                      <p className="text-muted-foreground leading-relaxed">{award.description}</p>
-                      <p className="text-primary text-sm mt-3 group-hover:text-accent transition-colors">Click to read more about this award →</p>
-                    </div>
-                  </div>
-                </Card>
+                  </Card>
+                </Link>
               ))}
             </div>
           </div>
