@@ -1,7 +1,13 @@
+import type { Metadata } from "next"
 import { ContactSection } from "@/components/contact-section"
 import { Footer } from "@/components/footer"
 import { AnimatedBackground } from "@/components/animated-background"
 import { Navigation } from "@/components/navigation"
+
+export const metadata: Metadata = {
+  title: "Contact",
+  description: "Get in touch to discuss AI engineering opportunities, collaborations, or questions.",
+}
 
 export default function ContactPage() {
   return (
