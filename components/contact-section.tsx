@@ -60,7 +60,7 @@ export function ContactSection() {
     {
       icon: MapPin,
       label: "Location",
-      value: "Mesa, Arizona, USA",
+      value: "Phoenix, Arizona, USA",
       href: "#",
     },
   ]
