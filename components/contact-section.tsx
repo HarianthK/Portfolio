@@ -4,50 +4,55 @@ import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Github, Linkedin, Mail, Phone, MapPin, Send } from "lucide-react"
+import { Github, Linkedin, Mail, MapPin, Send, Copy, Check } from "lucide-react"
 import Link from "next/link"
-import { useEffect, useState } from "react"
+import { useState } from "react"
+import { toast } from "sonner"
+import { Reveal } from "@/components/motion/reveal"
 
 export function ContactSection() {
-  const [mounted, setMounted] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle')
-
-  useEffect(() => {
-    setMounted(true)
-  }, [])
+  const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle")
+  const [copied, setCopied] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setIsSubmitting(true)
-    
+
     try {
       const formData = new FormData(e.currentTarget)
       const data = {
-        name: formData.get('name'),
-        email: formData.get('email'),
-        subject: formData.get('subject'),
-        message: formData.get('message'),
+        name: formData.get("name"),
+        email: formData.get("email"),
+        subject: formData.get("subject"),
+        message: formData.get("message"),
       }
 
       // Create mailto link with form data
       const mailtoLink = `mailto:hkalaval@asu.edu?subject=${encodeURIComponent(data.subject as string)}&body=${encodeURIComponent(
-        `Name: ${data.name}\nEmail: ${data.email}\n\nMessage:\n${data.message}`
+        `Name: ${data.name}\nEmail: ${data.email}\n\nMessage:\n${data.message}`,
       )}`
-      
+
       // Open email client
       window.location.href = mailtoLink
-      
-      setSubmitStatus('success')
+
+      setSubmitStatus("success")
       // Reset form
       const form = e.currentTarget
       form.reset()
     } catch (error) {
-      setSubmitStatus('error')
+      setSubmitStatus("error")
     } finally {
       setIsSubmitting(false)
-      setTimeout(() => setSubmitStatus('idle'), 5000)
+      setTimeout(() => setSubmitStatus("idle"), 5000)
     }
+  }
+
+  const handleCopyEmail = async () => {
+    await navigator.clipboard.writeText("hkalaval@asu.edu")
+    setCopied(true)
+    toast.success("Email copied to clipboard")
+    setTimeout(() => setCopied(false), 2000)
   }
 
   const contactInfo = [
@@ -56,21 +61,21 @@ export function ContactSection() {
       label: "Email",
       value: "hkalaval@asu.edu",
       href: "mailto:hkalaval@asu.edu",
+      copyable: true,
     },
     {
       icon: MapPin,
       label: "Location",
       value: "Phoenix, Arizona, USA",
       href: "#",
+      copyable: false,
     },
   ]
 
   return (
     <section className="min-h-screen flex items-center justify-center py-20 px-4 pt-24">
       <div className="max-w-6xl w-full">
-        <div
-          className={`transition-all duration-1000 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}
-        >
+        <Reveal>
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent animate-gradient bg-[length:200%_auto]">
               Let's Connect
@@ -137,27 +142,30 @@ export function ContactSection() {
                     className="bg-background/50 border-primary/20 focus:border-primary/40 resize-none"
                   />
                 </div>
-                
+
                 {/* Status Messages */}
-                {submitStatus === 'success' && (
+                {submitStatus === "success" && (
                   <div className="p-4 rounded-lg bg-green-500/10 border border-green-500/20 text-green-400">
                     Your email client should open with the message ready to send. If it doesn't open, please email me directly at hkalaval@asu.edu
                   </div>
                 )}
-                {submitStatus === 'error' && (
+                {submitStatus === "error" && (
                   <div className="p-4 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400">
                     Failed to send message. Please try again or contact me directly.
                   </div>
                 )}
-                
+
                 <Button
                   type="submit"
                   disabled={isSubmitting}
                   className="w-full gap-2 group hover:scale-105 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Send className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                  {isSubmitting ? 'Sending...' : 'Send Message'}
+                  {isSubmitting ? "Sending..." : "Send Message"}
                 </Button>
+                <p className="text-xs text-muted-foreground text-center -mt-2">
+                  This opens your email app with the message pre-filled — or copy the email address below instead.
+                </p>
               </form>
             </Card>
 
@@ -185,6 +193,18 @@ export function ContactSection() {
                             {info.value}
                           </Link>
                         </div>
+                        {info.copyable && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={handleCopyEmail}
+                            className="shrink-0 hover:bg-primary/10 hover:text-primary"
+                          >
+                            {copied ? <Check className="h-4 w-4 text-green-400" /> : <Copy className="h-4 w-4" />}
+                            <span className="sr-only">Copy email address</span>
+                          </Button>
+                        )}
                       </div>
                     )
                   })}
@@ -217,7 +237,7 @@ export function ContactSection() {
               </Card>
             </div>
           </div>
-        </div>
+        </Reveal>
       </div>
     </section>
   )
