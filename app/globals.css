@@ -180,6 +180,24 @@
   }
 }
 
+@keyframes pulse-right {
+  from {
+    left: -12%;
+  }
+  to {
+    left: 112%;
+  }
+}
+
+@keyframes pulse-down {
+  from {
+    top: -12%;
+  }
+  to {
+    top: 112%;
+  }
+}
+
 .animate-float {
   animation: float 6s ease-in-out infinite;
 }
@@ -199,6 +217,14 @@
 
 .animate-glow-pulse {
   animation: glow-pulse 2s ease-in-out infinite;
+}
+
+.animate-pulse-right {
+  animation: pulse-right linear infinite;
+}
+
+.animate-pulse-down {
+  animation: pulse-down linear infinite;
 }
 
 /* Added glass morphism effect */
