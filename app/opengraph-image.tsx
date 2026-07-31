@@ -17,7 +17,7 @@ export default function OpengraphImage() {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          background: "#0a0a0f",
+          background: "#16130f",
           fontFamily: "sans-serif",
         }}
       >
@@ -29,8 +29,8 @@ export default function OpengraphImage() {
             borderRadius: "50%",
             alignItems: "center",
             justifyContent: "center",
-            background: "linear-gradient(135deg, #a855f7 0%, #ec4899 100%)",
-            color: "white",
+            background: "linear-gradient(135deg, #f0b429 0%, #e07b39 100%)",
+            color: "#16130f",
             fontSize: 56,
             fontWeight: 700,
             marginBottom: 40,
@@ -53,7 +53,7 @@ export default function OpengraphImage() {
           style={{
             display: "flex",
             fontSize: 30,
-            color: "#c084fc",
+            color: "#f0b429",
           }}
         >
           AI Engineer — LLMs | RAG Systems | Graph-based Agents

@@ -1,9 +1,9 @@
 const pulses = [
-  { type: "right" as const, offset: "18%", color: "#ec4899", duration: 7, delay: 0 },
-  { type: "right" as const, offset: "62%", color: "#a855f7", duration: 9, delay: -3.5 },
-  { type: "right" as const, offset: "84%", color: "#6366f1", duration: 8, delay: -1.5 },
-  { type: "down" as const, offset: "22%", color: "#6366f1", duration: 8.5, delay: -2 },
-  { type: "down" as const, offset: "70%", color: "#a855f7", duration: 7.5, delay: -5 },
+  { type: "right" as const, offset: "18%", color: "#e07b39", duration: 7, delay: 0 },
+  { type: "right" as const, offset: "62%", color: "#f0b429", duration: 9, delay: -3.5 },
+  { type: "right" as const, offset: "84%", color: "#ffc857", duration: 8, delay: -1.5 },
+  { type: "down" as const, offset: "22%", color: "#f0b429", duration: 8.5, delay: -2 },
+  { type: "down" as const, offset: "70%", color: "#e07b39", duration: 7.5, delay: -5 },
 ]
 
 export function AnimatedBackground() {
@@ -14,7 +14,7 @@ export function AnimatedBackground() {
         className="absolute inset-0 opacity-70"
         style={{
           backgroundImage:
-            "linear-gradient(to right, rgba(148,138,196,0.08) 1px, transparent 1px), linear-gradient(to bottom, rgba(148,138,196,0.08) 1px, transparent 1px)",
+            "linear-gradient(to right, rgba(200,172,120,0.07) 1px, transparent 1px), linear-gradient(to bottom, rgba(200,172,120,0.07) 1px, transparent 1px)",
           backgroundSize: "48px 48px",
         }}
       />
