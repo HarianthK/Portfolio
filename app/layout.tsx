@@ -5,6 +5,7 @@ import { Analytics } from "@vercel/analytics/next"
 import { siteUrl } from "@/lib/site"
 import { CursorGlow } from "@/components/cursor-glow"
 import { ScrollProgress } from "@/components/scroll-progress"
+import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/sonner"
 import "./globals.css"
 
@@ -41,12 +42,14 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={`${inter.className} font-sans antialiased`}>
-        <ScrollProgress />
-        <CursorGlow />
-        {children}
-        <Toaster />
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
+          <ScrollProgress />
+          <CursorGlow />
+          {children}
+          <Toaster />
+        </ThemeProvider>
         <Analytics />
       </body>
     </html>

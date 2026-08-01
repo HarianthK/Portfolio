@@ -7,6 +7,7 @@ import { Home, User, Briefcase, GraduationCap, Code, Mail, Menu } from "lucide-r
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetClose } from "@/components/ui/sheet"
+import { ThemeToggle } from "@/components/theme-toggle"
 
 const navItems = [
   { href: "/", label: "Home", icon: Home },
@@ -49,9 +50,13 @@ export function Navigation() {
                 </Link>
               )
             })}
+            <div className="ml-1 pl-1 border-l border-border/60">
+              <ThemeToggle />
+            </div>
           </div>
 
-          <div className="md:hidden">
+          <div className="flex items-center gap-1 md:hidden">
+            <ThemeToggle />
             <Sheet open={open} onOpenChange={setOpen}>
               <Button
                 variant="ghost"
