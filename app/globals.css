@@ -4,44 +4,46 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
-  Amber & copper on a warm near-black. Both accents sit high on the lightness
-  scale, so anything using them as a *background* takes dark foreground text —
-  see --primary-foreground / --accent-foreground below.
+  Amber & copper, shared across both themes. Light mode darkens both accents
+  so they hold contrast as text on a warm off-white; dark mode lightens them
+  so they hold contrast on a warm near-black. --grid-line is a one-off token
+  (not part of the shadcn set) used by the animated background's grid lines.
 */
 :root {
-  --background: oklch(0.13 0.012 70);
-  --foreground: oklch(0.97 0.008 80);
-  --card: oklch(0.17 0.014 70);
-  --card-foreground: oklch(0.97 0.008 80);
-  --popover: oklch(0.17 0.014 70);
-  --popover-foreground: oklch(0.97 0.008 80);
-  --primary: oklch(0.79 0.145 78);
-  --primary-foreground: oklch(0.16 0.02 70);
-  --secondary: oklch(0.23 0.02 70);
-  --secondary-foreground: oklch(0.97 0.008 80);
-  --muted: oklch(0.23 0.02 70);
-  --muted-foreground: oklch(0.68 0.018 75);
-  --accent: oklch(0.68 0.135 48);
-  --accent-foreground: oklch(0.16 0.02 60);
-  --destructive: oklch(0.58 0.21 18);
-  --destructive-foreground: oklch(0.98 0.01 60);
-  --border: oklch(0.27 0.02 70);
-  --input: oklch(0.27 0.02 70);
-  --ring: oklch(0.79 0.145 78);
-  --chart-1: oklch(0.79 0.145 78);
-  --chart-2: oklch(0.68 0.135 48);
-  --chart-3: oklch(0.85 0.12 92);
-  --chart-4: oklch(0.6 0.13 35);
-  --chart-5: oklch(0.72 0.1 62);
+  --background: oklch(0.95 0.025 75);
+  --foreground: oklch(0.22 0.02 55);
+  --card: oklch(0.985 0.012 78);
+  --card-foreground: oklch(0.22 0.02 55);
+  --popover: oklch(0.985 0.012 78);
+  --popover-foreground: oklch(0.22 0.02 55);
+  --primary: oklch(0.52 0.16 48);
+  --primary-foreground: oklch(0.99 0.006 80);
+  --secondary: oklch(0.9 0.02 75);
+  --secondary-foreground: oklch(0.28 0.02 60);
+  --muted: oklch(0.9 0.02 75);
+  --muted-foreground: oklch(0.46 0.025 60);
+  --accent: oklch(0.56 0.15 35);
+  --accent-foreground: oklch(0.99 0.006 80);
+  --destructive: oklch(0.55 0.22 25);
+  --destructive-foreground: oklch(0.99 0.01 60);
+  --border: oklch(0.82 0.02 70);
+  --input: oklch(0.82 0.02 70);
+  --ring: oklch(0.52 0.16 48);
+  --chart-1: oklch(0.52 0.16 48);
+  --chart-2: oklch(0.56 0.15 35);
+  --chart-3: oklch(0.62 0.13 92);
+  --chart-4: oklch(0.46 0.14 35);
+  --chart-5: oklch(0.5 0.11 62);
   --radius: 0.75rem;
-  --sidebar: oklch(0.17 0.014 70);
-  --sidebar-foreground: oklch(0.97 0.008 80);
-  --sidebar-primary: oklch(0.79 0.145 78);
-  --sidebar-primary-foreground: oklch(0.16 0.02 70);
-  --sidebar-accent: oklch(0.23 0.02 70);
-  --sidebar-accent-foreground: oklch(0.97 0.008 80);
-  --sidebar-border: oklch(0.27 0.02 70);
-  --sidebar-ring: oklch(0.79 0.145 78);
+  --sidebar: oklch(0.985 0.012 78);
+  --sidebar-foreground: oklch(0.22 0.02 55);
+  --sidebar-primary: oklch(0.52 0.16 48);
+  --sidebar-primary-foreground: oklch(0.99 0.006 80);
+  --sidebar-accent: oklch(0.9 0.02 75);
+  --sidebar-accent-foreground: oklch(0.28 0.02 60);
+  --sidebar-border: oklch(0.82 0.02 70);
+  --sidebar-ring: oklch(0.52 0.16 48);
+  --grid-line: rgba(120, 90, 40, 0.11);
 }
 
 .dark {
@@ -77,6 +79,7 @@
   --sidebar-accent-foreground: oklch(0.97 0.008 80);
   --sidebar-border: oklch(0.28 0.02 70);
   --sidebar-ring: oklch(0.81 0.14 78);
+  --grid-line: rgba(200, 172, 120, 0.07);
 }
 
 @theme inline {
