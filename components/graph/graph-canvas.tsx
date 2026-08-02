@@ -6,7 +6,7 @@ import { OrbitControls } from "@react-three/drei"
 import { Bloom, EffectComposer } from "@react-three/postprocessing"
 import R3fForceGraph from "r3f-forcegraph"
 import * as THREE from "three"
-import { links, nodes, nodesInSection, type GraphNode, type SectionId } from "@/lib/graph-data"
+import { links, nodes, type GraphNode, type NodeKind } from "@/lib/graph-data"
 import {
   applySectionEmphasis,
   colorForNode,
@@ -15,8 +15,13 @@ import {
 } from "@/lib/graph-visuals"
 import { useSafeReducedMotion } from "@/lib/use-safe-reduced-motion"
 
+export type GraphFraming = "immersive" | "comfortable"
+
 type Props = {
-  activeSection: SectionId
+  /** Node kinds to keep lit. `null` lights the whole graph. */
+  highlight?: NodeKind[] | null
+  /** Immersive lets the graph bleed past the frame; comfortable fits it inside. */
+  framing?: GraphFraming
   onNodeFocus?: (node: GraphNode | null) => void
   onNodeSelect?: (node: GraphNode) => void
 }
@@ -32,18 +37,18 @@ function boundsOf(objects: THREE.Object3D[]) {
   return box
 }
 
-function Scene({ activeSection, onNodeFocus, onNodeSelect }: Props) {
+function Scene({ highlight, framing = "immersive", onNodeFocus, onNodeSelect }: Props) {
   const graphRef = useRef<GraphHandle | undefined>(undefined)
   const groupRef = useRef<THREE.Group>(null)
   const prefersReducedMotion = useSafeReducedMotion()
   const { gl, camera, size } = useThree()
 
-  // Once the visitor grabs the graph they own the camera, until they scroll to
-  // a different section — otherwise auto-framing would fight their dragging.
+  // Once the visitor grabs the graph they own the camera, until the highlight
+  // changes — otherwise auto-framing would fight their dragging.
   const userControlled = useRef(false)
   useEffect(() => {
     userControlled.current = false
-  }, [activeSection])
+  }, [highlight])
 
   // r3f-forcegraph mutates the objects it's given (it writes x/y/z onto each
   // node), so it gets copies — otherwise the module-level data in graph-data.ts
@@ -58,20 +63,16 @@ function Scene({ activeSection, onNodeFocus, onNodeSelect }: Props) {
 
   const { nodeObject, objects } = useMemo(() => createNodeObjectFactory(), [])
 
-  // Node ids the current section cares about. `null` means "the whole graph",
-  // which is what the hero shows.
   const activeIds = useMemo(() => {
-    if (activeSection === "hero") return null
-    const ids = nodesInSection(activeSection)
-    return ids.length > 0 ? new Set(ids) : null
-  }, [activeSection])
+    if (!highlight || highlight.length === 0) return null
+    const kinds = new Set(highlight)
+    return new Set(nodes.filter((node) => kinds.has(node.kind)).map((node) => node.id))
+  }, [highlight])
 
   useFrame((_, delta) => {
     graphRef.current?.tickFrame()
 
     // Frame-rate independent easing — same feel on a 60Hz and 144Hz display.
-    // Kept brisk: at slower rates the camera never actually arrived before the
-    // next section took over, so it read as permanently chasing the scroll.
     const ease = 1 - Math.exp(-5.5 * delta)
 
     applySectionEmphasis(objects, activeIds, ease)
@@ -79,35 +80,22 @@ function Scene({ activeSection, onNodeFocus, onNodeSelect }: Props) {
     const group = groupRef.current
     if (!group || objects.size === 0) return
 
-    const focus = activeIds
-      ? [...objects.entries()].filter(([id]) => activeIds.has(id)).map(([, object]) => object)
-      : [...objects.values()]
-
-    if (focus.length === 0) return
-
-    const box = boundsOf(focus)
+    // Framing always considers the whole graph. Filtering dims nodes rather than
+    // removing them, so re-fitting to just the lit ones would make the camera
+    // lurch every time a filter changed.
+    const box = boundsOf([...objects.values()])
     const centre = box.getCenter(new THREE.Vector3())
     const span = box.getSize(new THREE.Vector3())
-    // Floor the radius: a section cluster can be only a handful of nodes, and
-    // fitting that tightly flies the camera uncomfortably close.
     const radius = Math.max(span.x, span.y, 330) / 2
 
-    // On wide screens the written content sits in a left column, so the graph
-    // is nudged right to sit beside it rather than underneath it.
-    const lateralOffset = size.width >= 1024 ? radius * 0.26 : 0
-    const desiredGroupPos = centre.clone().negate().setX(-centre.x + lateralOffset)
-
-    group.position.lerp(desiredGroupPos, ease)
+    group.position.lerp(centre.clone().negate(), ease)
 
     if (userControlled.current) return
 
     const perspective = camera as THREE.PerspectiveCamera
     const vFov = (perspective.fov * Math.PI) / 180
     const hFov = 2 * Math.atan(Math.tan(vFov / 2) * (size.width / size.height))
-    // The hero sits slightly inside a perfect fit so the graph bleeds past the
-    // frame edges and feels immersive. Section views back off to a true fit,
-    // where clipped nodes would just read as broken rather than dramatic.
-    const margin = activeIds ? 0.88 : 0.82
+    const margin = framing === "immersive" ? 0.82 : 1.02
     const desired = (radius / Math.tan(Math.min(vFov, hFov) / 2)) * margin
 
     // Only the distance is touched, never the direction — that leaves
@@ -123,9 +111,8 @@ function Scene({ activeSection, onNodeFocus, onNodeSelect }: Props) {
     [gl, onNodeFocus],
   )
 
-  // Moving the cursor from the canvas onto the text column never produces a
-  // "no node" event from the graph, so without this the last hovered node stays
-  // latched and its readout won't go away.
+  // Leaving the canvas produces no "no node" event from the graph, so without
+  // this the last hovered node stays latched and its readout won't go away.
   useEffect(() => {
     const canvas = gl.domElement
     const clear = () => onNodeFocus?.(null)
@@ -184,19 +171,14 @@ function Scene({ activeSection, onNodeFocus, onNodeSelect }: Props) {
 
       {!prefersReducedMotion && (
         <EffectComposer>
-          <Bloom
-            intensity={1.15}
-            luminanceThreshold={0.18}
-            luminanceSmoothing={0.5}
-            mipmapBlur
-          />
+          <Bloom intensity={1.15} luminanceThreshold={0.18} luminanceSmoothing={0.5} mipmapBlur />
         </EffectComposer>
       )}
     </>
   )
 }
 
-export default function GraphCanvas({ activeSection, onNodeFocus, onNodeSelect }: Props) {
+export default function GraphCanvas(props: Props) {
   const [visible, setVisible] = useState(true)
 
   // The force simulation is a continuous render loop; there's no reason to burn
@@ -219,11 +201,7 @@ export default function GraphCanvas({ activeSection, onNodeFocus, onNodeSelect }
       }}
       style={{ position: "absolute", inset: 0 }}
     >
-      <Scene
-        activeSection={activeSection}
-        onNodeFocus={onNodeFocus}
-        onNodeSelect={onNodeSelect}
-      />
+      <Scene {...props} />
     </Canvas>
   )
 }

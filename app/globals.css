@@ -252,11 +252,28 @@
   animation: pulse-down linear infinite;
 }
 
-/* Added glass morphism effect */
-.glass-effect {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+/*
+  Content sections no longer sit over the 3D graph, so they have to carry
+  themselves. This is a faint measuring-grid — enough that a section reads as
+  deliberately surfaced rather than empty, quiet enough not to compete with
+  text. Static by design; the moving version belongs to the graph.
+*/
+.section-grid {
+  position: relative;
+  isolation: isolate;
+}
+
+.section-grid::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background-image:
+    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
+  background-size: 56px 56px;
+  /* Fades out at the edges so the grid never terminates on a hard line. */
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, #000 40%, transparent 100%);
 }
 
 @media (prefers-reduced-motion: reduce) {
