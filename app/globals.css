@@ -44,6 +44,13 @@
   --sidebar-border: oklch(0.82 0.02 70);
   --sidebar-ring: oklch(0.52 0.16 48);
   --grid-line: rgba(120, 90, 40, 0.11);
+
+  /* Knowledge-graph node families. Three categories so the graph reads as
+     structured rather than a monochrome cloud: warm for people/work, cool for
+     technology. Light theme runs them darker to hold contrast on beige. */
+  --node-role: oklch(0.52 0.16 48);
+  --node-project: oklch(0.56 0.15 35);
+  --node-tech: oklch(0.48 0.12 235);
 }
 
 .dark {
@@ -80,11 +87,21 @@
   --sidebar-border: oklch(0.28 0.02 70);
   --sidebar-ring: oklch(0.81 0.14 78);
   --grid-line: rgba(200, 172, 120, 0.07);
+
+  /* Brighter here on purpose — these get bloom applied over near-black, so they
+     need headroom to glow rather than blow out to white. */
+  --node-role: oklch(0.81 0.14 78);
+  --node-project: oklch(0.7 0.13 48);
+  --node-tech: oklch(0.72 0.12 225);
 }
 
 @theme inline {
-  --font-sans: "Inter", "Inter Fallback", system-ui, -apple-system, sans-serif;
-  --font-mono: "Geist Mono", "Geist Mono Fallback", monospace;
+  --font-sans: var(--font-body), system-ui, -apple-system, sans-serif;
+  --font-serif: var(--font-display), Georgia, serif;
+  --font-mono: var(--font-mono-data), ui-monospace, monospace;
+  --color-node-role: var(--node-role);
+  --color-node-project: var(--node-project);
+  --color-node-tech: var(--node-tech);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);

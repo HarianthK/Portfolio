@@ -1,6 +1,6 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Inter } from "next/font/google"
+import { Instrument_Serif, JetBrains_Mono, Manrope } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { siteUrl } from "@/lib/site"
 import { CursorGlow } from "@/components/cursor-glow"
@@ -9,7 +9,26 @@ import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/sonner"
 import "./globals.css"
 
-const inter = Inter({ subsets: ["latin"] })
+// Three faces, three jobs. The serif carries the human voice, the mono carries
+// machine output (node labels, metrics, readouts), and Manrope stays out of the
+// way for body copy. Deliberately avoids Inter and Geist — both read as
+// framework defaults rather than a choice.
+const display = Instrument_Serif({
+  subsets: ["latin"],
+  weight: "400",
+  style: ["normal", "italic"],
+  variable: "--font-display",
+})
+
+const body = Manrope({
+  subsets: ["latin"],
+  variable: "--font-body",
+})
+
+const mono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono-data",
+})
 
 const title = "Harianth Kalavala | AI Engineer"
 const description = "AI Engineer specializing in LLM pipelines and RAG systems"
@@ -21,7 +40,6 @@ export const metadata: Metadata = {
     template: "%s | Harianth Kalavala",
   },
   description,
-  generator: "v0.app",
   openGraph: {
     title,
     description,
@@ -42,8 +60,12 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.className} font-sans antialiased`}>
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={`${display.variable} ${body.variable} ${mono.variable}`}
+    >
+      <body className="font-sans antialiased">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
           <ScrollProgress />
           <CursorGlow />
