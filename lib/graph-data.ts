@@ -13,8 +13,12 @@ export type NodeKind = "self" | "role" | "education" | "project" | "outcome" | "
 
 export type EdgeKind = "worked-at" | "studied-at" | "built" | "built-with" | "produced" | "uses"
 
-/** Which scroll section pulls the camera to this node's cluster. */
-export type SectionId = "hero" | "now" | "work" | "foundations"
+/**
+ * Which scroll section pulls the camera to this node's cluster. "hero" and
+ * "contact" deliberately own no nodes — both show the whole graph, so the piece
+ * opens and closes on the complete picture.
+ */
+export type SectionId = "hero" | "now" | "work" | "foundations" | "contact"
 
 export type GraphNode = {
   id: string

@@ -5,7 +5,7 @@ import { KnowledgeGraph } from "@/components/graph/knowledge-graph"
 import { useActiveSection } from "@/lib/use-active-section"
 import type { SectionId } from "@/lib/graph-data"
 
-const SECTION_ORDER: SectionId[] = ["hero", "now", "work", "foundations"]
+const SECTION_ORDER: SectionId[] = ["hero", "now", "work", "foundations", "contact"]
 
 function SectionHeading({ index, label }: { index: string; label: string }) {
   return (
@@ -39,10 +39,14 @@ export function PortfolioPage() {
         style={{ background: "color-mix(in oklch, var(--background) 82%, transparent)" }}
       />
 
-      <main className="relative">
+      {/* The sections are full-height blocks stacked over the canvas, so left as
+          they were they'd swallow every mouse event and the graph couldn't be
+          dragged. Pointer events are switched off here and re-enabled only on
+          the text columns themselves. */}
+      <main className="pointer-events-none relative">
         {/* ── Hero ───────────────────────────────────────────────────────── */}
         <section id="hero" className="flex min-h-screen items-center px-6 md:px-14">
-          <div className="max-w-xl">
+          <div className="pointer-events-auto max-w-xl">
             <p className="font-mono text-xs uppercase tracking-[0.3em] text-primary">
               AI Engineer · Phoenix, AZ
             </p>
@@ -67,7 +71,7 @@ export function PortfolioPage() {
 
         {/* ── Now ────────────────────────────────────────────────────────── */}
         <section id="now" className="flex min-h-screen items-center px-6 md:px-14">
-          <div className="max-w-xl">
+          <div className="pointer-events-auto max-w-xl">
             <SectionHeading index="01" label="Now" />
             <h2 className="font-serif text-4xl leading-tight text-foreground md:text-5xl">
               AI Engineer at XNode AI
@@ -124,7 +128,7 @@ export function PortfolioPage() {
 
         {/* ── Work ───────────────────────────────────────────────────────── */}
         <section id="work" className="flex min-h-screen items-center px-6 md:px-14">
-          <div className="max-w-xl">
+          <div className="pointer-events-auto max-w-xl">
             <SectionHeading index="02" label="Built" />
             <h2 className="font-serif text-4xl leading-tight text-foreground md:text-5xl">
               Things I&apos;ve made outside the day job
@@ -173,7 +177,7 @@ export function PortfolioPage() {
 
         {/* ── Foundations ────────────────────────────────────────────────── */}
         <section id="foundations" className="flex min-h-screen items-center px-6 md:px-14">
-          <div className="max-w-xl">
+          <div className="pointer-events-auto max-w-xl">
             <SectionHeading index="03" label="Foundations" />
             <h2 className="font-serif text-4xl leading-tight text-foreground md:text-5xl">
               Where the data instincts came from
@@ -219,7 +223,7 @@ export function PortfolioPage() {
 
         {/* ── Contact ────────────────────────────────────────────────────── */}
         <section id="contact" className="flex min-h-[70vh] items-center px-6 pb-24 md:px-14">
-          <div className="max-w-xl">
+          <div className="pointer-events-auto max-w-xl">
             <SectionHeading index="04" label="Contact" />
             <h2 className="font-serif text-4xl leading-tight text-foreground md:text-5xl">
               Open to AI engineering roles

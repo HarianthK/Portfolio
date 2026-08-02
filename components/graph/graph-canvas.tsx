@@ -18,6 +18,7 @@ import { useSafeReducedMotion } from "@/lib/use-safe-reduced-motion"
 type Props = {
   activeSection: SectionId
   onNodeFocus?: (node: GraphNode | null) => void
+  onNodeSelect?: (node: GraphNode) => void
 }
 
 type GraphHandle = {
@@ -31,7 +32,7 @@ function boundsOf(objects: THREE.Object3D[]) {
   return box
 }
 
-function Scene({ activeSection, onNodeFocus }: Props) {
+function Scene({ activeSection, onNodeFocus, onNodeSelect }: Props) {
   const graphRef = useRef<GraphHandle | undefined>(undefined)
   const groupRef = useRef<THREE.Group>(null)
   const prefersReducedMotion = useSafeReducedMotion()
@@ -69,7 +70,9 @@ function Scene({ activeSection, onNodeFocus }: Props) {
     graphRef.current?.tickFrame()
 
     // Frame-rate independent easing — same feel on a 60Hz and 144Hz display.
-    const ease = 1 - Math.exp(-2.6 * delta)
+    // Kept brisk: at slower rates the camera never actually arrived before the
+    // next section took over, so it read as permanently chasing the scroll.
+    const ease = 1 - Math.exp(-5.5 * delta)
 
     applySectionEmphasis(objects, activeIds, ease)
 
@@ -87,11 +90,11 @@ function Scene({ activeSection, onNodeFocus }: Props) {
     const span = box.getSize(new THREE.Vector3())
     // Floor the radius: a section cluster can be only a handful of nodes, and
     // fitting that tightly flies the camera uncomfortably close.
-    const radius = Math.max(span.x, span.y, 260) / 2
+    const radius = Math.max(span.x, span.y, 330) / 2
 
     // On wide screens the written content sits in a left column, so the graph
     // is nudged right to sit beside it rather than underneath it.
-    const lateralOffset = size.width >= 1024 ? radius * 0.34 : 0
+    const lateralOffset = size.width >= 1024 ? radius * 0.26 : 0
     const desiredGroupPos = centre.clone().negate().setX(-centre.x + lateralOffset)
 
     group.position.lerp(desiredGroupPos, ease)
@@ -101,12 +104,15 @@ function Scene({ activeSection, onNodeFocus }: Props) {
     const perspective = camera as THREE.PerspectiveCamera
     const vFov = (perspective.fov * Math.PI) / 180
     const hFov = 2 * Math.atan(Math.tan(vFov / 2) * (size.width / size.height))
-    // Slightly inside a perfect fit so the graph bleeds past the frame edges.
-    const desired = (radius / Math.tan(Math.min(vFov, hFov) / 2)) * 0.82
+    // The hero sits slightly inside a perfect fit so the graph bleeds past the
+    // frame edges and feels immersive. Section views back off to a true fit,
+    // where clipped nodes would just read as broken rather than dramatic.
+    const margin = activeIds ? 0.88 : 0.82
+    const desired = (radius / Math.tan(Math.min(vFov, hFov) / 2)) * margin
 
     // Only the distance is touched, never the direction — that leaves
     // OrbitControls' rotation and auto-rotate free to do their own thing.
-    camera.position.setLength(THREE.MathUtils.damp(camera.position.length(), desired, 1.7, delta))
+    camera.position.setLength(THREE.MathUtils.damp(camera.position.length(), desired, 4.5, delta))
   })
 
   const handleHover = useCallback(
@@ -116,6 +122,16 @@ function Scene({ activeSection, onNodeFocus }: Props) {
     },
     [gl, onNodeFocus],
   )
+
+  // Moving the cursor from the canvas onto the text column never produces a
+  // "no node" event from the graph, so without this the last hovered node stays
+  // latched and its readout won't go away.
+  useEffect(() => {
+    const canvas = gl.domElement
+    const clear = () => onNodeFocus?.(null)
+    canvas.addEventListener("pointerleave", clear)
+    return () => canvas.removeEventListener("pointerleave", clear)
+  }, [gl, onNodeFocus])
 
   return (
     <>
@@ -148,6 +164,7 @@ function Scene({ activeSection, onNodeFocus }: Props) {
           warmupTicks={80}
           cooldownTime={prefersReducedMotion ? 0 : 9000}
           onNodeHover={handleHover as never}
+          onNodeClick={((node: GraphNode) => onNodeSelect?.(node)) as never}
         />
       </group>
 
@@ -179,7 +196,7 @@ function Scene({ activeSection, onNodeFocus }: Props) {
   )
 }
 
-export default function GraphCanvas({ activeSection, onNodeFocus }: Props) {
+export default function GraphCanvas({ activeSection, onNodeFocus, onNodeSelect }: Props) {
   const [visible, setVisible] = useState(true)
 
   // The force simulation is a continuous render loop; there's no reason to burn
@@ -202,7 +219,11 @@ export default function GraphCanvas({ activeSection, onNodeFocus }: Props) {
       }}
       style={{ position: "absolute", inset: 0 }}
     >
-      <Scene activeSection={activeSection} onNodeFocus={onNodeFocus} />
+      <Scene
+        activeSection={activeSection}
+        onNodeFocus={onNodeFocus}
+        onNodeSelect={onNodeSelect}
+      />
     </Canvas>
   )
 }

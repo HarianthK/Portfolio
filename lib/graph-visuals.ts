@@ -110,18 +110,21 @@ export function createNodeObjectFactory() {
     const color = colorForNode(node)
     const radius = radiusForNode(node)
 
-    const core = new THREE.Mesh(
-      new THREE.IcosahedronGeometry(radius, 3),
-      new THREE.MeshStandardMaterial({
-        color,
-        emissive: new THREE.Color(color),
-        // Bigger nodes glow harder, so hierarchy survives the bloom pass.
-        emissiveIntensity: node.kind === "tech" ? 0.7 : 1.6,
-        roughness: 0.35,
-        metalness: 0.1,
-      }),
-    )
-    group.add(core)
+    const coreMaterial = new THREE.MeshStandardMaterial({
+      color,
+      emissive: new THREE.Color(color),
+      // Bigger nodes glow harder, so hierarchy survives the bloom pass.
+      emissiveIntensity: node.kind === "tech" ? 0.7 : 1.6,
+      roughness: 0.35,
+      metalness: 0.1,
+      // Transparent so section de-emphasis can actually fade the node out.
+      // Without this only the glow dimmed and the solid sphere stayed put,
+      // which left "inactive" nodes looking nearly as present as active ones.
+      transparent: true,
+      opacity: 1,
+    })
+    coreMaterial.userData.baseOpacity = 1
+    group.add(new THREE.Mesh(new THREE.IcosahedronGeometry(radius, 3), coreMaterial))
 
     // Faint halo — reads as atmosphere rather than a hard-edged ball.
     const haloOpacity = node.kind === "tech" ? 0.05 : 0.1
