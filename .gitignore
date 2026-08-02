@@ -25,6 +25,13 @@ yarn-error.log*
 # playwright mcp runtime artifacts
 .playwright-mcp/
 
+# local editor/tooling config, not part of the project
+.mcp.json
+
+# personal documents kept in the working folder but never published.
+# public/resume.pdf is the one that ships; anything else stays out.
+/Resume_*.pdf
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

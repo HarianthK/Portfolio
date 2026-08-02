@@ -80,17 +80,45 @@ export function PortfolioPage() {
               <p>
                 I architected an enterprise information catalog that unifies metadata across
                 PostgreSQL and five other sources, making discovery and lineage tracking possible
-                across more than 100,000 data assets.
+                across more than 100,000 data assets. The unglamorous half is the ingestion,
+                validation, and indexing underneath it, running at 99%+ uptime behind CI/CD and
+                production monitoring.
               </p>
-              <p>
-                On top of it I built production knowledge graph systems in Neo4j and Graphiti that
-                model how data assets relate to business entities — which cut contextual search time
-                by roughly 35% and measurably improved retrieval quality for the RAG layer.
+            </div>
+
+            {/* The decision, given its own weight. This is the part that
+                separates having used the tools from having chosen between them. */}
+            <div className="mt-12 border-l-2 border-primary/40 pl-6">
+              <p className="font-mono text-xs uppercase tracking-[0.25em] text-primary">
+                The call that mattered
               </p>
-              <p>
-                The unglamorous half is the ingestion, validation, and indexing workflows that keep
-                it fed. Those run at 99%+ uptime behind CI/CD and production monitoring.
-              </p>
+              <h3 className="mt-4 font-serif text-3xl leading-tight text-foreground">
+                Where RAG stopped working
+              </h3>
+
+              <div className="mt-5 space-y-5 text-base leading-relaxed text-muted-foreground">
+                <p>
+                  RAG did most of what we needed and customers were happy with it — until the
+                  questions turned relational.
+                </p>
+                <p>
+                  Summarising a document was fine. Asking how two entities were connected was not.
+                  The relationship lived across several chunks, and once retrieval had split it up
+                  the model couldn&apos;t reassemble it — even when we handed over the full context.
+                  Chunking had destroyed the exact structure the question was about.
+                </p>
+                <p className="text-foreground">
+                  So we stopped asking retrieval to infer relationships and started storing them:
+                  entity and relationship extraction into Neo4j and Graphiti, modelled explicitly.
+                </p>
+                <p>
+                  That cut contextual search time by roughly 35%, but the honest headline is the
+                  trade rather than the number. Building the graph with correct relations burns a
+                  serious quantity of tokens up front. You pay once at ingestion instead of paying
+                  again at every query — which only makes sense if the system lives long enough to
+                  answer a lot of relational questions. Ours does.
+                </p>
+              </div>
             </div>
           </div>
         </section>
