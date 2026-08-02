@@ -121,7 +121,9 @@ export const nodes: GraphNode[] = [
     label: "Enterprise Information Catalog",
     kind: "project",
     detail: "Unified metadata across PostgreSQL and 5+ sources for AI-powered discovery and lineage",
-    meta: "XNode AI",
+    // Employer is named once, in the role node — professional work is attributed
+    // generically everywhere else.
+    meta: "Professional work",
     section: "now",
   },
   {
@@ -129,7 +131,7 @@ export const nodes: GraphNode[] = [
     label: "Production Knowledge Graphs",
     kind: "project",
     detail: "Modelled relationships between data assets and business entities to improve RAG retrieval",
-    meta: "XNode AI",
+    meta: "Professional work",
     section: "now",
   },
   {

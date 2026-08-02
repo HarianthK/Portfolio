@@ -93,30 +93,29 @@ export function PortfolioPage() {
                 The call that mattered
               </p>
               <h3 className="mt-4 font-serif text-3xl leading-tight text-foreground">
-                Where RAG stopped working
+                When similarity isn&apos;t enough
               </h3>
 
               <div className="mt-5 space-y-5 text-base leading-relaxed text-muted-foreground">
                 <p>
-                  RAG did most of what we needed and customers were happy with it — until the
-                  questions turned relational.
-                </p>
-                <p>
-                  Summarising a document was fine. Asking how two entities were connected was not.
-                  The relationship lived across several chunks, and once retrieval had split it up
-                  the model couldn&apos;t reassemble it — even when we handed over the full context.
-                  Chunking had destroyed the exact structure the question was about.
+                  Vector retrieval is excellent at finding what a document says. Preserving how
+                  things relate to each other is a different problem: chunking optimises for
+                  semantic similarity, and a relationship spanning several chunks doesn&apos;t
+                  survive that split intact. Adding more context doesn&apos;t recover it, because
+                  the structure is gone before the model ever sees it.
                 </p>
                 <p className="text-foreground">
-                  So we stopped asking retrieval to infer relationships and started storing them:
-                  entity and relationship extraction into Neo4j and Graphiti, modelled explicitly.
+                  That&apos;s not a flaw in RAG so much as a question it was never shaped to answer.
+                  So for relational queries I stopped asking retrieval to infer connections and
+                  modelled them directly — entity and relationship extraction into Neo4j and
+                  Graphiti, running alongside the vector layer rather than replacing it.
                 </p>
                 <p>
-                  That cut contextual search time by roughly 35%, but the honest headline is the
-                  trade rather than the number. Building the graph with correct relations burns a
-                  serious quantity of tokens up front. You pay once at ingestion instead of paying
-                  again at every query — which only makes sense if the system lives long enough to
-                  answer a lot of relational questions. Ours does.
+                  That cut contextual search time by roughly 35%, though the more useful headline is
+                  the trade. Building a graph with correct relations costs a significant number of
+                  tokens up front: you pay once at ingestion instead of paying again at every query.
+                  It earns that back only if the system answers enough relational questions to
+                  justify it — which is exactly the bet worth checking before you make it.
                 </p>
               </div>
             </div>
