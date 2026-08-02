@@ -3,10 +3,9 @@ import type { Metadata } from "next"
 import { Instrument_Serif, JetBrains_Mono, Manrope } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { siteUrl } from "@/lib/site"
-import { CursorGlow } from "@/components/cursor-glow"
 import { ScrollProgress } from "@/components/scroll-progress"
 import { ThemeProvider } from "@/components/theme-provider"
-import { Toaster } from "@/components/ui/sonner"
+import { ThemeToggle } from "@/components/theme-toggle"
 import "./globals.css"
 
 // Three faces, three jobs. The serif carries the human voice, the mono carries
@@ -68,9 +67,12 @@ export default function RootLayout({
       <body className="font-sans antialiased">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
           <ScrollProgress />
-          <CursorGlow />
+          {/* The nav bar is gone with the single-page layout, so the theme
+              control lives on its own in the corner. */}
+          <div className="fixed right-4 top-4 z-50">
+            <ThemeToggle />
+          </div>
           {children}
-          <Toaster />
         </ThemeProvider>
         <Analytics />
       </body>

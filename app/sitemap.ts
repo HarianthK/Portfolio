@@ -1,11 +1,13 @@
 import type { MetadataRoute } from "next"
 import { siteUrl } from "@/lib/site"
 
-const routes = ["", "/about", "/experience", "/education-skills", "/projects-awards", "/contact"]
-
+// One scroll-driven page now, so there's a single canonical URL rather than the
+// six routes this replaced.
 export default function sitemap(): MetadataRoute.Sitemap {
-  return routes.map((route) => ({
-    url: `${siteUrl}${route}`,
-    lastModified: new Date(),
-  }))
+  return [
+    {
+      url: siteUrl,
+      lastModified: new Date(),
+    },
+  ]
 }

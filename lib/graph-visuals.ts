@@ -102,7 +102,7 @@ function makeLabelSprite(text: string, color: string): THREE.Sprite {
 export function createNodeObjectFactory() {
   const cache = new Map<string, THREE.Object3D>()
 
-  return function nodeObject(node: GraphNode): THREE.Object3D {
+  function nodeObject(node: GraphNode): THREE.Object3D {
     const cached = cache.get(node.id)
     if (cached) return cached
 
@@ -124,17 +124,17 @@ export function createNodeObjectFactory() {
     group.add(core)
 
     // Faint halo — reads as atmosphere rather than a hard-edged ball.
-    const halo = new THREE.Mesh(
-      new THREE.IcosahedronGeometry(radius * 1.9, 2),
-      new THREE.MeshBasicMaterial({
-        color,
-        transparent: true,
-        opacity: node.kind === "tech" ? 0.05 : 0.1,
-        depthWrite: false,
-        side: THREE.BackSide,
-      }),
-    )
-    group.add(halo)
+    const haloOpacity = node.kind === "tech" ? 0.05 : 0.1
+    const haloMaterial = new THREE.MeshBasicMaterial({
+      color,
+      transparent: true,
+      opacity: haloOpacity,
+      depthWrite: false,
+      side: THREE.BackSide,
+    })
+    // Remembered so section fading can scale it rather than clobber it.
+    haloMaterial.userData.baseOpacity = haloOpacity
+    group.add(new THREE.Mesh(new THREE.IcosahedronGeometry(radius * 1.9, 2), haloMaterial))
 
     if (isLabelled(node)) {
       const label = makeLabelSprite(node.label, "#f6efe4")
@@ -143,9 +143,54 @@ export function createNodeObjectFactory() {
     }
 
     group.userData.nodeId = node.id
+    group.userData.kind = node.kind
     cache.set(node.id, group)
     return group
   }
+
+  // The cache doubles as the lookup for scroll choreography — the scene reads
+  // world positions out of it to work out where a section's cluster sits.
+  return { nodeObject, objects: cache }
+}
+
+/**
+ * Fades nodes that aren't part of the active section. Applied by walking the
+ * cached objects directly rather than re-rendering the graph, which would
+ * restart the simulation.
+ */
+export function applySectionEmphasis(
+  objects: Map<string, THREE.Object3D>,
+  activeIds: Set<string> | null,
+  lerp: number,
+) {
+  objects.forEach((object, id) => {
+    const isActive = !activeIds || activeIds.has(id)
+    const isTech = object.userData.kind === "tech"
+    const targetOpacity = isActive ? 1 : 0.12
+    const baseEmissive = isTech ? 0.7 : 1.6
+    const targetEmissive = isActive ? baseEmissive : baseEmissive * 0.15
+
+    object.traverse((child) => {
+      const mesh = child as THREE.Mesh
+      const material = mesh.material as THREE.MeshStandardMaterial | undefined
+      if (!material) return
+
+      if (material.emissiveIntensity !== undefined && material.emissive) {
+        material.emissiveIntensity += (targetEmissive - material.emissiveIntensity) * lerp
+      }
+      if (material.transparent) {
+        material.opacity += (targetOpacity * (material.userData.baseOpacity ?? 1) - material.opacity) * lerp
+      }
+    })
+
+    const sprite = object.children.find((child) => child instanceof THREE.Sprite) as
+      | THREE.Sprite
+      | undefined
+    if (sprite) {
+      const spriteMaterial = sprite.material as THREE.SpriteMaterial
+      spriteMaterial.opacity += (targetOpacity - spriteMaterial.opacity) * lerp
+    }
+  })
 }
 
 /** Frees cached geometry/materials when the scene unmounts. */

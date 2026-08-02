@@ -6,31 +6,43 @@ import { OrbitControls } from "@react-three/drei"
 import { Bloom, EffectComposer } from "@react-three/postprocessing"
 import R3fForceGraph from "r3f-forcegraph"
 import * as THREE from "three"
-import { links, nodes, type GraphNode } from "@/lib/graph-data"
-import { colorForNode, createNodeObjectFactory, radiusForNode } from "@/lib/graph-visuals"
+import { links, nodes, nodesInSection, type GraphNode, type SectionId } from "@/lib/graph-data"
+import {
+  applySectionEmphasis,
+  colorForNode,
+  createNodeObjectFactory,
+  radiusForNode,
+} from "@/lib/graph-visuals"
 import { useSafeReducedMotion } from "@/lib/use-safe-reduced-motion"
 
 type Props = {
+  activeSection: SectionId
   onNodeFocus?: (node: GraphNode | null) => void
 }
 
 type GraphHandle = {
   tickFrame: () => void
-  getGraphBbox: () => { x: [number, number]; y: [number, number]; z: [number, number] }
 }
 
-function Scene({ onNodeFocus }: Props) {
+/** Bounding box of a set of scene objects, in the graph group's local space. */
+function boundsOf(objects: THREE.Object3D[]) {
+  const box = new THREE.Box3()
+  objects.forEach((object) => box.expandByPoint(object.position))
+  return box
+}
+
+function Scene({ activeSection, onNodeFocus }: Props) {
   const graphRef = useRef<GraphHandle | undefined>(undefined)
+  const groupRef = useRef<THREE.Group>(null)
   const prefersReducedMotion = useSafeReducedMotion()
   const { gl, camera, size } = useThree()
-  // Distance the camera should sit at to frame the whole graph. Starts null and
-  // is computed from the real layout once the simulation has spread out.
-  const targetDistance = useRef<number | null>(null)
-  // Auto-framing is only active while the layout is still moving. Once it
-  // settles we stop touching the camera so OrbitControls owns it outright and
-  // the two aren't writing to the same position every frame.
-  const isAutoFraming = useRef(true)
-  const groupRef = useRef<THREE.Group>(null)
+
+  // Once the visitor grabs the graph they own the camera, until they scroll to
+  // a different section — otherwise auto-framing would fight their dragging.
+  const userControlled = useRef(false)
+  useEffect(() => {
+    userControlled.current = false
+  }, [activeSection])
 
   // r3f-forcegraph mutates the objects it's given (it writes x/y/z onto each
   // node), so it gets copies — otherwise the module-level data in graph-data.ts
@@ -43,52 +55,58 @@ function Scene({ onNodeFocus }: Props) {
     [],
   )
 
-  const nodeObject = useMemo(() => createNodeObjectFactory(), [])
+  const { nodeObject, objects } = useMemo(() => createNodeObjectFactory(), [])
 
-  // The force simulation only advances when something ticks it. The same loop
-  // eases the camera out to whatever distance frames the settled layout —
-  // without this the graph spreads past the viewport and gets clipped.
+  // Node ids the current section cares about. `null` means "the whole graph",
+  // which is what the hero shows.
+  const activeIds = useMemo(() => {
+    if (activeSection === "hero") return null
+    const ids = nodesInSection(activeSection)
+    return ids.length > 0 ? new Set(ids) : null
+  }, [activeSection])
+
   useFrame((_, delta) => {
     graphRef.current?.tickFrame()
 
-    if (!isAutoFraming.current) return
+    // Frame-rate independent easing — same feel on a 60Hz and 144Hz display.
+    const ease = 1 - Math.exp(-2.6 * delta)
 
-    const bbox = graphRef.current?.getGraphBbox?.()
-    if (bbox && groupRef.current) {
-      const spanX = bbox.x[1] - bbox.x[0]
-      const spanY = bbox.y[1] - bbox.y[0]
-      // Only the on-screen axes decide how wide the frustum needs to be.
-      // Folding depth in as well pushes the camera much too far back, since a
-      // 3D layout is roughly as deep as it is wide.
-      const radius = Math.max(spanX, spanY, 1) / 2
+    applySectionEmphasis(objects, activeIds, ease)
 
-      if (Number.isFinite(radius)) {
-        // The simulation's centroid drifts away from the origin as it settles,
-        // so the whole graph is shifted back to centre rather than moving the
-        // orbit target (which OrbitControls owns).
-        const centre = new THREE.Vector3(
-          (bbox.x[0] + bbox.x[1]) / 2,
-          (bbox.y[0] + bbox.y[1]) / 2,
-          (bbox.z[0] + bbox.z[1]) / 2,
-        )
-        groupRef.current.position.lerp(centre.negate(), 1 - Math.exp(-2.5 * delta))
+    const group = groupRef.current
+    if (!group || objects.size === 0) return
 
-        const perspective = camera as THREE.PerspectiveCamera
-        const vFov = (perspective.fov * Math.PI) / 180
-        // Portrait viewports are limited by horizontal FOV, so take whichever
-        // is tighter.
-        const hFov = 2 * Math.atan(Math.tan(vFov / 2) * (size.width / size.height))
-        // Slightly under a perfect fit, so the graph fills the frame and bleeds
-        // past the edges rather than sitting politely inside them.
-        targetDistance.current = (radius / Math.tan(Math.min(vFov, hFov) / 2)) * 0.82
-      }
-    }
+    const focus = activeIds
+      ? [...objects.entries()].filter(([id]) => activeIds.has(id)).map(([, object]) => object)
+      : [...objects.values()]
 
-    const desired = targetDistance.current
-    if (desired) {
-      const current = camera.position.length()
-      camera.position.setLength(THREE.MathUtils.damp(current, desired, 1.6, delta))
-    }
+    if (focus.length === 0) return
+
+    const box = boundsOf(focus)
+    const centre = box.getCenter(new THREE.Vector3())
+    const span = box.getSize(new THREE.Vector3())
+    // Floor the radius: a section cluster can be only a handful of nodes, and
+    // fitting that tightly flies the camera uncomfortably close.
+    const radius = Math.max(span.x, span.y, 260) / 2
+
+    // On wide screens the written content sits in a left column, so the graph
+    // is nudged right to sit beside it rather than underneath it.
+    const lateralOffset = size.width >= 1024 ? radius * 0.34 : 0
+    const desiredGroupPos = centre.clone().negate().setX(-centre.x + lateralOffset)
+
+    group.position.lerp(desiredGroupPos, ease)
+
+    if (userControlled.current) return
+
+    const perspective = camera as THREE.PerspectiveCamera
+    const vFov = (perspective.fov * Math.PI) / 180
+    const hFov = 2 * Math.atan(Math.tan(vFov / 2) * (size.width / size.height))
+    // Slightly inside a perfect fit so the graph bleeds past the frame edges.
+    const desired = (radius / Math.tan(Math.min(vFov, hFov) / 2)) * 0.82
+
+    // Only the distance is touched, never the direction — that leaves
+    // OrbitControls' rotation and auto-rotate free to do their own thing.
+    camera.position.setLength(THREE.MathUtils.damp(camera.position.length(), desired, 1.7, delta))
   })
 
   const handleHover = useCallback(
@@ -101,39 +119,36 @@ function Scene({ onNodeFocus }: Props) {
 
   return (
     <>
-      {/* Low ambient so the emissive cores do the lighting work, plus one key
-          light to give the halos some form. */}
+      {/* Low ambient so the emissive cores do the lighting work, plus key
+          lights to give the halos some form. */}
       <ambientLight intensity={0.55} />
       <pointLight position={[120, 120, 120]} intensity={1.2} color="#ffd9a0" />
       <pointLight position={[-140, -80, -60]} intensity={0.5} color="#4a9fc4" />
 
       <group ref={groupRef}>
-      <R3fForceGraph
-        // The library's ref type is generic over node/link shapes and doesn't
-        // infer cleanly here; only `tickFrame` and `getGraphBbox` are used.
-        ref={graphRef as never}
-        graphData={graphData}
-        nodeThreeObject={nodeObject as never}
-        nodeVal={(node: GraphNode) => radiusForNode(node)}
-        nodeColor={(node: GraphNode) => colorForNode(node)}
-        linkColor={() => "#8a7a5f"}
-        linkOpacity={0.22}
-        linkWidth={0.4}
-        // Particles travelling the edges read as data moving through the graph —
-        // the thing these systems actually do.
-        linkDirectionalParticles={prefersReducedMotion ? 0 : 2}
-        linkDirectionalParticleWidth={1.1}
-        linkDirectionalParticleSpeed={0.004}
-        linkDirectionalParticleColor={() => "#f0b429"}
-        d3AlphaDecay={0.018}
-        d3VelocityDecay={0.32}
-        warmupTicks={80}
-        cooldownTime={prefersReducedMotion ? 0 : 9000}
-        onEngineStop={() => {
-          isAutoFraming.current = false
-        }}
-        onNodeHover={handleHover as never}
-      />
+        <R3fForceGraph
+          // The library's ref type is generic over node/link shapes and doesn't
+          // infer cleanly here; only `tickFrame` is used.
+          ref={graphRef as never}
+          graphData={graphData}
+          nodeThreeObject={nodeObject as never}
+          nodeVal={(node: GraphNode) => radiusForNode(node)}
+          nodeColor={(node: GraphNode) => colorForNode(node)}
+          linkColor={() => "#8a7a5f"}
+          linkOpacity={0.22}
+          linkWidth={0.4}
+          // Particles travelling the edges read as data moving through the
+          // graph — the thing these systems actually do.
+          linkDirectionalParticles={prefersReducedMotion ? 0 : 2}
+          linkDirectionalParticleWidth={1.1}
+          linkDirectionalParticleSpeed={0.004}
+          linkDirectionalParticleColor={() => "#f0b429"}
+          d3AlphaDecay={0.018}
+          d3VelocityDecay={0.32}
+          warmupTicks={80}
+          cooldownTime={prefersReducedMotion ? 0 : 9000}
+          onNodeHover={handleHover as never}
+        />
       </group>
 
       <OrbitControls
@@ -145,6 +160,9 @@ function Scene({ onNodeFocus }: Props) {
         maxDistance={1400}
         autoRotate={!prefersReducedMotion}
         autoRotateSpeed={0.28}
+        onStart={() => {
+          userControlled.current = true
+        }}
       />
 
       {!prefersReducedMotion && (
@@ -161,7 +179,7 @@ function Scene({ onNodeFocus }: Props) {
   )
 }
 
-export default function GraphCanvas({ onNodeFocus }: Props) {
+export default function GraphCanvas({ activeSection, onNodeFocus }: Props) {
   const [visible, setVisible] = useState(true)
 
   // The force simulation is a continuous render loop; there's no reason to burn
@@ -174,17 +192,17 @@ export default function GraphCanvas({ onNodeFocus }: Props) {
 
   return (
     <Canvas
-      camera={{ position: [0, 40, 280], fov: 52, near: 1, far: 2000 }}
+      camera={{ position: [0, 40, 280], fov: 52, near: 1, far: 4000 }}
       gl={{ antialias: true, powerPreference: "high-performance" }}
       dpr={[1, 1.75]}
       frameloop={visible ? "always" : "never"}
       onCreated={({ scene }) => {
         // Fog gives the far side of the graph depth instead of a flat cloud.
-        scene.fog = new THREE.FogExp2("#0a0704", 0.0022)
+        scene.fog = new THREE.FogExp2("#0a0704", 0.0016)
       }}
       style={{ position: "absolute", inset: 0 }}
     >
-      <Scene onNodeFocus={onNodeFocus} />
+      <Scene activeSection={activeSection} onNodeFocus={onNodeFocus} />
     </Canvas>
   )
 }
