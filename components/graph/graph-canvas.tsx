@@ -5,12 +5,14 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber"
 import { OrbitControls } from "@react-three/drei"
 import { Bloom, EffectComposer } from "@react-three/postprocessing"
 import R3fForceGraph from "r3f-forcegraph"
+import { useTheme } from "next-themes"
 import * as THREE from "three"
 import { links, nodes, type GraphNode, type NodeKind } from "@/lib/graph-data"
 import {
   applySectionEmphasis,
   colorForNode,
   createNodeObjectFactory,
+  disposeObject,
   radiusForNode,
 } from "@/lib/graph-visuals"
 import { useSafeReducedMotion } from "@/lib/use-safe-reduced-motion"
@@ -63,7 +65,21 @@ function Scene({ highlight, framing = "immersive", onNodeFocus, onNodeSelect }: 
     [],
   )
 
-  const { nodeObject, objects } = useMemo(() => createNodeObjectFactory(), [])
+  // Label colours are baked into a canvas texture when the sprite is made, so
+  // switching theme means rebuilding them rather than restyling in place.
+  const { resolvedTheme } = useTheme()
+  const theme = resolvedTheme === "light" ? "light" : "dark"
+
+  const { nodeObject, objects } = useMemo(() => createNodeObjectFactory(theme), [theme])
+
+  // The previous set of meshes and textures is dropped when the theme changes,
+  // and again on unmount; neither is reclaimed automatically.
+  useEffect(() => {
+    return () => {
+      objects.forEach(disposeObject)
+      objects.clear()
+    }
+  }, [objects])
 
   const activeIds = useMemo(() => {
     if (!highlight || highlight.length === 0) return null

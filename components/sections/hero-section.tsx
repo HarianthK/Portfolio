@@ -11,10 +11,12 @@ export function HeroSection() {
       <div className="relative flex-1 overflow-hidden">
         <GraphStage framing="immersive" />
 
-        {/* Fades the canvas into the band below so the join isn't a hard edge. */}
+        {/* Fades the canvas into the band below so the join isn't a hard edge.
+            Sits below the readout panel: as a later sibling it was painting
+            over the panel, washing out the bottom of it. */}
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-x-0 bottom-0 h-32"
+          className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-32"
           style={{ background: "linear-gradient(to bottom, transparent, var(--background))" }}
         />
       </div>

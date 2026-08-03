@@ -77,10 +77,12 @@ export const nodes: GraphNode[] = [
 
   // ── Roles ────────────────────────────────────────────────────────────────
   {
+    // Labelled by role rather than employer. The company name is written once,
+    // in the experience entry, and shouldn't resurface in graph readouts.
     id: "xnode",
-    label: "XNode AI",
+    label: "AI Engineer",
     kind: "role",
-    detail: "AI Engineer",
+    detail: "Current role — retrieval systems and knowledge graphs",
     meta: "06/2025 – Present · Remote",
     section: "now",
   },

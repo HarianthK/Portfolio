@@ -32,10 +32,20 @@ export function isLabelled(node: GraphNode): boolean {
 }
 
 /**
+ * Label colours per theme. Light text with a dark outline works on the near
+ * black background but washes out badly on the light theme's beige, so the
+ * light theme inverts it: dark text with a pale halo behind it.
+ */
+const LABEL_COLORS = {
+  dark: { fill: "#f6efe4", outline: "rgba(10, 7, 4, 0.9)" },
+  light: { fill: "#2b1d0e", outline: "rgba(250, 244, 234, 0.95)" },
+} as const
+
+/**
  * Text rendered to a canvas and used as a sprite texture. Cheaper than a text
  * geometry library for a handful of labels, and it always faces the camera.
  */
-function makeLabelSprite(text: string, color: string): THREE.Sprite {
+function makeLabelSprite(text: string, fill: string, outline: string): THREE.Sprite {
   const padding = 24
   const fontSize = 44
   const font = `500 ${fontSize}px ui-monospace, "JetBrains Mono", monospace`
@@ -60,15 +70,14 @@ function makeLabelSprite(text: string, color: string): THREE.Sprite {
     const cx = canvas.width / (2 * scale)
     const cy = canvas.height / (2 * scale)
 
-    // Dark halo behind light text so labels stay readable against both the
-    // near-black dark theme and the beige light theme, without having to
-    // rebuild every sprite when the theme is toggled.
+    // A halo in the opposing tone, so the text keeps its edge whatever it
+    // passes in front of.
     ctx.lineJoin = "round"
     ctx.lineWidth = 7
-    ctx.strokeStyle = "rgba(10, 7, 4, 0.9)"
+    ctx.strokeStyle = outline
     ctx.strokeText(text, cx, cy)
 
-    ctx.fillStyle = color
+    ctx.fillStyle = fill
     ctx.fillText(text, cx, cy)
   }
 
@@ -99,8 +108,9 @@ function makeLabelSprite(text: string, color: string): THREE.Sprite {
  * Objects are cached per node id — `nodeThreeObject` is called on every graph
  * refresh, and rebuilding geometry each time would leak GPU memory.
  */
-export function createNodeObjectFactory() {
+export function createNodeObjectFactory(theme: "dark" | "light" = "dark") {
   const cache = new Map<string, THREE.Object3D>()
+  const label = LABEL_COLORS[theme]
 
   function nodeObject(node: GraphNode): THREE.Object3D {
     const cached = cache.get(node.id)
@@ -143,9 +153,9 @@ export function createNodeObjectFactory() {
     group.add(new THREE.Mesh(new THREE.IcosahedronGeometry(radius * 1.9, 1), haloMaterial))
 
     if (isLabelled(node)) {
-      const label = makeLabelSprite(node.label, "#f6efe4")
-      label.position.set(0, radius + 4, 0)
-      group.add(label)
+      const sprite = makeLabelSprite(node.label, label.fill, label.outline)
+      sprite.position.set(0, radius + 4, 0)
+      group.add(sprite)
     }
 
     group.userData.nodeId = node.id
@@ -199,13 +209,21 @@ export function applySectionEmphasis(
   })
 }
 
-/** Frees cached geometry/materials when the scene unmounts. */
+/** Frees cached geometry, materials and label textures. */
 export function disposeObject(root: THREE.Object3D) {
+  const release = (material: THREE.Material) => {
+    // Label sprites carry a canvas texture that won't be reclaimed with the
+    // material on its own.
+    const map = (material as THREE.SpriteMaterial).map
+    map?.dispose()
+    material.dispose()
+  }
+
   root.traverse((child) => {
     const mesh = child as THREE.Mesh
-    if (mesh.geometry) mesh.geometry.dispose()
+    mesh.geometry?.dispose()
     const material = mesh.material as THREE.Material | THREE.Material[] | undefined
-    if (Array.isArray(material)) material.forEach((m) => m.dispose())
-    else material?.dispose()
+    if (Array.isArray(material)) material.forEach(release)
+    else if (material) release(material)
   })
 }

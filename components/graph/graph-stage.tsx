@@ -86,7 +86,9 @@ export function GraphStage({ highlight = null, framing = "immersive", showReadou
       />
 
       {showReadout && shown && (
-        <div className="pointer-events-none absolute bottom-4 left-4 right-4 max-w-sm rounded-lg border border-primary/25 bg-background/90 p-4 backdrop-blur-md sm:bottom-6 sm:left-6 sm:right-auto">
+        // z-20 keeps it above the hero's bottom fade, which is a later sibling
+        // and was otherwise painting over the panel.
+        <div className="pointer-events-none absolute bottom-4 left-4 right-4 z-20 max-w-sm rounded-lg border border-primary/25 bg-background/90 p-4 backdrop-blur-md sm:bottom-6 sm:left-6 sm:right-auto">
           <p className="font-mono text-[0.7rem] uppercase tracking-widest text-primary">
             {shown.kind}
           </p>
