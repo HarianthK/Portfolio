@@ -124,7 +124,10 @@ export function createNodeObjectFactory() {
       opacity: 1,
     })
     coreMaterial.userData.baseOpacity = 1
-    group.add(new THREE.Mesh(new THREE.IcosahedronGeometry(radius, 3), coreMaterial))
+    // Detail 2 rather than 3: at these on-screen sizes, and with bloom softening
+    // the silhouette anyway, the extra subdivision isn't visible but does cost
+    // four times the triangles across every node.
+    group.add(new THREE.Mesh(new THREE.IcosahedronGeometry(radius, 2), coreMaterial))
 
     // Faint halo — reads as atmosphere rather than a hard-edged ball.
     const haloOpacity = node.kind === "tech" ? 0.05 : 0.1
@@ -137,7 +140,7 @@ export function createNodeObjectFactory() {
     })
     // Remembered so section fading can scale it rather than clobber it.
     haloMaterial.userData.baseOpacity = haloOpacity
-    group.add(new THREE.Mesh(new THREE.IcosahedronGeometry(radius * 1.9, 2), haloMaterial))
+    group.add(new THREE.Mesh(new THREE.IcosahedronGeometry(radius * 1.9, 1), haloMaterial))
 
     if (isLabelled(node)) {
       const label = makeLabelSprite(node.label, "#f6efe4")

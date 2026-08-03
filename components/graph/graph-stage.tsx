@@ -1,7 +1,7 @@
 "use client"
 
 import dynamic from "next/dynamic"
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import type { GraphFraming } from "@/components/graph/graph-canvas"
 import type { GraphNode, NodeKind } from "@/lib/graph-data"
 
@@ -28,6 +28,22 @@ type Props = {
 export function GraphStage({ highlight = null, framing = "immersive", showReadout = true, className }: Props) {
   const [hovered, setHovered] = useState<GraphNode | null>(null)
   const [pinned, setPinned] = useState<GraphNode | null>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [onScreen, setOnScreen] = useState(false)
+
+  // Two of these are mounted at once. Without this both render continuously,
+  // which measured at 15fps on a desktop — the off-screen one is pure waste.
+  useEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([entry]) => setOnScreen(entry.isIntersecting),
+      // A little margin so it's already running by the time it scrolls in.
+      { rootMargin: "200px" },
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
 
   const handleSelect = useCallback((node: GraphNode) => {
     // Tapping is the only way in on touch, where there's no hover at all, so a
@@ -51,10 +67,15 @@ export function GraphStage({ highlight = null, framing = "immersive", showReadou
   const shown = pinned ?? hovered
 
   return (
-    <div className={className}>
+    // Hidden from assistive tech on purpose: a WebGL canvas exposes nothing
+    // usable, and everything it shows — the roles, projects and relationships —
+    // is written out in the sections around it. The explorer's filter buttons
+    // sit outside this element and stay reachable.
+    <div ref={containerRef} className={className} aria-hidden>
       <GraphCanvas
         highlight={highlight}
         framing={framing}
+        paused={!onScreen}
         onNodeFocus={setHovered}
         onNodeSelect={handleSelect}
       />

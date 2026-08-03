@@ -24,6 +24,8 @@ type Props = {
   framing?: GraphFraming
   onNodeFocus?: (node: GraphNode | null) => void
   onNodeSelect?: (node: GraphNode) => void
+  /** Stops the render loop entirely — used while the stage is off screen. */
+  paused?: boolean
 }
 
 type GraphHandle = {
@@ -178,23 +180,28 @@ function Scene({ highlight, framing = "immersive", onNodeFocus, onNodeSelect }: 
   )
 }
 
-export default function GraphCanvas(props: Props) {
-  const [visible, setVisible] = useState(true)
+export default function GraphCanvas({ paused = false, ...props }: Props) {
+  const [tabVisible, setTabVisible] = useState(true)
 
   // The force simulation is a continuous render loop; there's no reason to burn
   // GPU on it while the tab is in the background.
   useEffect(() => {
-    const handleVisibility = () => setVisible(!document.hidden)
+    const handleVisibility = () => setTabVisible(!document.hidden)
     document.addEventListener("visibilitychange", handleVisibility)
     return () => document.removeEventListener("visibilitychange", handleVisibility)
   }, [])
+
+  // The page mounts two of these — the hero and the explorer. Left running,
+  // both drive a full render loop with a bloom pass whether or not they're on
+  // screen, which measured at 15fps. Only the visible one should be drawing.
+  const running = tabVisible && !paused
 
   return (
     <Canvas
       camera={{ position: [0, 40, 280], fov: 52, near: 1, far: 4000 }}
       gl={{ antialias: true, powerPreference: "high-performance" }}
       dpr={[1, 1.75]}
-      frameloop={visible ? "always" : "never"}
+      frameloop={running ? "always" : "never"}
       onCreated={({ scene }) => {
         // Fog gives the far side of the graph depth instead of a flat cloud.
         scene.fog = new THREE.FogExp2("#0a0704", 0.0016)

@@ -18,9 +18,9 @@ export function StorySection() {
 
         <div className="mt-10 space-y-6 text-lg leading-relaxed text-muted-foreground">
           <p>
-            The master&apos;s was the reason on the paperwork. The real one was wanting to find out
-            how somewhere else thinks — a different country, different people, a different set of
-            defaults about how things get built and why they get built that way.
+            I came for the master&apos;s at ASU, and I came to find out how somewhere else thinks —
+            a different country, different people, a different set of defaults about how things get
+            built and why they get built that way.
           </p>
           <p>
             That instinct turned out to be most of the job. The useful part of retrieval work is

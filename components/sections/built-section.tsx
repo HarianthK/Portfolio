@@ -1,4 +1,5 @@
 import { FigureBlock } from "@/components/figure-block"
+import { cn } from "@/lib/utils"
 
 type Project = {
   name: string
@@ -50,16 +51,27 @@ export function BuiltSection() {
         </h2>
 
         <div className="mt-16 space-y-20">
-          {PROJECTS.map((project, i) => (
+          {PROJECTS.map((project, i) => {
+            const hasFigure = Boolean(project.figure)
+            // Alternate which side the figure sits on so the eye keeps moving.
+            // Only meaningful when there *is* a figure — otherwise the article
+            // is a single full-width column rather than a grid with an empty
+            // cell, which previously squeezed the text into 16rem.
+            const figureLeft = hasFigure && i % 2 === 1
+
+            return (
             <article
               key={project.name}
-              className={`grid gap-8 border-t border-border pt-10 md:grid-cols-[minmax(0,1fr)_minmax(0,16rem)] md:gap-14 ${
-                // Alternating emphasis keeps the eye moving down the page
-                // instead of settling into a rhythm it can skim.
-                i % 2 === 1 ? "md:grid-cols-[minmax(0,16rem)_minmax(0,1fr)]" : ""
-              }`}
+              className={cn(
+                "border-t border-border pt-10",
+                hasFigure && "grid gap-8 md:gap-14",
+                hasFigure &&
+                  (figureLeft
+                    ? "md:grid-cols-[minmax(0,16rem)_minmax(0,1fr)]"
+                    : "md:grid-cols-[minmax(0,1fr)_minmax(0,16rem)]"),
+              )}
             >
-              <div className={i % 2 === 1 ? "md:order-2" : ""}>
+              <div className={cn(figureLeft && "md:order-2")}>
                 <h3 className="font-serif text-3xl leading-tight text-foreground">
                   {project.name}
                 </h3>
@@ -86,12 +98,13 @@ export function BuiltSection() {
               </div>
 
               {project.figure && (
-                <div className={i % 2 === 1 ? "md:order-1" : ""}>
+                <div className={cn(figureLeft && "md:order-1")}>
                   <FigureBlock {...project.figure} />
                 </div>
               )}
             </article>
-          ))}
+            )
+          })}
         </div>
       </div>
     </section>
