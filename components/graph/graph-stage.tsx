@@ -64,7 +64,12 @@ export function GraphStage({ highlight = null, framing = "immersive", showReadou
     return () => window.removeEventListener("keydown", onKey)
   }, [pinned])
 
-  const shown = pinned ?? hovered
+  // Hover wins over the pin, not the other way round. Pinning used to take
+  // priority, which meant that after clicking a node, pointing at any other one
+  // did nothing at all and the graph felt broken. Now hovering always previews
+  // whatever is under the cursor, and the pinned node is what the panel returns
+  // to once you point at nothing.
+  const shown = hovered ?? pinned
 
   return (
     // Hidden from assistive tech on purpose: a WebGL canvas exposes nothing
@@ -92,9 +97,11 @@ export function GraphStage({ highlight = null, framing = "immersive", showReadou
           {shown.meta && (
             <p className="mt-2 font-mono text-xs text-muted-foreground/80">{shown.meta}</p>
           )}
-          {pinned && (
+          {/* Only label it pinned when the pinned node is the one on show —
+              otherwise a hover preview would claim to be pinned. */}
+          {pinned && shown.id === pinned.id && (
             <p className="mt-3 font-mono text-[0.65rem] uppercase tracking-widest text-primary/70">
-              tap elsewhere or press esc to dismiss
+              pinned · press esc to dismiss
             </p>
           )}
         </div>
