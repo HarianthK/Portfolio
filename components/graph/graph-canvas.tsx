@@ -72,6 +72,17 @@ function Scene({ highlight, framing = "immersive", onNodeFocus, onNodeSelect }: 
 
   const { nodeObject, objects } = useMemo(() => createNodeObjectFactory(theme), [theme])
 
+  // Fog tints whatever recedes into the distance, so it has to match the page
+  // behind the canvas or the far side of the graph muddies in light mode.
+  const { scene } = useThree()
+
+  useEffect(() => {
+    scene.fog = new THREE.FogExp2(theme === "light" ? "#f7ecdd" : "#0a0704", 0.0016)
+    return () => {
+      scene.fog = null
+    }
+  }, [scene, theme])
+
   // The previous set of meshes and textures is dropped when the theme changes,
   // and again on unmount; neither is reclaimed automatically.
   useEffect(() => {
@@ -93,7 +104,7 @@ function Scene({ highlight, framing = "immersive", onNodeFocus, onNodeSelect }: 
     // Frame-rate independent easing — same feel on a 60Hz and 144Hz display.
     const ease = 1 - Math.exp(-5.5 * delta)
 
-    applySectionEmphasis(objects, activeIds, ease)
+    applySectionEmphasis(objects, activeIds, ease, theme)
 
     const group = groupRef.current
     if (!group || objects.size === 0) return
@@ -121,22 +132,64 @@ function Scene({ highlight, framing = "immersive", onNodeFocus, onNodeSelect }: 
     camera.position.setLength(THREE.MathUtils.damp(camera.position.length(), desired, 4.5, delta))
   })
 
-  const handleHover = useCallback(
-    (node: GraphNode | null) => {
-      gl.domElement.style.cursor = node ? "pointer" : "grab"
-      onNodeFocus?.(node)
+  /**
+   * Hit testing is done here rather than through the graph library's hover
+   * callback, which reported entering a node but never leaving one — so the
+   * first node touched stayed described in the corner regardless of where the
+   * cursor went afterwards.
+   *
+   * Raycasting the node objects directly also makes the hit area exactly the
+   * circle that's drawn, since labels and glow halos opt out of raycasting.
+   */
+  const raycaster = useMemo(() => new THREE.Raycaster(), [])
+  const pointer = useMemo(() => new THREE.Vector2(), [])
+
+  const nodeAtPointer = useCallback(
+    (event: PointerEvent): GraphNode | null => {
+      const rect = gl.domElement.getBoundingClientRect()
+      pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1
+      pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1
+      raycaster.setFromCamera(pointer, camera)
+
+      for (const hit of raycaster.intersectObjects([...objects.values()], true)) {
+        let object: THREE.Object3D | null = hit.object
+        while (object && !object.userData?.nodeId) object = object.parent
+        const id = object?.userData?.nodeId as string | undefined
+        if (id) return nodes.find((node) => node.id === id) ?? null
+      }
+      return null
     },
-    [gl, onNodeFocus],
+    [camera, gl, objects, pointer, raycaster],
   )
 
-  // Leaving the canvas produces no "no node" event from the graph, so without
-  // this the last hovered node stays latched and its readout won't go away.
   useEffect(() => {
     const canvas = gl.domElement
     const clear = () => onNodeFocus?.(null)
+
+    const handleMove = (event: PointerEvent) => {
+      const node = nodeAtPointer(event)
+      canvas.style.cursor = node ? "pointer" : "grab"
+      onNodeFocus?.(node)
+    }
+    const handleUp = (event: PointerEvent) => {
+      const node = nodeAtPointer(event)
+      if (node) onNodeSelect?.(node)
+    }
+
+    canvas.addEventListener("pointermove", handleMove)
+    canvas.addEventListener("pointerup", handleUp)
     canvas.addEventListener("pointerleave", clear)
-    return () => canvas.removeEventListener("pointerleave", clear)
-  }, [gl, onNodeFocus])
+    // Scrolling slides the canvas beneath a stationary cursor without firing a
+    // pointer event, which would otherwise leave the last node latched.
+    window.addEventListener("scroll", clear, { passive: true })
+
+    return () => {
+      canvas.removeEventListener("pointermove", handleMove)
+      canvas.removeEventListener("pointerup", handleUp)
+      canvas.removeEventListener("pointerleave", clear)
+      window.removeEventListener("scroll", clear)
+    }
+  }, [gl, nodeAtPointer, onNodeFocus, onNodeSelect])
 
   return (
     <>
@@ -154,9 +207,16 @@ function Scene({ highlight, framing = "immersive", onNodeFocus, onNodeSelect }: 
           graphData={graphData}
           nodeThreeObject={nodeObject as never}
           nodeVal={(node: GraphNode) => radiusForNode(node)}
-          nodeColor={(node: GraphNode) => colorForNode(node)}
-          linkColor={() => "#8a7a5f"}
-          linkOpacity={0.22}
+          // Custom node objects are supplied above, so this only governs the
+          // library's own hit spheres. At the default of 4 they were several
+          // times wider than the circle actually drawn, which made empty space
+          // around a node report as a hover.
+          nodeRelSize={1}
+          nodeColor={(node: GraphNode) => colorForNode(node, theme)}
+          // A neutral rule on paper, rather than another brown competing with
+          // the node inks.
+          linkColor={() => (theme === "light" ? "#6b5f52" : "#8a7a5f")}
+          linkOpacity={theme === "light" ? 0.45 : 0.22}
           linkWidth={0.4}
           // Particles travelling the edges read as data moving through the
           // graph — the thing these systems actually do.
@@ -168,8 +228,7 @@ function Scene({ highlight, framing = "immersive", onNodeFocus, onNodeSelect }: 
           d3VelocityDecay={0.32}
           warmupTicks={80}
           cooldownTime={prefersReducedMotion ? 0 : 9000}
-          onNodeHover={handleHover as never}
-          onNodeClick={((node: GraphNode) => onNodeSelect?.(node)) as never}
+          // Hover and click are handled above, by raycasting directly.
         />
       </group>
 
@@ -187,7 +246,11 @@ function Scene({ highlight, framing = "immersive", onNodeFocus, onNodeSelect }: 
         }}
       />
 
-      {!prefersReducedMotion && (
+      {/* Bloom only makes sense on the dark theme. It works by adding light,
+          and on a pale background there's nothing brighter than the page to add
+          — it just bleaches the graph out, worst of all around the near-white
+          centre node. */}
+      {!prefersReducedMotion && theme === "dark" && (
         <EffectComposer>
           <Bloom intensity={1.15} luminanceThreshold={0.18} luminanceSmoothing={0.5} mipmapBlur />
         </EffectComposer>
@@ -218,10 +281,6 @@ export default function GraphCanvas({ paused = false, ...props }: Props) {
       gl={{ antialias: true, powerPreference: "high-performance" }}
       dpr={[1, 1.75]}
       frameloop={running ? "always" : "never"}
-      onCreated={({ scene }) => {
-        // Fog gives the far side of the graph depth instead of a flat cloud.
-        scene.fog = new THREE.FogExp2("#0a0704", 0.0016)
-      }}
       style={{ position: "absolute", inset: 0 }}
     >
       <Scene {...props} />

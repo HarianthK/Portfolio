@@ -28,18 +28,18 @@ export function ExplorerSection() {
   }, [])
 
   return (
-    <section id="explorer" className="relative bg-[#0a0704] py-20 md:py-28">
+    <section id="explorer" className="relative py-20 md:py-28">
       <div className="px-6 md:px-14">
         <div className="mx-auto flex max-w-6xl flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <p className="font-mono text-xs uppercase tracking-[0.3em] text-[#f0b429]">
-              <span className="text-[#f0b429]/50">03</span> Explore
+            <p className="font-mono text-xs uppercase tracking-[0.3em] text-primary">
+              <span className="text-primary/50">03</span> Explore
             </p>
-            <h2 className="mt-4 max-w-lg font-serif text-4xl leading-tight text-[#f6efe4] md:text-5xl">
+            <h2 className="mt-4 max-w-lg font-serif text-4xl leading-tight text-foreground md:text-5xl">
               The whole thing, as a graph
             </h2>
           </div>
-          <p className="max-w-sm text-sm leading-relaxed text-[#f6efe4]/60">
+          <p className="max-w-sm text-sm leading-relaxed text-muted-foreground">
             Every node is a real entity from my work and every edge a relationship that actually
             exists. {isTouch ? "Drag to turn it, tap a node to read it." : "Drag to orbit, hover a node to read it, click to pin."}
           </p>
@@ -55,8 +55,8 @@ export function ExplorerSection() {
               aria-pressed={active === i}
               className={`rounded-full border px-4 py-1.5 font-mono text-xs transition-colors ${
                 active === i
-                  ? "border-[#f0b429] bg-[#f0b429]/15 text-[#f0b429]"
-                  : "border-[#f6efe4]/20 text-[#f6efe4]/60 hover:border-[#f6efe4]/40 hover:text-[#f6efe4]"
+                  ? "border-primary bg-primary/15 text-primary"
+                  : "border-border text-muted-foreground hover:border-primary/40 hover:text-foreground"
               }`}
             >
               {filter.label}
@@ -69,7 +69,7 @@ export function ExplorerSection() {
         <GraphStage
           highlight={FILTERS[active].kinds}
           framing="comfortable"
-          className="relative h-[70vh] min-h-[26rem] overflow-hidden rounded-xl border border-[#f6efe4]/10 bg-[#080603]"
+          className="relative h-[70vh] min-h-[26rem] overflow-hidden rounded-xl border border-border bg-muted/20"
         />
       </div>
     </section>

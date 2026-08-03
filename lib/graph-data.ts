@@ -56,8 +56,10 @@ export const NODE_SIZE: Record<NodeKind, number> = {
  * structure instead of being a monochrome cloud. Values are read from CSS
  * custom properties at runtime so both themes stay correct.
  */
-export const NODE_FAMILY: Record<NodeKind, "role" | "project" | "tech"> = {
-  self: "role",
+export const NODE_FAMILY: Record<NodeKind, "self" | "role" | "project" | "tech"> = {
+  // The person sits in a family of one, so it can be coloured apart from
+  // everything it connects to.
+  self: "self",
   role: "role",
   education: "role",
   project: "project",
