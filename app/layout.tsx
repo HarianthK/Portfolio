@@ -30,7 +30,11 @@ const mono = JetBrains_Mono({
 })
 
 const title = "Harianth Kalavala | AI Engineer"
-const description = "AI Engineer specializing in LLM pipelines and RAG systems"
+// This is what shows in search results and in a shared link, so it says what
+// the page says. The old wording led with RAG, which the site itself now
+// describes moving on from.
+const description =
+  "AI Engineer in Phoenix, Arizona, building retrieval systems and knowledge graphs that turn unstructured data into something production can depend on."
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
