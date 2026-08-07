@@ -97,8 +97,17 @@ function makeLabelSprite(text: string, fill: string, outline: string): THREE.Spr
   const textWidth = measure ? measure.measureText(text).width : text.length * fontSize * 0.6
 
   const canvas = document.createElement("canvas")
-  // Device-pixel oversampling so labels stay crisp when the camera is close.
-  const scale = 2
+  /*
+    Oversampling was a flat 2, which is a 1:1 texel-to-pixel match only on a
+    non-retina screen. On a device-pixel-ratio 2 display the label was being
+    magnified twice over and went soft — one of the two reasons the graph read
+    as blurry. Track the display instead, then clamp: the widest label is around
+    620 CSS px, so 4x would approach the 2048 texture limit on some GPUs.
+  */
+  const dpr = typeof window === "undefined" ? 1 : window.devicePixelRatio || 1
+  const untiled = (textWidth + padding * 2) * 2 * Math.min(dpr, 2)
+  const scale = untiled > 2048 ? (2048 / (textWidth + padding * 2)) : 2 * Math.min(dpr, 2)
+
   canvas.width = (textWidth + padding * 2) * scale
   canvas.height = (fontSize + padding) * scale
 
@@ -141,6 +150,76 @@ function makeLabelSprite(text: string, fill: string, outline: string): THREE.Spr
   const height = 4.5
   sprite.scale.set(height * aspect, height, 1)
   return sprite
+}
+
+/** Which wave of the entrance a node belongs to. Lower arrives first. */
+const APPEAR_ORDER: Record<GraphNode["kind"], number> = {
+  self: 0,
+  role: 1,
+  education: 1,
+  project: 2,
+  outcome: 3,
+  tech: 4,
+}
+
+/** Seconds between waves, and how long one node takes to reach full size. */
+const ENTRANCE_STAGGER = 0.16
+const ENTRANCE_DURATION = 0.55
+
+/** Total length of the entrance, used to ramp the edges in behind the nodes. */
+export const ENTRANCE_TOTAL =
+  Math.max(...Object.values(APPEAR_ORDER)) * ENTRANCE_STAGGER + ENTRANCE_DURATION
+
+/**
+ * Grows each node from nothing, family by family, so the graph assembles itself
+ * rather than simply being there. The whole pitch of the site is that he builds
+ * these things; watching one get built is the argument.
+ *
+ * Returns true once every node has landed, so the caller can stop driving it.
+ */
+export function applyEntrance(
+  objects: Map<string, THREE.Object3D>,
+  elapsed: number,
+  instant = false,
+): boolean {
+  /*
+    Nothing to grow yet is emphatically *not* "finished". The first frame runs
+    before the graph library has built any node objects, and reporting settled
+    there meant the caller stopped driving the entrance a moment before every
+    node appeared — leaving all of them stuck at zero scale, permanently.
+  */
+  if (objects.size === 0) return false
+
+  if (instant) {
+    objects.forEach((object) => object.scale.setScalar(1))
+    return true
+  }
+
+  let settled = true
+
+  objects.forEach((object) => {
+    const order = (object.userData.appearOrder as number) ?? 0
+    const t = (elapsed - order * ENTRANCE_STAGGER) / ENTRANCE_DURATION
+
+    if (t >= 1) {
+      object.scale.setScalar(1)
+      return
+    }
+
+    settled = false
+
+    if (t <= 0) {
+      object.scale.setScalar(0)
+      return
+    }
+
+    // Ease-out-back: overshoots a little and settles, which reads as a node
+    // snapping into place rather than being faded up.
+    const p = t - 1
+    object.scale.setScalar(Math.max(0, 1 + 2.2 * p * p * p + 1.2 * p * p))
+  })
+
+  return settled
 }
 
 /**
@@ -217,6 +296,13 @@ export function createNodeObjectFactory(theme: GraphTheme = "dark") {
 
     group.userData.nodeId = node.id
     group.userData.kind = node.kind
+    // Which wave this node arrives in. Built from the middle outwards — the
+    // person, then where he's been, then what came out of it, then the tools —
+    // so the graph assembles in the order the hierarchy reads.
+    group.userData.appearOrder = APPEAR_ORDER[node.kind]
+    // Entrance starts from nothing. applyEntrance drives this back to 1; if
+    // reduced motion is set it's snapped to 1 on the first frame instead.
+    group.scale.setScalar(0)
     cache.set(node.id, group)
     return group
   }

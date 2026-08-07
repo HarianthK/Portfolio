@@ -7,13 +7,22 @@ import { Bloom, EffectComposer } from "@react-three/postprocessing"
 import R3fForceGraph from "r3f-forcegraph"
 import { useTheme } from "next-themes"
 import * as THREE from "three"
-import { links, nodes, type GraphNode, type NodeKind } from "@/lib/graph-data"
 import {
+  links,
+  nodes,
+  nodesInSection,
+  type GraphNode,
+  type NodeKind,
+  type SectionId,
+} from "@/lib/graph-data"
+import {
+  applyEntrance,
   applySectionEmphasis,
   colorForNode,
   createNodeObjectFactory,
   disposeObject,
   radiusForNode,
+  ENTRANCE_TOTAL,
 } from "@/lib/graph-visuals"
 import { useSafeReducedMotion } from "@/lib/use-safe-reduced-motion"
 
@@ -22,6 +31,11 @@ export type GraphFraming = "immersive" | "comfortable"
 type Props = {
   /** Node kinds to keep lit. `null` lights the whole graph. */
   highlight?: NodeKind[] | null
+  /**
+   * Scroll-driven focus. When set, the camera flies to that section's cluster
+   * and everything else dims. `null` frames the whole graph.
+   */
+  focus?: SectionId | null
   /** Immersive lets the graph bleed past the frame; comfortable fits it inside. */
   framing?: GraphFraming
   onNodeFocus?: (node: GraphNode | null) => void
@@ -41,18 +55,19 @@ function boundsOf(objects: THREE.Object3D[]) {
   return box
 }
 
-function Scene({ highlight, framing = "immersive", onNodeFocus, onNodeSelect }: Props) {
+function Scene({ highlight, focus = null, framing = "immersive", onNodeFocus, onNodeSelect }: Props) {
   const graphRef = useRef<GraphHandle | undefined>(undefined)
   const groupRef = useRef<THREE.Group>(null)
   const prefersReducedMotion = useSafeReducedMotion()
   const { gl, camera, size } = useThree()
 
   // Once the visitor grabs the graph they own the camera, until the highlight
-  // changes — otherwise auto-framing would fight their dragging.
+  // or the scrolled-to section changes — otherwise auto-framing would fight
+  // their dragging.
   const userControlled = useRef(false)
   useEffect(() => {
     userControlled.current = false
-  }, [highlight])
+  }, [highlight, focus])
 
   // r3f-forcegraph mutates the objects it's given (it writes x/y/z onto each
   // node), so it gets copies — otherwise the module-level data in graph-data.ts
@@ -92,11 +107,40 @@ function Scene({ highlight, framing = "immersive", onNodeFocus, onNodeSelect }: 
     }
   }, [objects])
 
+  /*
+    Which nodes are lit. Two independent sources: the explorer's filter chips
+    (by kind) and the scroll position (by section). Scroll wins when both are
+    present, since it's the one the reader is actively driving.
+  */
   const activeIds = useMemo(() => {
+    if (focus) return new Set(nodesInSection(focus))
     if (!highlight || highlight.length === 0) return null
     const kinds = new Set(highlight)
     return new Set(nodes.filter((node) => kinds.has(node.kind)).map((node) => node.id))
-  }, [highlight])
+  }, [focus, highlight])
+
+  // Drives the assemble-on-arrival animation. Reduced motion skips it whole.
+  const entranceElapsed = useRef(0)
+  const entranceDone = useRef(false)
+
+  /*
+    Edges are held back until the nodes have almost finished arriving. Drawn
+    from the start they'd be a web of lines strung between invisible points,
+    since a link is positioned by its endpoints regardless of node scale.
+
+    This is a single state flip rather than a per-frame fade: link opacity is a
+    prop the graph library reads on refresh, so animating it continuously would
+    rebuild the link objects every frame.
+  */
+  const [linksIn, setLinksIn] = useState(false)
+  useEffect(() => {
+    if (prefersReducedMotion) {
+      setLinksIn(true)
+      return
+    }
+    const timer = setTimeout(() => setLinksIn(true), (ENTRANCE_TOTAL - 0.3) * 1000)
+    return () => clearTimeout(timer)
+  }, [prefersReducedMotion])
 
   useFrame((_, delta) => {
     graphRef.current?.tickFrame()
@@ -104,18 +148,43 @@ function Scene({ highlight, framing = "immersive", onNodeFocus, onNodeSelect }: 
     // Frame-rate independent easing — same feel on a 60Hz and 144Hz display.
     const ease = 1 - Math.exp(-5.5 * delta)
 
+    if (!entranceDone.current) {
+      // The clock only starts once there's something to animate, so the stagger
+      // isn't spent while the graph is still being built.
+      if (objects.size > 0) entranceElapsed.current += delta
+      entranceDone.current = applyEntrance(objects, entranceElapsed.current, prefersReducedMotion)
+    }
+
     applySectionEmphasis(objects, activeIds, ease, theme)
 
     const group = groupRef.current
     if (!group || objects.size === 0) return
 
-    // Framing always considers the whole graph. Filtering dims nodes rather than
-    // removing them, so re-fitting to just the lit ones would make the camera
-    // lurch every time a filter changed.
-    const box = boundsOf([...objects.values()])
+    /*
+      What the camera frames. Without a scroll focus this is the whole graph —
+      filter chips dim nodes rather than removing them, so re-fitting to the lit
+      ones would make the camera lurch on every chip press.
+
+      With a focus it deliberately does the opposite: flying to the cluster is
+      the entire point of the sticky rail.
+    */
+    const framed =
+      focus && activeIds
+        ? [...objects.entries()].filter(([id]) => activeIds.has(id)).map(([, object]) => object)
+        : [...objects.values()]
+
+    const box = boundsOf(framed.length > 0 ? framed : [...objects.values()])
     const centre = box.getCenter(new THREE.Vector3())
     const span = box.getSize(new THREE.Vector3())
-    const radius = Math.max(span.x, span.y, 330) / 2
+    // A lone cluster can be small enough to fill the frame uncomfortably, so
+    // the floor is lower when focused but never zero.
+    //
+    // The allowance is for labels, and only applies when focused. Bounds are
+    // built from node *positions*, but a name sits beside its node and runs
+    // well past it, so a tight cluster gets its outermost labels sliced off by
+    // the edge of the panel. The unfocused hero is meant to bleed, so it keeps
+    // the tighter fit.
+    const radius = Math.max(span.x, span.y, focus ? 190 : 330) / 2 + (focus ? 46 : 0)
 
     group.position.lerp(centre.clone().negate(), ease)
 
@@ -216,11 +285,12 @@ function Scene({ highlight, framing = "immersive", onNodeFocus, onNodeSelect }: 
           // A neutral rule on paper, rather than another brown competing with
           // the node inks.
           linkColor={() => (theme === "light" ? "#6b5f52" : "#8a7a5f")}
-          linkOpacity={theme === "light" ? 0.45 : 0.22}
+          linkOpacity={linksIn ? (theme === "light" ? 0.45 : 0.22) : 0}
           linkWidth={0.4}
           // Particles travelling the edges read as data moving through the
-          // graph — the thing these systems actually do.
-          linkDirectionalParticles={prefersReducedMotion ? 0 : 2}
+          // graph — the thing these systems actually do. Held back with the
+          // edges they travel along.
+          linkDirectionalParticles={prefersReducedMotion || !linksIn ? 0 : 2}
           linkDirectionalParticleWidth={1.1}
           linkDirectionalParticleSpeed={0.004}
           linkDirectionalParticleColor={() => "#f0b429"}
@@ -252,7 +322,10 @@ function Scene({ highlight, framing = "immersive", onNodeFocus, onNodeSelect }: 
           centre node. */}
       {!prefersReducedMotion && theme === "dark" && (
         <EffectComposer>
-          <Bloom intensity={1.15} luminanceThreshold={0.18} luminanceSmoothing={0.5} mipmapBlur />
+          {/* Eased down from 1.15. At native resolution the old value spread
+              far enough to soften the very edges the sharper canvas exists to
+              show. */}
+          <Bloom intensity={0.95} luminanceThreshold={0.2} luminanceSmoothing={0.45} mipmapBlur />
         </EffectComposer>
       )}
     </>
@@ -261,6 +334,23 @@ function Scene({ highlight, framing = "immersive", onNodeFocus, onNodeSelect }: 
 
 export default function GraphCanvas({ paused = false, ...props }: Props) {
   const [tabVisible, setTabVisible] = useState(true)
+
+  /*
+    Render at the display's own resolution. This was capped at 1.75 to protect
+    the frame rate, which on a retina screen meant drawing 23% fewer pixels than
+    the panel had — the graph was being magnified, and it read as blurry.
+
+    Multisampling is dropped in exchange on those screens. At two device pixels
+    per CSS pixel the geometry edges are already sampled finely enough that MSAA
+    is mostly paying for itself twice, and it's the expensive half of the two.
+
+    Read once on mount: this component is only ever loaded with `ssr: false`
+    (see graph-stage.tsx), so there's no server render to mismatch.
+  */
+  const [{ dpr, antialias }] = useState(() => {
+    const ratio = typeof window === "undefined" ? 1 : window.devicePixelRatio || 1
+    return { dpr: Math.min(ratio, 2), antialias: ratio < 2 }
+  })
 
   // The force simulation is a continuous render loop; there's no reason to burn
   // GPU on it while the tab is in the background.
@@ -277,9 +367,11 @@ export default function GraphCanvas({ paused = false, ...props }: Props) {
 
   return (
     <Canvas
-      camera={{ position: [0, 40, 280], fov: 52, near: 1, far: 4000 }}
-      gl={{ antialias: true, powerPreference: "high-performance" }}
-      dpr={[1, 1.75]}
+      // Starts further out than it settles, so the opening move is a dolly in
+      // towards the graph as it assembles rather than a static shot.
+      camera={{ position: [0, 60, 520], fov: 52, near: 1, far: 4000 }}
+      gl={{ antialias, powerPreference: "high-performance" }}
+      dpr={dpr}
       frameloop={running ? "always" : "never"}
       style={{ position: "absolute", inset: 0 }}
     >
