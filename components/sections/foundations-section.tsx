@@ -53,18 +53,17 @@ const EDUCATION = [
  */
 export function FoundationsSection() {
   return (
-    <section id="foundations" className="section-grid relative px-6 py-28 md:px-14 md:py-36">
-      <div className="mx-auto max-w-5xl">
-        <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+    <section id="foundations" className="section-grid relative py-24 md:py-32">
+        <div className="flex flex-col gap-8 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="font-mono text-xs uppercase tracking-[0.3em] text-primary">
-              <span className="text-primary/50">05</span> Foundations
+              <span className="text-primary/50">04</span> Foundations
             </p>
             <h2 className="mt-4 font-serif text-4xl leading-tight text-foreground md:text-5xl">
               Where the data instincts came from
             </h2>
           </div>
-          <div className="w-full max-w-[15rem]">
+          <div className="w-full max-w-60">
             <FigureBlock
               value="2.5M+"
               label="Item repository"
@@ -117,7 +116,6 @@ export function FoundationsSection() {
             </dd>
           </div>
         </dl>
-      </div>
     </section>
   )
 }

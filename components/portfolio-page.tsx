@@ -1,26 +1,22 @@
-import { BuiltSection } from "@/components/sections/built-section"
 import { ContactSection } from "@/components/sections/contact-section"
-import { ExplorerSection } from "@/components/sections/explorer-section"
-import { FoundationsSection } from "@/components/sections/foundations-section"
 import { HeroSection } from "@/components/sections/hero-section"
-import { NowSection } from "@/components/sections/now-section"
+import { NarrativeRail } from "@/components/sections/narrative-rail"
 import { StorySection } from "@/components/sections/story-section"
 
 /**
  * Order matters: a person, then the current work and the thinking behind it,
- * then the graph as something to play with, then the record. Each section owns
- * its own layout — the previous version repeated one shape all the way down,
- * which is what made it feel templated no matter how good the graph was.
+ * then the graph as something to play with, then the record.
+ *
+ * The middle three sections and the explorer now live inside NarrativeRail,
+ * which keeps the graph beside them the whole way down instead of letting it
+ * disappear for three sections and come back as a static widget.
  */
 export function PortfolioPage() {
   return (
     <main>
       <HeroSection />
       <StorySection />
-      <NowSection />
-      <ExplorerSection />
-      <BuiltSection />
-      <FoundationsSection />
+      <NarrativeRail />
       <ContactSection />
     </main>
   )

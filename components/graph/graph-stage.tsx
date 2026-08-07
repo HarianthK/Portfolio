@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic"
 import { useCallback, useEffect, useRef, useState } from "react"
 import type { GraphFraming } from "@/components/graph/graph-canvas"
-import type { GraphNode, NodeKind } from "@/lib/graph-data"
+import type { GraphNode, NodeKind, SectionId } from "@/lib/graph-data"
 
 // WebGL can't render on the server, and pulling three.js into the initial
 // bundle would delay first paint for no benefit.
@@ -13,9 +13,23 @@ const GraphCanvas = dynamic(() => import("@/components/graph/graph-canvas"), {
 
 type Props = {
   highlight?: NodeKind[] | null
+  /** Scroll-driven section focus — the camera flies to that cluster. */
+  focus?: SectionId | null
   framing?: GraphFraming
   /** Hero is a picture you can poke; the explorer is a tool you use. */
   showReadout?: boolean
+  /**
+   * Whether pointer input reaches the canvas. The rail is a moving illustration
+   * beside the writing until it unpins into the explorer, at which point it
+   * becomes something to grab.
+   */
+  interactive?: boolean
+  /**
+   * Lets a parent stop the render loop. The stage pauses itself when its own
+   * container scrolls away, but the rail's panel is `fixed` — always on screen
+   * by definition — so the rail has to say when it's actually in play.
+   */
+  active?: boolean
   className?: string
 }
 
@@ -25,7 +39,15 @@ type Props = {
  * full-page backdrop any more: text laid over a live 3D scene needed so heavy a
  * scrim that it turned the graph to mud, especially on phones.
  */
-export function GraphStage({ highlight = null, framing = "immersive", showReadout = true, className }: Props) {
+export function GraphStage({
+  highlight = null,
+  focus = null,
+  framing = "immersive",
+  showReadout = true,
+  interactive = true,
+  active = true,
+  className,
+}: Props) {
   const [hovered, setHovered] = useState<GraphNode | null>(null)
   const [pinned, setPinned] = useState<GraphNode | null>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -44,6 +66,14 @@ export function GraphStage({ highlight = null, framing = "immersive", showReadou
     observer.observe(el)
     return () => observer.disconnect()
   }, [])
+
+  // Leaving interactive mode has to drop whatever was being pointed at, or the
+  // readout would stay frozen on the last node once the graph docks again.
+  useEffect(() => {
+    if (interactive) return
+    setHovered(null)
+    setPinned(null)
+  }, [interactive])
 
   const handleSelect = useCallback((node: GraphNode) => {
     // Tapping is the only way in on touch, where there's no hover at all, so a
@@ -77,13 +107,18 @@ export function GraphStage({ highlight = null, framing = "immersive", showReadou
     // is written out in the sections around it. The explorer's filter buttons
     // sit outside this element and stay reachable.
     <div ref={containerRef} className={className} aria-hidden>
-      <GraphCanvas
-        highlight={highlight}
-        framing={framing}
-        paused={!onScreen}
-        onNodeFocus={setHovered}
-        onNodeSelect={handleSelect}
-      />
+      {/* Non-interactive while docked: the rail is illustration beside the
+          writing, and swallowing drags there would fight the page scroll. */}
+      <div className={interactive ? "absolute inset-0" : "pointer-events-none absolute inset-0"}>
+        <GraphCanvas
+          highlight={highlight}
+          focus={focus}
+          framing={framing}
+          paused={!onScreen || !active}
+          onNodeFocus={interactive ? setHovered : undefined}
+          onNodeSelect={handleSelect}
+        />
+      </div>
 
       {showReadout && shown && (
         // z-20 keeps it above the hero's bottom fade, which is a later sibling
