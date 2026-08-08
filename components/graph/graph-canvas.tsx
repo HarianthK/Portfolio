@@ -3,10 +3,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Canvas, useFrame, useThree } from "@react-three/fiber"
 import { OrbitControls } from "@react-three/drei"
-import { Bloom, EffectComposer } from "@react-three/postprocessing"
+import { Bloom, DepthOfField, EffectComposer, Vignette } from "@react-three/postprocessing"
 import R3fForceGraph from "r3f-forcegraph"
 import { useTheme } from "next-themes"
 import * as THREE from "three"
+import { Atmosphere } from "@/components/graph/atmosphere"
 import {
   links,
   nodes,
@@ -23,10 +24,14 @@ import {
   disposeObject,
   radiusForNode,
   ENTRANCE_TOTAL,
+  FAMILY_COLOR,
 } from "@/lib/graph-visuals"
 import { useSafeReducedMotion } from "@/lib/use-safe-reduced-motion"
 
 export type GraphFraming = "immersive" | "comfortable"
+
+/** The graph is always centred on the origin, so that's where the lens focuses. */
+const FOCUS_TARGET = new THREE.Vector3(0, 0, 0)
 
 type Props = {
   /** Node kinds to keep lit. `null` lights the whole graph. */
@@ -122,6 +127,23 @@ function Scene({ highlight, focus = null, framing = "immersive", onNodeFocus, on
   // Drives the assemble-on-arrival animation. Reduced motion skips it whole.
   const entranceElapsed = useRef(0)
   const entranceDone = useRef(false)
+  const entrancePlayed = useRef(false)
+
+  /*
+    Switching theme throws away every node object and builds new ones, because
+    the colours and the label textures are baked in at construction. Those new
+    objects are born at zero scale, waiting for the entrance to grow them — and
+    the entrance had already run and marked itself finished, so nothing ever
+    did. Every node vanished and only the edges were left.
+
+    Resetting here re-arms it for the rebuilt objects. The replay is instant
+    rather than animated: an assembling graph is the right way to arrive on the
+    page, and the wrong way to respond to someone flipping a colour scheme.
+  */
+  useEffect(() => {
+    entranceElapsed.current = 0
+    entranceDone.current = false
+  }, [objects])
 
   /*
     Edges are held back until the nodes have almost finished arriving. Drawn
@@ -152,7 +174,9 @@ function Scene({ highlight, focus = null, framing = "immersive", onNodeFocus, on
       // The clock only starts once there's something to animate, so the stagger
       // isn't spent while the graph is still being built.
       if (objects.size > 0) entranceElapsed.current += delta
-      entranceDone.current = applyEntrance(objects, entranceElapsed.current, prefersReducedMotion)
+      const instant = prefersReducedMotion || entrancePlayed.current
+      entranceDone.current = applyEntrance(objects, entranceElapsed.current, instant)
+      if (entranceDone.current) entrancePlayed.current = true
     }
 
     applySectionEmphasis(objects, activeIds, ease, theme)
@@ -188,6 +212,28 @@ function Scene({ highlight, focus = null, framing = "immersive", onNodeFocus, on
 
     group.position.lerp(centre.clone().negate(), ease)
 
+    /*
+      Lean the whole graph a few degrees towards the pointer. It's a small
+      angle on purpose — enough that the scene feels like it's aware of you and
+      has volume, not so much that it fights the orbit controls or makes people
+      seasick. Heavily damped, so a fast mouse doesn't whip it around.
+    */
+    if (!prefersReducedMotion) {
+      const lean = 0.13
+      group.rotation.y = THREE.MathUtils.damp(
+        group.rotation.y,
+        parallax.current.x * lean,
+        2.2,
+        delta,
+      )
+      group.rotation.x = THREE.MathUtils.damp(
+        group.rotation.x,
+        parallax.current.y * lean * 0.6,
+        2.2,
+        delta,
+      )
+    }
+
     if (userControlled.current) return
 
     const perspective = camera as THREE.PerspectiveCamera
@@ -213,6 +259,14 @@ function Scene({ highlight, focus = null, framing = "immersive", onNodeFocus, on
   const raycaster = useMemo(() => new THREE.Raycaster(), [])
   const pointer = useMemo(() => new THREE.Vector2(), [])
 
+  /*
+    Where the pointer is, in -1..1, used to lean the graph a few degrees towards
+    the viewer. Kept in a ref and applied per frame rather than held in state:
+    this changes on every mouse move, and re-rendering the scene graph at that
+    rate would cost far more than the effect is worth.
+  */
+  const parallax = useRef({ x: 0, y: 0 })
+
   const nodeAtPointer = useCallback(
     (event: PointerEvent): GraphNode | null => {
       const rect = gl.domElement.getBoundingClientRect()
@@ -236,6 +290,10 @@ function Scene({ highlight, focus = null, framing = "immersive", onNodeFocus, on
     const clear = () => onNodeFocus?.(null)
 
     const handleMove = (event: PointerEvent) => {
+      const rect = canvas.getBoundingClientRect()
+      parallax.current.x = ((event.clientX - rect.left) / rect.width) * 2 - 1
+      parallax.current.y = ((event.clientY - rect.top) / rect.height) * 2 - 1
+
       const node = nodeAtPointer(event)
       canvas.style.cursor = node ? "pointer" : "grab"
       onNodeFocus?.(node)
@@ -309,23 +367,53 @@ function Scene({ highlight, focus = null, framing = "immersive", onNodeFocus, on
         rotateSpeed={0.45}
         minDistance={80}
         maxDistance={1400}
+        /* Slower than it was, and no longer the only movement in the scene.
+           A constant even spin is the least cinematic move there is — it reads
+           as a screensaver. Most of the motion now comes from the parallax
+           below, which responds to the viewer instead of ignoring them. */
         autoRotate={!prefersReducedMotion}
-        autoRotateSpeed={0.28}
+        autoRotateSpeed={0.16}
         onStart={() => {
           userControlled.current = true
         }}
       />
 
-      {/* Bloom only makes sense on the dark theme. It works by adding light,
-          and on a pale background there's nothing brighter than the page to add
-          — it just bleaches the graph out, worst of all around the near-white
-          centre node. */}
+      {/* Atmosphere is part of the same argument as the rim light: something
+          has to sit between the eye and the subject for the scene to have
+          depth. Dark only — on paper, floating motes are just specks. */}
+      {theme === "dark" && !prefersReducedMotion && <Atmosphere color={FAMILY_COLOR.dark.role} />}
+
+      {/* The filmic pass, and dark-theme only for the same reason bloom is:
+          these effects all work by adding light or crushing blacks, and on a
+          pale background there is nothing brighter than the page to add.
+
+          Order matters. Depth of field runs first so bloom spreads from an
+          already-blurred image — the other way round, bloom haloes the sharp
+          edges and the blur then smears the haloes. */}
       {!prefersReducedMotion && theme === "dark" && (
         <EffectComposer>
+          {/*
+            Focus is pinned to the graph's centre — which is the origin, since
+            the group is positioned to put it there and the controls orbit it —
+            rather than a hand-tuned distance. A fixed `focusDistance` is in
+            normalised units against the far plane, and at far=4000 the value
+            that looked right on paper put the focal plane roughly 250 units in
+            front of the graph, so the entire scene blurred.
+
+            Deliberately restrained. Labels are sprites drawn with depth testing
+            off, so this pass blurs them according to whatever is behind them
+            rather than their own distance — push the blur any harder and the
+            node names go soft, which is the exact complaint this whole piece of
+            work exists to answer.
+          */}
+          <DepthOfField target={FOCUS_TARGET} focalLength={0.012} bokehScale={0.6} height={480} />
           {/* Eased down from 1.15. At native resolution the old value spread
               far enough to soften the very edges the sharper canvas exists to
               show. */}
           <Bloom intensity={0.95} luminanceThreshold={0.2} luminanceSmoothing={0.45} mipmapBlur />
+          {/* Pulls the corners down so the frame has a centre of attention
+              rather than being evenly lit wall to wall. */}
+          <Vignette offset={0.28} darkness={0.72} eskil={false} />
         </EffectComposer>
       )}
     </>

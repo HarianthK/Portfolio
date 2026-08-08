@@ -82,15 +82,66 @@ const LABEL_COLORS = {
 } as const
 
 /**
+ * A rim light, done the way film does it: bright where the surface turns away
+ * from the viewer, dark where it faces them.
+ *
+ * This is the difference between a coloured ball and a lit object. The nodes
+ * were flat discs of colour with a glow bolted on, which is exactly why the
+ * graph read as a diagram rather than a photograph of something.
+ *
+ * Additively blended, so it only ever adds light — over a near-black background
+ * that gives the edge of each node a filament brightness that bloom then picks
+ * up and spreads.
+ */
+function makeRimMaterial(color: string): THREE.ShaderMaterial {
+  return new THREE.ShaderMaterial({
+    uniforms: {
+      uColor: { value: new THREE.Color(color) },
+      // Tight falloff: a wide rim looks like fog around the node instead of
+      // light catching its edge.
+      uPower: { value: 2.6 },
+      uOpacity: { value: 1 },
+    },
+    vertexShader: `
+      varying vec3 vNormalW;
+      varying vec3 vViewW;
+      void main() {
+        vec4 worldPos = modelMatrix * vec4(position, 1.0);
+        // Nodes only ever scale uniformly (the entrance animation), so the
+        // model matrix can rotate the normal without an inverse-transpose.
+        vNormalW = normalize(mat3(modelMatrix) * normal);
+        vViewW = normalize(cameraPosition - worldPos.xyz);
+        gl_Position = projectionMatrix * viewMatrix * worldPos;
+      }
+    `,
+    fragmentShader: `
+      uniform vec3 uColor;
+      uniform float uPower;
+      uniform float uOpacity;
+      varying vec3 vNormalW;
+      varying vec3 vViewW;
+      void main() {
+        float facing = clamp(dot(normalize(vNormalW), normalize(vViewW)), 0.0, 1.0);
+        float rim = pow(1.0 - facing, uPower);
+        gl_FragColor = vec4(uColor * rim, rim * uOpacity);
+      }
+    `,
+    transparent: true,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+  })
+}
+
+/**
  * Text rendered to a canvas and used as a sprite texture. Cheaper than a text
  * geometry library for a handful of labels, and it always faces the camera.
  */
 function makeLabelSprite(text: string, fill: string, outline: string): THREE.Sprite {
   const padding = 24
   const fontSize = 44
-  // Semibold: these render small on screen, and the lighter weight went thin
-  // and grey once the glow was removed from the light theme.
-  const font = `600 ${fontSize}px ui-monospace, "JetBrains Mono", monospace`
+  // Bold, not semibold. These end up only about ten pixels tall on screen, and
+  // at that size a lighter weight loses its stems to minification entirely.
+  const font = `700 ${fontSize}px ui-monospace, "JetBrains Mono", monospace`
 
   const measure = document.createElement("canvas").getContext("2d")
   if (measure) measure.font = font
@@ -121,20 +172,42 @@ function makeLabelSprite(text: string, fill: string, outline: string): THREE.Spr
     const cx = canvas.width / (2 * scale)
     const cy = canvas.height / (2 * scale)
 
-    // A halo in the opposing tone, so the text keeps its edge whatever it
-    // passes in front of.
+    /*
+      A halo in the opposing tone, so the text keeps its edge whatever it
+      passes in front of.
+
+      Was 7px wide, which is most of the width of a stem at this size. Once the
+      sprite is minified down to its on-screen size the halo and the glyph get
+      averaged together, and a pale halo around dark text simply erased it —
+      which is why the labels were unreadable on the light theme. Wide enough
+      to separate the text from what's behind it, narrow enough to survive.
+    */
     ctx.lineJoin = "round"
-    ctx.lineWidth = 7
+    ctx.miterLimit = 2
+    ctx.lineWidth = 3.5
     ctx.strokeStyle = outline
     ctx.strokeText(text, cx, cy)
 
     ctx.fillStyle = fill
+    ctx.fillText(text, cx, cy)
+    // Twice, so the glyph core stays dominant over the halo once the whole
+    // thing is scaled down.
     ctx.fillText(text, cx, cy)
   }
 
   const texture = new THREE.CanvasTexture(canvas)
   texture.needsUpdate = true
   texture.colorSpace = THREE.SRGBColorSpace
+  /*
+    These sprites are always seen much smaller than they're drawn, so how the
+    texture is *shrunk* matters far more than how it's stretched. Anisotropic
+    filtering keeps the strokes from dissolving into grey at a glancing angle,
+    which is most of what made the smaller labels illegible.
+  */
+  texture.generateMipmaps = true
+  texture.minFilter = THREE.LinearMipmapLinearFilter
+  texture.magFilter = THREE.LinearFilter
+  texture.anisotropy = 8
 
   const sprite = new THREE.Sprite(
     new THREE.SpriteMaterial({
@@ -147,7 +220,9 @@ function makeLabelSprite(text: string, fill: string, outline: string): THREE.Spr
   )
 
   const aspect = canvas.width / canvas.height
-  const height = 4.5
+  // Up from 4.5. The text was being drawn at roughly ten screen pixels tall,
+  // which is below the size at which this typeface holds together at all.
+  const height = 6.4
   sprite.scale.set(height * aspect, height, 1)
   return sprite
 }
@@ -263,11 +338,20 @@ export function createNodeObjectFactory(theme: GraphTheme = "dark") {
     // four times the triangles across every node.
     group.add(new THREE.Mesh(new THREE.IcosahedronGeometry(radius, 2), coreMaterial))
 
-    // Halo only on dark, where it reads as atmosphere around a glowing point.
-    // On the light theme a pale ring of a dark ink is just a grey smudge, and
-    // one around every node was what made the whole graph look muddy.
+    // Rim light and halo are dark-theme only. On the light theme a pale ring of
+    // a dark ink is just a grey smudge, and one around every node was what made
+    // the whole graph look muddy — light mode reads as print, not film.
     if (theme === "dark") {
-      const haloOpacity = node.kind === "tech" ? 0.05 : 0.1
+      // Sits just proud of the surface so the rim traces the node's silhouette
+      // rather than z-fighting with it.
+      const rim = new THREE.Mesh(
+        new THREE.IcosahedronGeometry(radius * 1.04, 3),
+        makeRimMaterial(color),
+      )
+      rim.raycast = () => {}
+      group.add(rim)
+
+      const haloOpacity = node.kind === "tech" ? 0.04 : 0.08
       const haloMaterial = new THREE.MeshBasicMaterial({
         color,
         transparent: true,
@@ -286,7 +370,9 @@ export function createNodeObjectFactory(theme: GraphTheme = "dark") {
 
     if (isLabelled(node)) {
       const sprite = makeLabelSprite(node.label, label.fill, label.outline)
-      sprite.position.set(0, radius + 4, 0)
+      // Clears the node by half the label's own height, now that the label is
+      // taller — otherwise the descenders sit on top of the sphere.
+      sprite.position.set(0, radius + 6.5, 0)
       // A label is a wide quad sitting above the node, and most of it is
       // transparent — but raycasting doesn't care about transparency, so
       // leaving it hittable made empty space next to the text report a hover.
@@ -336,6 +422,15 @@ export function applySectionEmphasis(
       const mesh = child as THREE.Mesh
       const material = mesh.material as THREE.MeshStandardMaterial | undefined
       if (!material) return
+
+      // The rim light fades through a uniform rather than material.opacity,
+      // which its shader ignores — without this branch a de-emphasised node
+      // kept a bright outline while its body dimmed away underneath.
+      const uniforms = (material as unknown as THREE.ShaderMaterial).uniforms
+      if (uniforms?.uOpacity) {
+        uniforms.uOpacity.value += (targetOpacity - uniforms.uOpacity.value) * lerp
+        return
+      }
 
       if (material.emissiveIntensity !== undefined && material.emissive) {
         material.emissiveIntensity += (targetEmissive - material.emissiveIntensity) * lerp
