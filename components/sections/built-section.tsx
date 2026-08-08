@@ -25,10 +25,24 @@ const PROJECTS: Project[] = [
     },
   },
   {
+    /*
+      Rewritten to describe the thing that actually loads.
+
+      The previous version claimed authentication, time-series performance
+      tracking and real-time updates. Opening the site shows a public search
+      with no sign-in, and nothing pushing live updates. A hiring manager who
+      reads a feature list and then clicks through to something else is being
+      handed a reason to doubt everything around it — and the site's whole
+      argument rests on its claims being checkable.
+
+      What is here is verifiable by using it: type-ahead search, points totalled
+      per division, competition history, and eligibility. Both endpoints named
+      below are real — /api/autocomplete and /api/dancer.
+    */
     name: "Registry Points",
     summary:
-      "A full-stack data application with authentication, time-series performance tracking, and interactive visualisation, backed by a REST API with flexible querying and real-time updates.",
-    stack: ["React", "Next.js", "REST APIs", "Vercel"],
+      "A lookup over the World Swing Dance Council's competitor registry. Type part of a name and it finds the dancer, then returns their competition history with points totalled by division and the divisions they're currently eligible to enter. Type-ahead search and record lookup each run through their own endpoint.",
+    stack: ["Next.js", "React", "REST APIs", "Vercel"],
     href: "https://registry-points.vercel.app",
     hrefLabel: "Visit site",
   },
