@@ -33,6 +33,23 @@ export type GraphFraming = "immersive" | "comfortable"
 /** The graph is always centred on the origin, so that's where the lens focuses. */
 const FOCUS_TARGET = new THREE.Vector3(0, 0, 0)
 
+/*
+  The opening move.
+
+  The page used to fade a finished graph in and leave it turning, which is
+  atmosphere without an event — nothing to actually watch. Instead the camera
+  starts inside the cloud, close enough that a couple of nodes fill the frame,
+  and retreats until the whole structure resolves around it. The nodes are
+  igniting family by family while that happens, so the reveal and the assembly
+  land together.
+
+  Long enough to read as a camera move rather than a zoom, short enough that
+  nobody is kept waiting to use the page — and it can be interrupted at any
+  point by touching the graph.
+*/
+const INTRO_DURATION = 3.1
+const INTRO_START_DISTANCE = 64
+
 type Props = {
   /** Node kinds to keep lit. `null` lights the whole graph. */
   highlight?: NodeKind[] | null
@@ -128,6 +145,14 @@ function Scene({ highlight, focus = null, framing = "immersive", onNodeFocus, on
   const entranceElapsed = useRef(0)
   const entranceDone = useRef(false)
   const entrancePlayed = useRef(false)
+
+  /*
+    The opening camera move. Only the hero performs it — and only once, so that
+    scrolling back up to the top doesn't replay it every time — and reduced
+    motion skips it entirely, landing straight on the framed view.
+  */
+  const intro = useRef(0)
+  const introRunning = useRef(framing === "immersive" && !prefersReducedMotion)
 
   /*
     Switching theme throws away every node object and builds new ones, because
@@ -241,6 +266,32 @@ function Scene({ highlight, focus = null, framing = "immersive", onNodeFocus, on
     const hFov = 2 * Math.atan(Math.tan(vFov / 2) * (size.width / size.height))
     const margin = framing === "immersive" ? 0.82 : 1.02
     const desired = (radius / Math.tan(Math.min(vFov, hFov) / 2)) * margin
+
+    /*
+      The opening pull-back, on the hero only. The explorer is somewhere people
+      arrive at deliberately and want to use straight away, so it gets no
+      performance.
+
+      Driven explicitly rather than through the damping below, because damping
+      is exponential: it moves fastest at the start and crawls at the end, which
+      is precisely backwards for a reveal. This accelerates away from the nodes
+      and settles softly.
+    */
+    if (introRunning.current) {
+      intro.current = Math.min(1, intro.current + delta / INTRO_DURATION)
+      /*
+        Ease in *and* out, quartic. The first attempt used an ease-out, which
+        front-loads the movement: eighty per cent of the distance was gone
+        within the first second and the remaining two were an imperceptible
+        crawl, so there was nothing to watch. This holds inside the cloud for a
+        beat, sweeps out through the middle of the move, and settles softly.
+      */
+      const t = intro.current
+      const eased = t < 0.5 ? 8 * t * t * t * t : 1 - Math.pow(-2 * t + 2, 4) / 2
+      camera.position.setLength(THREE.MathUtils.lerp(INTRO_START_DISTANCE, desired, eased))
+      if (intro.current >= 1) introRunning.current = false
+      return
+    }
 
     // Only the distance is touched, never the direction — that leaves
     // OrbitControls' rotation and auto-rotate free to do their own thing.
@@ -455,9 +506,10 @@ export default function GraphCanvas({ paused = false, ...props }: Props) {
 
   return (
     <Canvas
-      // Starts further out than it settles, so the opening move is a dolly in
-      // towards the graph as it assembles rather than a static shot.
-      camera={{ position: [0, 60, 520], fov: 52, near: 1, far: 4000 }}
+      /* Starts deep inside the cloud. Matching the intro's opening distance
+         here matters: set it further out and the very first painted frame is
+         the wide shot, which shows the ending before the move begins. */
+      camera={{ position: [0, 7.4, 63.6], fov: 52, near: 1, far: 4000 }}
       gl={{ antialias, powerPreference: "high-performance" }}
       dpr={dpr}
       frameloop={running ? "always" : "never"}
