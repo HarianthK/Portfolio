@@ -41,10 +41,33 @@ const PROJECTS: Project[] = [
     */
     name: "Registry Points",
     summary:
-      "A lookup over the World Swing Dance Council's competitor registry. Type part of a name and it finds the dancer, then returns their competition history with points totalled by division and the divisions they're currently eligible to enter. Type-ahead search and record lookup each run through their own endpoint.",
+      "A lookup over the World Swing Dance Council's competitor registry. Type part of a name and it finds the dancer, then returns their points by division, how close they are to moving up, a chart of their competitions over time, and a comparison against other dancers on the same axis. Lookups take about a seventh of a second: the original asked the registry for a session token first, and nothing ever checked it.",
     stack: ["Next.js", "React", "REST APIs", "Vercel"],
     href: "https://registry-points.vercel.app",
     hrefLabel: "Visit site",
+    figure: {
+      value: "10",
+      label: "Dependencies, down from 53",
+      context: "Twenty-eight Radix packages removed for components that are a few lines of markup.",
+    },
+  },
+  {
+    /*
+      The scoring is the part worth describing. Anyone can draw a line between
+      two points; deciding which line is prettier is the actual work, and it is
+      checkable against the roads Arizona has already designated as scenic.
+    */
+    name: "Trailblaze AZ",
+    summary:
+      "A route planner that picks the pretty way instead of the quick one. Every drivable road in Arizona is scored for how close it runs to woodland, wilderness and water, then checked against the roads the state has officially designated scenic. Ask it for Phoenix to Sedona and it sends you over the Mogollon Rim rather than up the interstate, shows the climb that explains the extra two hours, and works out when to leave to arrive in golden hour.",
+    stack: ["Next.js", "OSRM", "OpenStreetMap", "Python", "MapLibre"],
+    href: "https://trailblaze-az.vercel.app",
+    hrefLabel: "Visit site",
+    figure: {
+      value: "931,043",
+      label: "Roads scored",
+      context: "Every drivable way in Arizona, rated against the state's own designated byways.",
+    },
   },
 ]
 
