@@ -69,6 +69,24 @@ const PROJECTS: Project[] = [
       context: "Every drivable way in Arizona, rated against the state's own designated byways.",
     },
   },
+  {
+    /*
+      The interesting claim here is not that it runs, it is that it is provably
+      right. An emulator can look fine and have a broken carry flag, so the
+      figure is the test suite rather than anything about the code.
+    */
+    name: "CHIP-8",
+    summary:
+      "A virtual machine from 1977, rebuilt from its instruction set and running in a browser. Four kilobytes of memory, sixteen registers, thirty-five instructions, and programs written for it almost fifty years ago run unchanged. No dependencies and no build step: a page, a script and a file.",
+    stack: ["JavaScript", "Canvas", "Web Audio"],
+    href: "https://github.com/HarianthK/chip8",
+    hrefLabel: "View code",
+    figure: {
+      value: "35/35",
+      label: "Instructions verified",
+      context: "Checked against a published test suite, then checked again by breaking one on purpose.",
+    },
+  },
 ]
 
 /**

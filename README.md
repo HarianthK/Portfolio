@@ -3,7 +3,7 @@
 My personal site. Live at **[harianthk.vercel.app](https://harianthk.vercel.app)**.
 
 I'm Harianth Kalavala, an AI engineer in Phoenix, Arizona. I build retrieval
-systems and knowledge graphs — the parts that turn messy documents into
+systems and knowledge graphs, the parts that turn messy documents into
 something an application can rely on.
 
 ## The graph
@@ -24,13 +24,13 @@ instead of animating.
 
 The site reads as one continuous story rather than a list of pages:
 
-- **Hero** — the graph, and what I do.
-- **Story** — how I got here.
-- **Built** — the projects, and what each one actually solves.
-- **Explorer** — a closer look at how retrieval works.
-- **Foundations** — the ideas underneath the work.
-- **Now** — what I'm doing at the moment.
-- **Contact** — how to reach me.
+- **Hero**, the graph, and what I do.
+- **Story**, how I got here.
+- **Built**, the projects, and what each one actually solves.
+- **Explorer**, a closer look at how retrieval works.
+- **Foundations**, the ideas underneath the work.
+- **Now**, what I'm doing at the moment.
+- **Contact**, how to reach me.
 
 ## Running it
 
