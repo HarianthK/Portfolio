@@ -70,21 +70,18 @@ const PROJECTS: Project[] = [
     },
   },
   {
-    /*
-      The interesting claim here is not that it runs, it is that it is provably
-      right. An emulator can look fine and have a broken carry flag, so the
-      figure is the test suite rather than anything about the code.
-    */
+    // Coverage is the claim worth making: an emulator that runs most programs is
+    // one with a bug it has not met yet, so the figure is the whole archive.
     name: "CHIP-8",
     summary:
-      "A virtual machine from 1977, rebuilt from its instruction set and running in a browser. Four kilobytes of memory, sixteen registers, thirty-five instructions, and programs written for it almost fifty years ago run unchanged. No dependencies and no build step: a page, a script and a file.",
+      "A virtual machine from 1977, rebuilt from its instruction set and running in a browser, with both of the extensions people later built on it: SUPER-CHIP's larger screen and scrolling, and XO-CHIP's second colour plane, sixty four kilobytes of memory and waveform sound. Every one of the 103 programs in the community archive runs, fetched when you pick one from the list. No dependencies and no build step: a page, a script and a file.",
     stack: ["JavaScript", "Canvas", "Web Audio"],
     href: "https://github.com/HarianthK/chip8",
     hrefLabel: "View code",
     figure: {
-      value: "35/35",
-      label: "Instructions verified",
-      context: "Checked against a published test suite, then checked again by breaking one on purpose.",
+      value: "103/103",
+      label: "Programs in the archive",
+      context: "Each is run headlessly to confirm it draws and answers a key, over a published instruction suite.",
     },
   },
 ]
