@@ -76,8 +76,8 @@ const PROJECTS: Project[] = [
     summary:
       "A virtual machine from 1977, rebuilt from its instruction set and running in a browser, with both of the extensions people later built on it: SUPER-CHIP's larger screen and scrolling, and XO-CHIP's second colour plane, sixty four kilobytes of memory and waveform sound. Every one of the 103 programs in the community archive runs, fetched when you pick one from the list. No dependencies and no build step: a page, a script and a file.",
     stack: ["JavaScript", "Canvas", "Web Audio"],
-    href: "https://github.com/HarianthK/chip8",
-    hrefLabel: "View code",
+    href: "https://harianthk.github.io/chip8/",
+    hrefLabel: "Play it",
     figure: {
       value: "103/103",
       label: "Programs in the archive",
