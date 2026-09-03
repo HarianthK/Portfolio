@@ -70,6 +70,21 @@ const PROJECTS: Project[] = [
     },
   },
   {
+    // The compiler is only worth building because the machine under it was
+    // already proven, which is what makes its tests able to run the output.
+    name: "Nibble",
+    summary:
+      "A small language that compiles to CHIP-8 machine code, and the machine to run it on. Write a program with variables, sprites, loops and key tests, press compile, and play it: the bytes shown under the screen are the real output and would run on any CHIP-8 interpreter. A dozen lines becomes sixty one bytes. Three passes in one file, no dependencies, with jumps left blank and patched once their addresses are known.",
+    stack: ["JavaScript", "Compilers", "Canvas"],
+    href: "https://nibble-lang.vercel.app",
+    hrefLabel: "Write a program",
+    figure: {
+      value: "61",
+      label: "Bytes from a dozen lines",
+      context: "Every test compiles a program, runs it on the emulator, and checks which pixels came on.",
+    },
+  },
+  {
     // Coverage is the claim worth making: an emulator that runs most programs is
     // one with a bug it has not met yet, so the figure is the whole archive.
     name: "CHIP-8",
