@@ -60,7 +60,8 @@ so a shared link looks like the site rather than like a default.
 
 ## Notes for later
 
-A few things here were harder than they looked, and are worth remembering:
+Why the entries say what they say is in [DOCS.md](DOCS.md). A few things here
+were harder than they looked, and are worth remembering:
 
 **Fonts in generated images.** The preview card builds each line of text with
 a font that has been given that exact line to work from. Skip that and the

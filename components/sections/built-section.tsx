@@ -14,7 +14,7 @@ const PROJECTS: Project[] = [
   {
     name: "LangGraph Agentic Platform",
     summary:
-      "A multi-agent system for supply chain resilience: real-time news analytics, geospatial risk scoring, and automated alerting. I designed the orchestration layer — state management, tool routing, memory, and the LLM decision loops.",
+      "A multi-agent system for supply chain resilience: real-time news analytics, geospatial risk scoring, and automated alerting. I designed the orchestration layer: state management, tool routing, memory, and the LLM decision loops.",
     stack: ["LangGraph", "LangChain", "Python", "LLMs"],
     href: "https://github.com/HarianthK/Langgraph-agent-automation",
     hrefLabel: "View code",
@@ -25,20 +25,8 @@ const PROJECTS: Project[] = [
     },
   },
   {
-    /*
-      Rewritten to describe the thing that actually loads.
-
-      The previous version claimed authentication, time-series performance
-      tracking and real-time updates. Opening the site shows a public search
-      with no sign-in, and nothing pushing live updates. A hiring manager who
-      reads a feature list and then clicks through to something else is being
-      handed a reason to doubt everything around it — and the site's whole
-      argument rests on its claims being checkable.
-
-      What is here is verifiable by using it: type-ahead search, points totalled
-      per division, competition history, and eligibility. Both endpoints named
-      below are real — /api/autocomplete and /api/dancer.
-    */
+    // Describes what actually loads, because a claim that does not survive a
+    // click costs you every other claim on the page. See DOCS.md.
     name: "Registry Points",
     summary:
       "A lookup over the World Swing Dance Council's competitor registry. Type part of a name and it finds the dancer, then returns their points by division, how close they are to moving up, a chart of their competitions over time, and a comparison against other dancers on the same axis. Lookups take about a seventh of a second: the original asked the registry for a session token first, and nothing ever checked it.",
@@ -52,11 +40,8 @@ const PROJECTS: Project[] = [
     },
   },
   {
-    /*
-      The scoring is the part worth describing. Anyone can draw a line between
-      two points; deciding which line is prettier is the actual work, and it is
-      checkable against the roads Arizona has already designated as scenic.
-    */
+    // The scoring is the part worth describing, and it is checkable against the
+    // roads the state already calls scenic.
     name: "Trailblaze AZ",
     summary:
       "A route planner that picks the pretty way instead of the quick one. Every drivable road in Arizona is scored for how close it runs to woodland, wilderness and water, then checked against the roads the state has officially designated scenic. Ask it for Phoenix to Sedona and it sends you over the Mogollon Rim rather than up the interstate, shows the climb that explains the extra two hours, and works out when to leave to arrive in golden hour.",
@@ -70,42 +55,37 @@ const PROJECTS: Project[] = [
     },
   },
   {
-    // The compiler is only worth building because the machine under it was
-    // already proven, which is what makes its tests able to run the output.
+    // Worth building only because the machine under it was already proven.
     name: "Nibble",
     summary:
-      "A small language that compiles to CHIP-8 machine code, and the machine to run it on. Write a program with variables, sprites, loops and key tests, press compile, and play it: the bytes shown under the screen are the real output and would run on any CHIP-8 interpreter. A dozen lines becomes sixty one bytes. Three passes in one file, no dependencies, with jumps left blank and patched once their addresses are known.",
+      "A small language that compiles to CHIP-8 machine code, written for the emulator below. Variables, sprites, routines, collisions, numbers and text: press compile and play it, with the real output shown as bytes under the screen. Meteors, a dodging game with a score, three lives and a proper ending, comes to 504 of them. Three passes in one file and no dependencies, with jumps left blank and filled in once their addresses are known.",
     stack: ["JavaScript", "Compilers", "Canvas"],
     href: "https://nibble-lang.vercel.app",
     hrefLabel: "Write a program",
     figure: {
       value: "61",
       label: "Bytes from a dozen lines",
-      context: "Every test compiles a program, runs it on the emulator, and checks which pixels came on.",
+      context: "Every test compiles a program and runs it on the machine. Each example must also come out identical under the six instructions interpreters disagree about.",
     },
   },
   {
-    // Coverage is the claim worth making: an emulator that runs most programs is
-    // one with a bug it has not met yet, so the figure is the whole archive.
+    // The figure is the bug it was hiding, not the coverage. See DOCS.md.
     name: "CHIP-8",
     summary:
-      "A virtual machine from 1977, rebuilt from its instruction set and running in a browser, with both of the extensions people later built on it: SUPER-CHIP's larger screen and scrolling, and XO-CHIP's second colour plane, sixty four kilobytes of memory and waveform sound. Every one of the 103 programs in the community archive runs, fetched when you pick one from the list. No dependencies and no build step: a page, a script and a file.",
+      "A virtual machine from 1977, rebuilt from its instruction set and running in a browser, with both of the extensions people later built on it: SUPER-CHIP's larger screen and scrolling, and XO-CHIP's second colour plane, sixty four kilobytes of memory and waveform sound. Every program in the community archive runs, and because none of them record how they are played, the page works out which keys each one watches by playing it. It is also the machine Nibble compiles for.",
     stack: ["JavaScript", "Canvas", "Web Audio"],
     href: "https://harianthk.github.io/chip8/",
     hrefLabel: "Play it",
     figure: {
-      value: "103/103",
-      label: "Programs in the archive",
-      context: "Each is run headlessly to confirm it draws and answers a key, over a published instruction suite.",
+      value: "86",
+      label: "Programs quietly running wrong",
+      context: "Six instructions have two accepted readings, and the archive records which each program expects. It had been ignoring that. It reads them now.",
     },
   },
 ]
 
-/**
- * An asymmetric stack rather than a grid of equal cards — the card grid is
- * exactly the shape the template version used, and it flattens everything to
- * the same importance.
- */
+// An asymmetric stack rather than a grid of equal cards, which would flatten
+// everything to the same importance. See DOCS.md.
 export function BuiltSection() {
   return (
     <section id="built" className="relative px-6 py-28 md:px-14 md:py-36">
@@ -120,10 +100,8 @@ export function BuiltSection() {
         <div className="mt-16 space-y-20">
           {PROJECTS.map((project, i) => {
             const hasFigure = Boolean(project.figure)
-            // Alternate which side the figure sits on so the eye keeps moving.
-            // Only meaningful when there *is* a figure — otherwise the article
-            // is a single full-width column rather than a grid with an empty
-            // cell, which previously squeezed the text into 16rem.
+            // Alternate the figure's side so the eye keeps moving, but only when
+            // there is one, or the text gets squeezed into an empty grid cell.
             const figureLeft = hasFigure && i % 2 === 1
 
             return (
