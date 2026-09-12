@@ -58,12 +58,12 @@ const PROJECTS: Project[] = [
     // Worth building only because the machine under it was already proven.
     name: "Nibble",
     summary:
-      "A small language that compiles to CHIP-8 machine code, written for the emulator below. Variables, sprites, routines, collisions, numbers and text: press compile and play it, with the real output shown as bytes under the screen. Meteors, a dodging game with a score, three lives and a proper ending, comes to 504 of them. Three passes in one file and no dependencies, with jumps left blank and filled in once their addresses are known.",
+      "A small language that compiles to CHIP-8 machine code, written for the emulator below. Variables, sprites, routines, collisions, numbers and text: press compile and play it, with the real output shown as bytes under the screen. Meteors, a dodging game with a score, three lives and a proper ending, comes to 447 of them, down from 504 after the compiler learned to flip a skip instead of jumping, share one copy of wait, and print from a table. Every program was recorded frame by frame before each change and matched exactly after.",
     stack: ["JavaScript", "Compilers", "Canvas"],
     href: "https://nibble-lang.vercel.app",
     hrefLabel: "Write a program",
     figure: {
-      value: "61",
+      value: "53",
       label: "Bytes from a dozen lines",
       context: "Every test compiles a program and runs it on the machine. Each example must also come out identical under the six instructions interpreters disagree about.",
     },
