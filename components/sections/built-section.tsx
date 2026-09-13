@@ -72,7 +72,7 @@ const PROJECTS: Project[] = [
     // The figure is the bug it was hiding, not the coverage. See DOCS.md.
     name: "CHIP-8",
     summary:
-      "A virtual machine from 1977, rebuilt from its instruction set and running in a browser, with both of the extensions people later built on it: SUPER-CHIP's larger screen and scrolling, and XO-CHIP's second colour plane, sixty four kilobytes of memory and waveform sound. Every program in the community archive runs, and because none of them record how they are played, the page works out which keys each one watches by playing it. It is also the machine Nibble compiles for.",
+      "A virtual machine from 1977, rebuilt from its instruction set and running in a browser, with both of the extensions people later built on it: SUPER-CHIP's larger screen and scrolling, and XO-CHIP's second colour plane, sixty four kilobytes of memory and waveform sound. Every program in the community archive runs, and because none of them record how they are played, the page works out which keys each one watches by playing it. It can also read any program back as Octo source, telling code from sprites by walking every path the machine could take; all 104 listings compile back to the identical bytes through Octo's own compiler. It is also the machine Nibble compiles for.",
     stack: ["JavaScript", "Canvas", "Web Audio"],
     href: "https://harianthk.github.io/chip8/",
     hrefLabel: "Play it",
