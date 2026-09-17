@@ -55,6 +55,34 @@ const PROJECTS: Project[] = [
     },
   },
   {
+    // Built to read the files the instrumentation work kept producing.
+    name: "Retrace",
+    summary:
+      "Drop in an OpenTelemetry trace of an LLM app and see what it did: the calls as a tree with timing, and for each one the model, the token counts with cache and reasoning details, the conversation that was sent and what came back, the tool calls, the tools offered and any error. It reads the three shapes such a file comes in, the Python SDK's JSON, OTLP and a Phoenix export, and needs no server or account. The sample is five real spans exported by the OpenTelemetry SDK. It came out of fixing the instrumentors that write these files: three pull requests to Arize's OpenInference and Traceloop's OpenLLMetry so far, the first merged the same day.",
+    stack: ["JavaScript", "OpenTelemetry", "OpenInference"],
+    href: "https://retrace-llm.vercel.app/?sample=1",
+    hrefLabel: "Open the sample",
+    figure: {
+      value: "3",
+      label: "File shapes read",
+      context: "Every reader is checked in headless Chrome against the same five spans, which must give the same tree whichever shape they arrive in.",
+    },
+  },
+  {
+    // A ledger kept by hand for a week, turned into a page.
+    name: "Upstream",
+    summary:
+      "Type a GitHub username and see every pull request that person has sent to somebody else's project, grouped by project, each marked merged, open or closed with how long it took, and the totals: sent, merged, projects, maintainers, median time to a merge. One search against GitHub's API from the browser, nothing stored. It exists because the profile page counts everything and answers nothing; this answers the one question that matters when you work on other people's code.",
+    stack: ["JavaScript", "GitHub API"],
+    href: "https://upstream-prs.vercel.app/?user=HarianthK",
+    hrefLabel: "See mine",
+    figure: {
+      value: "30",
+      label: "Pull requests upstream",
+      context: "Sent in a week to twenty six maintainers, six merged so far, each one a bug proved with a program before it was sent.",
+    },
+  },
+  {
     // Worth building only because the machine under it was already proven.
     name: "Nibble",
     summary:
