@@ -58,14 +58,14 @@ const PROJECTS: Project[] = [
     // Built to read the files the instrumentation work kept producing.
     name: "Retrace",
     summary:
-      "Drop in an OpenTelemetry trace of an LLM app and see what it did: the calls as a tree with timing, and for each one the model, the token counts with cache and reasoning details, the conversation that was sent and what came back, the tool calls, the tools offered and any error. It reads the three shapes such a file comes in, the Python SDK's JSON, OTLP and a Phoenix export, and needs no server or account. The sample is five real spans exported by the OpenTelemetry SDK. It came out of fixing the instrumentors that write these files: three pull requests to Arize's OpenInference and Traceloop's OpenLLMetry so far, the first merged the same day.",
+      "Drop in an OpenTelemetry trace of an LLM app and see what it did: the calls as a tree with timing, and for each one the model, the token counts with cache and reasoning details, the conversation that was sent and what came back, the tool calls, the tools offered and any error. It reads the four shapes such a file comes in, the Python SDK's JSON, OTLP and both of Phoenix's exports, and needs no server or account. The sample is five real spans exported by the OpenTelemetry SDK. It came out of fixing the instrumentors that write these files: six pull requests to four projects, Arize's OpenInference, Traceloop's OpenLLMetry, OpenLIT and Comet's Opik, the first merged the same day.",
     stack: ["JavaScript", "OpenTelemetry", "OpenInference"],
     href: "https://retrace-llm.vercel.app/?sample=1",
     hrefLabel: "Open the sample",
     figure: {
-      value: "3",
+      value: "4",
       label: "File shapes read",
-      context: "Every reader is checked in headless Chrome against the same five spans, which must give the same tree whichever shape they arrive in.",
+      context: "Every reader is checked in headless Chrome against the same five spans, which must give the same tree whichever shape they arrive in. The two Phoenix readers were corrected against exports from a Phoenix run locally.",
     },
   },
   {
@@ -77,9 +77,37 @@ const PROJECTS: Project[] = [
     href: "https://upstream-prs.vercel.app/?user=HarianthK",
     hrefLabel: "See mine",
     figure: {
-      value: "30",
+      value: "33",
       label: "Pull requests upstream",
-      context: "Sent in a week to twenty six maintainers, six merged so far, each one a bug proved with a program before it was sent.",
+      context: "Sent to twenty eight projects and twenty five maintainers, seven merged so far, each one a bug proved with a program before it was sent.",
+    },
+  },
+  {
+    // Written to find out what the operating system's resolver hides.
+    name: "Resolve",
+    summary:
+      "A DNS resolver in one Python file, no libraries: it builds the query bytes, starts at a root server and follows each referral down itself instead of asking someone else's resolver to do it. Ask it for en.wikipedia.org with -v and you watch a root server hand it to .org, .org hand it to Wikimedia, and Wikimedia answer with an alias it then chases from scratch. It handles the parts that make real name servers awkward: compression pointers into the same packet, referrals that arrive without the addresses they refer to, and replies too big for a UDP packet, which have to be asked again over TCP.",
+    stack: ["Python", "DNS", "Sockets"],
+    href: "https://github.com/HarianthK/resolve",
+    hrefLabel: "View code",
+    figure: {
+      value: "3",
+      label: "Hops from the root",
+      context: "The root names .org, .org names Wikimedia, Wikimedia answers. The test checks one live name against the system resolver and must agree exactly.",
+    },
+  },
+  {
+    // A file format is only understood when somebody else's program reads your output.
+    name: "deflate",
+    summary:
+      "A gzip compressor built from its two ideas: LZ77, which replaces anything already seen with go back and copy, and Huffman coding, which spends fewer bits on the symbols that occur most. It writes real .gz files, picks the cheapest of the format's three block types so incompressible input never grows, and never decompresses anything itself. That last part is deliberate: every test hands the file to Python's gzip, to zlib and to the gzip program, because a compressor checked by its own decompressor only proves the two share the same misunderstanding.",
+    stack: ["Python", "DEFLATE", "Huffman"],
+    href: "https://github.com/HarianthK/deflate",
+    hrefLabel: "View code",
+    figure: {
+      value: "3%",
+      label: "Off gzip's own output",
+      context: "On real text against gzip -9, and byte for byte identical on small files. The gap is lazy matching, named in the notes rather than hidden.",
     },
   },
   {
