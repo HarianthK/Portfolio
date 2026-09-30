@@ -79,7 +79,7 @@ const PROJECTS: Project[] = [
     figure: {
       value: "33",
       label: "Pull requests upstream",
-      context: "Sent to twenty eight projects and twenty five maintainers, seven merged so far, each one a bug proved with a program before it was sent.",
+      context: "Sent to twenty eight projects and twenty five maintainers, eleven merged so far, each one a bug proved with a program before it was sent.",
     },
   },
   {
@@ -105,9 +105,37 @@ const PROJECTS: Project[] = [
     href: "https://github.com/HarianthK/deflate",
     hrefLabel: "View code",
     figure: {
-      value: "3%",
-      label: "Off gzip's own output",
-      context: "On real text against gzip -9, and byte for byte identical on small files. The gap is lazy matching, named in the notes rather than hidden.",
+      value: "1 to 3%",
+      label: "Off gzip -9 on real text",
+      context: "Smaller than gzip on repetitive input. Lazy matching, gzip's own trick of checking whether a match one byte later is longer, closed most of the gap that was there.",
+    },
+  },
+  {
+    // The checks avoid comparing pictures, which only ever says something changed.
+    name: "trace-rays",
+    summary:
+      "A ray tracer in one Python file: spheres on a checkered floor with shadows, reflections and a highlight, written to a PNG it encodes itself. Every pixel is one question asked backwards, from the eye rather than the lamp, and shadows and reflections are the same question asked again from the surface. The checks never compare pictures: they pin the geometry, compare one point of floor with and without the sphere that shadows it, and let Pillow decode the PNG.",
+    stack: ["Python", "Graphics"],
+    href: "https://github.com/HarianthK/trace-rays",
+    hrefLabel: "View code",
+    figure: {
+      value: "4",
+      label: "Breakages caught",
+      context: "The occlusion test, the PNG filter byte, the quadratic's roots and the surface normal, each removed on purpose, each failing a different check.",
+    },
+  },
+  {
+    // Built in five phases, each checked by breaking it on purpose before moving on.
+    name: "ember",
+    summary:
+      "A programming language written in Rust with no dependencies: a compiler to bytecode, a stack virtual machine, closures that share the variables they capture, lists and maps, a mark and sweep garbage collector and a REPL. Breaking each phase on purpose found two bugs from the first week, errors reported on the wrong line and every accented string corrupted, and two collector rules no test depended on. A tree-walking interpreter was written only to race it.",
+    stack: ["Rust", "Compilers", "Garbage collection"],
+    href: "https://github.com/HarianthK/ember",
+    hrefLabel: "View code",
+    figure: {
+      value: "3 to 5x",
+      label: "Faster than a tree-walker",
+      context: "Over the same syntax tree, on recursion, a tight loop and a closure called a million times; level with CPython on recursion and just ahead of it on the closure.",
     },
   },
   {
