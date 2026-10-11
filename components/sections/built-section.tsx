@@ -79,14 +79,14 @@ const PROJECTS: Project[] = [
     figure: {
       value: "33",
       label: "Pull requests upstream",
-      context: "Sent to twenty eight projects and twenty five maintainers, eleven merged so far, each one a bug proved with a program before it was sent.",
+      context: "Sent to twenty eight projects and twenty five maintainers, twelve merged so far, each one a bug proved with a program before it was sent.",
     },
   },
   {
     // Written to find out what the operating system's resolver hides.
     name: "Resolve",
     summary:
-      "A DNS resolver in one Python file, no libraries: it builds the query bytes, starts at a root server and follows each referral down itself instead of asking someone else's resolver to do it. Ask it for en.wikipedia.org with -v and you watch a root server hand it to .org, .org hand it to Wikimedia, and Wikimedia answer with an alias it then chases from scratch. It handles the parts that make real name servers awkward: compression pointers into the same packet, referrals that arrive without the addresses they refer to, and replies too big for a UDP packet, which have to be asked again over TCP.",
+      "A DNS resolver in one Python file, no libraries: it builds the query bytes, starts at a root server and follows each referral down itself instead of asking someone else's resolver to do it. Ask it for en.wikipedia.org with -v and you watch a root server hand it to .org, .org hand it to Wikimedia, and Wikimedia answer with an alias it then chases from scratch. It handles the parts that make real name servers awkward: compression pointers into the same packet, referrals that arrive without the addresses they refer to, and replies too big for a UDP packet, which have to be asked again over TCP. Since then it has learned what a resolver run in production does: it caches answers and missing names for as long as their records allow, offers EDNS0 so big answers fit in one packet, believes each server only about its own zone, and tells each server only the next label down, so the root learns you wanted something in .org and nothing more.",
     stack: ["Python", "DNS", "Sockets"],
     href: "https://github.com/HarianthK/resolve",
     hrefLabel: "View code",
@@ -100,7 +100,7 @@ const PROJECTS: Project[] = [
     // A file format is only understood when somebody else's program reads your output.
     name: "deflate",
     summary:
-      "A gzip compressor built from its two ideas: LZ77, which replaces anything already seen with go back and copy, and Huffman coding, which spends fewer bits on the symbols that occur most. It writes real .gz files, picks the cheapest of the format's three block types so incompressible input never grows, and never decompresses anything itself. That last part is deliberate: every test hands the file to Python's gzip, to zlib and to the gzip program, because a compressor checked by its own decompressor only proves the two share the same misunderstanding.",
+      "A gzip compressor built from its two ideas: LZ77, which replaces anything already seen with go back and copy, and Huffman coding, which spends fewer bits on the symbols that occur most. It writes real .gz files, picks the cheapest of the format's three block types so incompressible input never grows, and every test hands the file to Python's gzip, to zlib and to the gzip program, because a compressor checked by its own decompressor only proves the two share the same misunderstanding. It reads gzip files too, but for the same reason its decompressor is only ever tested on files zlib wrote, at every level, and on broken ones it must refuse.",
     stack: ["Python", "DEFLATE", "Huffman"],
     href: "https://github.com/HarianthK/deflate",
     hrefLabel: "View code",
@@ -114,21 +114,21 @@ const PROJECTS: Project[] = [
     // The checks avoid comparing pictures, which only ever says something changed.
     name: "trace-rays",
     summary:
-      "A ray tracer in one Python file: spheres on a checkered floor with shadows, reflections and a highlight, written to a PNG it encodes itself. Every pixel is one question asked backwards, from the eye rather than the lamp, and shadows and reflections are the same question asked again from the surface. The checks never compare pictures: they pin the geometry, compare one point of floor with and without the sphere that shadows it, and let Pillow decode the PNG.",
+      "A ray tracer in one Python file: spheres on a checkered floor with shadows, reflections, a highlight and a glass ball that turns the floor behind it upside down, written to a PNG it encodes itself. Every pixel is one question asked backwards, from the eye rather than the lamp, and shadows and reflections are the same question asked again from the surface. The checks never compare pictures: they pin the geometry, compare one point of floor with and without the sphere that shadows it, and let Pillow decode the PNG.",
     stack: ["Python", "Graphics"],
     href: "https://github.com/HarianthK/trace-rays",
     hrefLabel: "View code",
     figure: {
-      value: "4",
+      value: "13",
       label: "Breakages caught",
-      context: "The occlusion test, the PNG filter byte, the quadratic's roots and the surface normal, each removed on purpose, each failing a different check.",
+      context: "The occlusion test, the PNG filter byte, the quadratic's roots and the surface normal first, then seven for the glass and two for its shadow, each removed on purpose and each failing a check.",
     },
   },
   {
     // Built in five phases, each checked by breaking it on purpose before moving on.
     name: "ember",
     summary:
-      "A programming language written in Rust with no dependencies: a compiler to bytecode, a stack virtual machine, closures that share the variables they capture, lists and maps, a mark and sweep garbage collector and a REPL. Breaking each phase on purpose found two bugs from the first week, errors reported on the wrong line and every accented string corrupted, and two collector rules no test depended on. A tree-walking interpreter was written only to race it.",
+      "A programming language written in Rust with no dependencies: a compiler to bytecode, a stack virtual machine, closures that share the variables they capture, lists and maps, a mark and sweep garbage collector and a REPL. Breaking each phase on purpose found two bugs from the first week, errors reported on the wrong line and every accented string corrupted, and two collector rules no test depended on. A tree-walking interpreter was written only to race it. A misspelt name or map key now suggests the one probably meant, the way Python does.",
     stack: ["Rust", "Compilers", "Garbage collection"],
     href: "https://github.com/HarianthK/ember",
     hrefLabel: "View code",
@@ -142,7 +142,7 @@ const PROJECTS: Project[] = [
     // Worth building only because the machine under it was already proven.
     name: "Nibble",
     summary:
-      "A small language that compiles to CHIP-8 machine code, written for the emulator below. Variables, arrays, constants, sprites, routines, loops, collisions, numbers and text: press compile and play it, with the real output shown as bytes under the screen and read back as Octo source beside them. Meteors, a dodging game with a score, three lives and a proper ending, comes to 418 of them, down from 504 as the compiler learned to flip a skip instead of jumping and to share one copy of what it repeats. Snake, Pong and Breakout followed once there were arrays. Every program was recorded frame by frame before each change and matched exactly after.",
+      "A small language that compiles to CHIP-8 machine code, written for the emulator below. Variables, arrays, constants, sprites, routines, loops, collisions, numbers and text: press compile and play it, with the real output shown as bytes under the screen and read back as Octo source beside them. Meteors, a dodging game with a score, three lives and a proper ending, comes to 418 of them, down from 504 as the compiler learned to flip a skip instead of jumping and to share one copy of what it repeats. Snake, Pong and Breakout followed once there were arrays, and Lights Out once there were bit operators; multiplication, which the machine lacks, is built from shifts and adds. Every program was recorded frame by frame before each change and matched exactly after.",
     stack: ["JavaScript", "Compilers", "Canvas"],
     href: "https://nibble-lang.vercel.app",
     hrefLabel: "Write a program",
