@@ -79,7 +79,7 @@ const PROJECTS: Project[] = [
     figure: {
       value: "33",
       label: "Pull requests upstream",
-      context: "Sent to twenty eight projects and twenty five maintainers, twelve merged so far, each one a bug proved with a program before it was sent.",
+      context: "Sent to twenty eight projects and twenty five maintainers, thirteen merged so far, each one a bug proved with a program before it was sent.",
     },
   },
   {
