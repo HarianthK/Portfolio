@@ -81,7 +81,7 @@ To add a look:
 Effects load lazily because the default visitor should download nothing for a
 theme they never chose. Each look has one entry file (`components/looks/star-wars.tsx`)
 that composes its parts, and that is what `EFFECTS` points at. The Star Wars
-chunk is about 10 KB (under 4 KB gzipped) and is fetched only when that look is on.
+chunk is about 17 KB (under 7 KB gzipped) and is fetched only when that look is on.
 
 The pattern for effects, so the next look can copy it: the section components
 are never edited. The effect file renders a `<style>` with all its CSS (so no
@@ -113,7 +113,39 @@ Star Wars effects (`components/looks/star-wars-fx.tsx`):
   a transform, so nothing moves in the layout; the sections clip horizontal
   overflow in this look so the stretch never adds a scrollbar.
 
-The canvas runs requestAnimationFrame only while a trail or bolt is on screen,
+Space battle (`components/looks/star-wars-battle.tsx`, ships in
+`star-wars-ships.ts`): a second fixed canvas behind the page (`z-index: -10`,
+`pointer-events: none`), above the starfield and below all content.
+
+- Every 15 to 30 seconds (random) a skirmish of a few seconds flies along one
+  smooth curve: one or two TIE fighters chased by one or two X-wings firing red
+  bolts, sometimes a trailing TIE firing green at the X-wings. Each ship follows
+  the same curve a little later and weaves sideways, which reads as a chase.
+  Half the time the lead TIE is hit and breaks up in a flash and sparks.
+- One skirmish in five is the Millennium Falcon streaking past at nearly twice
+  the speed with TIEs on its tail. A Star Destroyer glides across the top of the
+  far distance (70 seconds, very dim) first after 30 to 60 seconds, then every
+  90 to 180 seconds.
+- Depth: each skirmish picks near, mid or far. Farther is smaller (X-wing 56,
+  39 or 25 px long), dimmer (opacity 0.6, 0.42, 0.28) and slower. Phones use
+  only mid and far at 0.6 size and fewer ships. Ships drift slightly with
+  scroll, like the starfield.
+- Readability: when the screen leaves at least 110 px beside a 1024 px content
+  column, the fight stays inside one side margin. Narrower screens get quick
+  horizontal crossings at low opacity.
+- Frames run only while a ship, bolt or spark is in flight. A hidden tab drops
+  the fight and skips its turn. Pixel ratio is capped at 2. Unmount clears both
+  timers, the frame, the listeners and the canvas.
+- Test hook: `?sw-battle` in the URL starts a skirmish 0.6 s after the look
+  turns on and every 6 s after, always with a hit, and brings the destroyer in
+  at once; `?sw-battle=falcon` forces the Falcon. It does nothing otherwise.
+
+The ships are original vector drawings made with canvas paths in a 100-unit box
+(nose toward +x). No image, sprite, model or font was downloaded, traced or
+copied. Harianth asked for the recognisable ships knowing they are Lucasfilm
+designs; it is his personal site.
+
+The effect canvas runs requestAnimationFrame only while a trail or bolt is on screen,
 and drops everything when the tab is hidden; the distant bolt skips its turn
 while hidden.
 
@@ -122,12 +154,15 @@ media query directly, since the hook reads false on its first render) the
 starfield is drawn once and stays still, and the hyperspace jump is skipped.
 The dividers are drawn fully lit with no ignition or hum, the hologram is a
 still tint without scanline movement or flicker, and there is no cursor trail,
-no bolts and no heading animation (the effect canvas is never created). The
+no bolts, no heading animation (the effect canvas is never created) and no
+ships or battles (the battle canvas is never created). The
 starfield also stops while the tab is hidden, caps the pixel ratio at 2 and
 scales the star count to the screen area, and removes its listeners and frame
 on unmount.
 
 No copyrighted or trademarked material in any look: no logos, film fonts or
-lookalikes, character or ship images, music, sounds, quoted lines or crawl
-text. A look evokes its source with original drawing and colour only, and the
-source's name appears only as the plain-text label in the menu.
+lookalikes, character images, copied ship art, music, sounds, quoted lines or
+crawl text. A look evokes its source with original drawing and colour only, and
+the source's name appears only as the plain-text label in the menu. The one
+exception by choice is the Star Wars ships above: original drawings of
+recognisable designs.
