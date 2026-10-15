@@ -6,6 +6,8 @@ import { siteUrl } from "@/lib/site"
 import { ScrollProgress } from "@/components/scroll-progress"
 import { ThemeProvider } from "@/components/theme-provider"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { LookPicker } from "@/components/look-picker"
+import { lookBootScript } from "@/lib/looks"
 import "./globals.css"
 
 // Three faces, three jobs. The serif carries the human voice, the mono carries
@@ -68,12 +70,16 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${display.variable} ${body.variable} ${mono.variable}`}
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: lookBootScript }} />
+      </head>
       <body className="font-sans antialiased">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
           <ScrollProgress />
           {/* The nav bar is gone with the single-page layout, so the theme
               control lives on its own in the corner. */}
-          <div className="fixed right-4 top-4 z-50">
+          <div className="fixed right-4 top-4 z-50 flex">
+            <LookPicker />
             <ThemeToggle />
           </div>
           {children}

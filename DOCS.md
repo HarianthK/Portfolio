@@ -53,3 +53,43 @@ the template version used and it flattened every project to the same importance.
 The figure alternates sides so the eye keeps moving, but only on entries that
 have one. Without that condition the article became a grid with an empty cell
 and squeezed the text into 16rem.
+
+## Looks: opt-in fan themes
+
+Recruiters arrive from resume links, so nobody sees a fan theme unless they pick
+one. The sparkle button beside the light/dark switch opens a small menu (a
+native popover with radio buttons) listing the looks. The choice is saved in
+localStorage under `look` and put on `<html>` as `data-look`. A one-line script
+in the layout's `<head>` applies a saved look before first paint, so a returning
+visitor never sees the default flash first. Both reads and writes sit in
+try/catch; without storage the picker still works for the visit.
+
+A look is a palette plus optional effects. The palette is a
+`html[data-look="..."]` block in `globals.css` that redefines the same tokens
+`:root` and `.dark` use, so every component picks it up with no changes. Star
+Wars is dark only: picking it switches the theme to dark and hides (but keeps
+the space of) the light/dark switch, so nothing in the corner moves.
+
+To add a look:
+
+1. Add `{ id, label }` to `LOOKS` in `lib/looks.ts`.
+2. Add a `html[data-look="id"]` token block to `globals.css`.
+3. If it has motion, write the effect in `components/looks/` and register it in
+   `EFFECTS` in `components/look-picker.tsx` with `dynamic(..., { ssr: false })`.
+   Add the id to `DARK_ONLY` if it only works on a dark page.
+
+Effects load lazily because the default visitor should download nothing for a
+theme they never chose. The Star Wars starfield is its own chunk of about 2 KB
+that is fetched only when that look is on.
+
+With reduced motion (the OS setting, read through `useSafeReducedMotion` and the
+media query directly, since the hook reads false on its first render) the
+starfield is drawn once and stays still, and the hyperspace jump is skipped. The
+animation also stops while the tab is hidden, caps the pixel ratio at 2 and
+scales the star count to the screen area, and removes its listeners and frame
+on unmount.
+
+No copyrighted or trademarked material in any look: no logos, film fonts or
+lookalikes, character or ship images, music, sounds, quoted lines or crawl
+text. A look evokes its source with original drawing and colour only, and the
+source's name appears only as the plain-text label in the menu.

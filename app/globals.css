@@ -95,6 +95,49 @@
   --node-tech: oklch(0.72 0.12 225);
 }
 
+/* Opt-in fan looks (see DOCS.md). The html prefix outranks :root and .dark. */
+html[data-look="star-wars"] {
+  --background: oklch(0.13 0.03 268);
+  --foreground: oklch(0.96 0.01 250);
+  --card: oklch(0.18 0.035 266);
+  --card-foreground: oklch(0.96 0.01 250);
+  --popover: oklch(0.18 0.035 266);
+  --popover-foreground: oklch(0.96 0.01 250);
+  --primary: oklch(0.86 0.16 90);
+  --primary-foreground: oklch(0.16 0.03 268);
+  --secondary: oklch(0.25 0.04 264);
+  --secondary-foreground: oklch(0.96 0.01 250);
+  --muted: oklch(0.25 0.04 264);
+  --muted-foreground: oklch(0.76 0.03 250);
+  --accent: oklch(0.74 0.14 235);
+  --accent-foreground: oklch(0.16 0.03 268);
+  --border: oklch(0.3 0.045 262);
+  --input: oklch(0.3 0.045 262);
+  --ring: oklch(0.74 0.14 235);
+  --grid-line: rgba(140, 170, 255, 0.06);
+  --node-role: oklch(0.86 0.16 90);
+  --node-project: oklch(0.74 0.14 235);
+  --node-tech: oklch(0.72 0.1 200);
+}
+
+html[data-look="star-wars"] body {
+  background-image: radial-gradient(ellipse 70% 50% at 80% 10%, oklch(0.24 0.07 262 / 0.5), transparent 70%);
+  background-attachment: fixed;
+}
+
+html[data-look="star-wars"] :is(h1, h2) {
+  text-shadow: 0 0 28px oklch(0.86 0.16 90 / 0.28);
+}
+
+html[data-look="star-wars"] a:hover {
+  text-shadow: 0 0 12px oklch(0.74 0.14 235 / 0.6);
+}
+
+/* Space is always dark, so the light/dark switch steps aside, keeping its slot. */
+html[data-look="star-wars"] .mode-toggle {
+  visibility: hidden;
+}
+
 @theme inline {
   --font-sans: var(--font-body), system-ui, -apple-system, sans-serif;
   --font-serif: var(--font-display), Georgia, serif;
