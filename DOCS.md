@@ -79,13 +79,51 @@ To add a look:
    Add the id to `DARK_ONLY` if it only works on a dark page.
 
 Effects load lazily because the default visitor should download nothing for a
-theme they never chose. The Star Wars starfield is its own chunk of about 2 KB
-that is fetched only when that look is on.
+theme they never chose. Each look has one entry file (`components/looks/star-wars.tsx`)
+that composes its parts, and that is what `EFFECTS` points at. The Star Wars
+chunk is about 10 KB (under 4 KB gzipped) and is fetched only when that look is on.
+
+The pattern for effects, so the next look can copy it: the section components
+are never edited. The effect file renders a `<style>` with all its CSS (so no
+CSS reaches the default stylesheet), finds the page's own elements with
+selectors (`main > section`, `h2`, `#built article`), adds classes or small
+elements to them in a `useEffect`, and the cleanup removes every element,
+class, observer, listener, timer and frame it added. Switching back to Default
+leaves the DOM and listener counts exactly as they were.
+
+Star Wars effects (`components/looks/star-wars-fx.tsx`):
+
+- Lightsaber dividers: a hilt and blade on the top edge of every section after
+  the hero, blue, green or gold in turn, alternating sides. An
+  IntersectionObserver ignites it (a CSS scale transition) the first time the
+  section comes into view, and it hums (an opacity flicker) only while visible.
+- Cursor trail: a short blue blade following the mouse, only when the device
+  reports `(hover: hover) and (pointer: fine)`, drawn on a fixed canvas with
+  `pointer-events: none`, so the real cursor and clicks are untouched.
+- Holographic cards: hovering or focusing inside a project in Built or an entry
+  in Foundations shows a blue tint behind the text with moving scanlines, a
+  light flicker and a red and cyan edge. The tint sits under the text, so
+  contrast stays close to the plain page.
+- Blaster bolts: a click on empty background (not on links, buttons, inputs,
+  text, canvases or while text is selected) sends a red bolt from a screen edge
+  to the click with a small spark. At most three at once. Every 8 to 20 seconds
+  a faint distant bolt crosses behind the page, one at a time.
+- Hyperspace headings: each section `h2` waits invisible until it is in view,
+  then plays once from a stretched, blurred streak into the normal text. It is
+  a transform, so nothing moves in the layout; the sections clip horizontal
+  overflow in this look so the stretch never adds a scrollbar.
+
+The canvas runs requestAnimationFrame only while a trail or bolt is on screen,
+and drops everything when the tab is hidden; the distant bolt skips its turn
+while hidden.
 
 With reduced motion (the OS setting, read through `useSafeReducedMotion` and the
 media query directly, since the hook reads false on its first render) the
-starfield is drawn once and stays still, and the hyperspace jump is skipped. The
-animation also stops while the tab is hidden, caps the pixel ratio at 2 and
+starfield is drawn once and stays still, and the hyperspace jump is skipped.
+The dividers are drawn fully lit with no ignition or hum, the hologram is a
+still tint without scanline movement or flicker, and there is no cursor trail,
+no bolts and no heading animation (the effect canvas is never created). The
+starfield also stops while the tab is hidden, caps the pixel ratio at 2 and
 scales the star count to the screen area, and removes its listeners and frame
 on unmount.
 

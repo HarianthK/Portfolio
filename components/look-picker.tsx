@@ -9,7 +9,7 @@ import { LOOKS, LOOK_STORAGE_KEY, type LookId } from "@/lib/looks"
 
 // Each look's effects stay in their own chunk, fetched only when that look is on.
 const EFFECTS: Partial<Record<LookId, ComponentType<{ jump: boolean }>>> = {
-  "star-wars": dynamic(() => import("@/components/looks/star-wars-sky"), { ssr: false }),
+  "star-wars": dynamic(() => import("@/components/looks/star-wars"), { ssr: false }),
 }
 
 // Looks that only make sense on a dark page switch the light/dark theme too.
