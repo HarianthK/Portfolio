@@ -14,9 +14,9 @@ type Bit = { x: number; y: number; vx: number; vy: number; t: number; life: numb
 const LENGTH: Record<ShipKind, number> = { xwing: 56, tie: 40, falcon: 66, destroyer: 70 }
 // Near, mid and far: farther ships are smaller, dimmer and slower.
 const DEPTHS = [
-  { size: 1, alpha: 0.6, speed: 240, z: 1 },
-  { size: 0.7, alpha: 0.42, speed: 170, z: 0.6 },
-  { size: 0.45, alpha: 0.28, speed: 120, z: 0.3 },
+  { size: 1.6, alpha: 0.9, speed: 260, z: 1 },
+  { size: 1.15, alpha: 0.7, speed: 190, z: 0.6 },
+  { size: 0.8, alpha: 0.5, speed: 140, z: 0.3 },
 ]
 const RED = "#ff5a36"
 const GREEN = "#4dff6a"
@@ -69,10 +69,10 @@ export default function StarWarsBattle() {
       kick()
     }
 
-    // Wide screens keep the fight in a side margin; narrow ones cross quickly, small and dim.
+    // Half the fights on a wide screen keep to a side margin; the rest cross the whole sky behind the page.
     function makePath(): Pt[] {
       const margin = (w - 1024) / 2
-      if (margin >= 110) {
+      if (margin >= 110 && Math.random() < 0.5) {
         const x0 = Math.random() < 0.5 ? 40 : w - margin + 40
         const xs = () => rand(x0, x0 + margin - 80)
         const ys = [-90, h * 0.33, h * 0.66, h + 90]
