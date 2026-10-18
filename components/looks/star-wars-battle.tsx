@@ -50,7 +50,8 @@ export default function StarWarsBattle() {
     let w = 0
     let h = 0
     let frame = 0
-    let battle: Battle | null = null
+    // Several skirmishes can overlap: up to three on a wide screen, one on a phone.
+    let battles: Battle[] = []
     let sd: { t0: number; dur: number; y: number; size: number } | null = null
     let bolts: Bolt[] = []
     let bits: Bit[] = []
@@ -94,17 +95,20 @@ export default function StarWarsBattle() {
         ships.push(ship("falcon", 0, 0, 10))
         ships.push(ship("tie", 0.3, 14, 16, GREEN))
         if (!small) ships.push(ship("tie", 0.5, -16, 16, GREEN))
+        if (!small && Math.random() < 0.5) ships.push(ship("tie", 0.7, 4, 14, GREEN))
       } else {
         ships.push(ship("tie", 0, 0, 20))
-        if (!small && Math.random() < 0.5) ships.push(ship("tie", 0.25, 26, 18))
+        if (!small && Math.random() < 0.8) ships.push(ship("tie", 0.25, 26, 18))
+        if (!small && Math.random() < 0.4) ships.push(ship("tie", 0.4, -24, 18))
         ships.push(ship("xwing", 0.6, -8, 10, RED))
-        if (!small && Math.random() < 0.5) ships.push(ship("xwing", 0.85, 18, 10, RED))
-        if (!small && Math.random() < 0.4) ships.push(ship("tie", 1.2, 0, 12, GREEN))
+        if (Math.random() < 0.7) ships.push(ship("xwing", 0.85, 18, 10, RED))
+        if (!small && Math.random() < 0.35) ships.push(ship("xwing", 1.05, -20, 10, RED))
+        if (!small && Math.random() < 0.5) ships.push(ship("tie", 1.3, 0, 12, GREEN))
       }
       const path = makePath()
       let len = 0
       for (let i = 1; i < 4; i++) len += Math.hypot(path[i].x - path[i - 1].x, path[i].y - path[i - 1].y)
-      battle = {
+      battles.push({
         path,
         t0: performance.now(),
         dur: (len / depth.speed / (falcon ? 1.8 : 1)) * 1000,
@@ -113,7 +117,7 @@ export default function StarWarsBattle() {
         z: depth.z,
         hitAt: !falcon && (test || Math.random() < 0.5) ? rand(0.45, 0.65) : 2,
         ships,
-      }
+      })
       kick()
     }
 
@@ -139,7 +143,6 @@ export default function StarWarsBattle() {
       frame = 0
       ctx.clearRect(0, 0, w, h)
       const shift = -(window.scrollY - scroll0) * 0.1
-      const b = battle
 
       if (sd) {
         const p = (now - sd.t0) / sd.dur
@@ -151,7 +154,7 @@ export default function StarWarsBattle() {
         }
       }
 
-      if (b) {
+      battles = battles.filter((b) => {
         const t = (now - b.t0) / b.dur
         let flying = false
         for (const sh of b.ships) {
@@ -180,8 +183,8 @@ export default function StarWarsBattle() {
             })
           }
         }
-        if (!flying) battle = null
-      }
+        return flying
+      })
 
       ctx.globalCompositeOperation = "lighter"
       ctx.lineCap = "round"
@@ -225,17 +228,17 @@ export default function StarWarsBattle() {
       }
       ctx.globalAlpha = 1
       ctx.globalCompositeOperation = "source-over"
-      if (battle || sd || bolts.length || bits.length) frame = requestAnimationFrame(tick)
+      if (battles.length || sd || bolts.length || bits.length) frame = requestAnimationFrame(tick)
     }
 
     // Frames run only while something is in flight.
     function kick() {
-      if (!frame && !document.hidden && (battle || sd || bolts.length || bits.length)) frame = requestAnimationFrame(tick)
+      if (!frame && !document.hidden && (battles.length || sd || bolts.length || bits.length)) frame = requestAnimationFrame(tick)
     }
 
-    function scheduleBattle(ms = test ? 6000 : rand(15000, 30000)) {
+    function scheduleBattle(ms = test ? 6000 : rand(4000, 10000)) {
       battleTimer = window.setTimeout(() => {
-        if (!document.hidden && !battle) {
+        if (!document.hidden && battles.length < (w < 640 ? 1 : 3)) {
           scroll0 = window.scrollY
           startBattle()
         }
@@ -244,7 +247,7 @@ export default function StarWarsBattle() {
     }
 
     // A Star Destroyer glides through the far distance now and then.
-    function scheduleDestroyer(ms = rand(90000, 180000)) {
+    function scheduleDestroyer(ms = rand(45000, 90000)) {
       sdTimer = window.setTimeout(() => {
         if (!document.hidden && !sd) {
           const small = w < 640
@@ -259,7 +262,7 @@ export default function StarWarsBattle() {
       if (!document.hidden) return kick()
       cancelAnimationFrame(frame)
       frame = 0
-      battle = null
+      battles = []
       bolts = []
       bits = []
       ctx.clearRect(0, 0, w, h)
@@ -268,8 +271,8 @@ export default function StarWarsBattle() {
     resize()
     window.addEventListener("resize", resize)
     document.addEventListener("visibilitychange", onVisibility)
-    scheduleBattle(test ? 600 : rand(15000, 30000))
-    scheduleDestroyer(test ? 300 : rand(30000, 60000))
+    scheduleBattle(test ? 600 : rand(2000, 5000))
+    scheduleDestroyer(test ? 300 : rand(10000, 25000))
 
     return () => {
       cancelAnimationFrame(frame)

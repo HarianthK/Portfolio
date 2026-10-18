@@ -4,7 +4,7 @@ import { useEffect } from "react"
 import { useSafeReducedMotion } from "@/lib/use-safe-reduced-motion"
 
 // Everything here is added to the page on mount and removed on unmount. See DOCS.md "Looks".
-const BLADES = ["#4cc3ff", "#59f07a", "#ffcf4a"]
+const BLADES = ["#4cc3ff", "#ff3b3b", "#59f07a", "#ffcf4a", "#c06bff"]
 const TRAIL_MS = 140
 const BOLT_MS = 190
 const SPARK_MS = 280
