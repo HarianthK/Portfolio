@@ -133,8 +133,110 @@ html[data-look="star-wars"] a:hover {
   text-shadow: 0 0 12px oklch(0.74 0.14 235 / 0.6);
 }
 
-/* Space is always dark, so the light/dark switch steps aside, keeping its slot. */
-html[data-look="star-wars"] .mode-toggle {
+/* Candlelit stone: warm near-black, parchment text, gold and a deep crimson. */
+html[data-look="harry-potter"] {
+  --background: oklch(0.15 0.022 45);
+  --foreground: oklch(0.93 0.03 85);
+  --card: oklch(0.2 0.028 45);
+  --card-foreground: oklch(0.93 0.03 85);
+  --popover: oklch(0.2 0.028 45);
+  --popover-foreground: oklch(0.93 0.03 85);
+  --primary: oklch(0.82 0.13 85);
+  --primary-foreground: oklch(0.18 0.03 45);
+  --secondary: oklch(0.26 0.035 40);
+  --secondary-foreground: oklch(0.93 0.03 85);
+  --muted: oklch(0.26 0.035 40);
+  --muted-foreground: oklch(0.76 0.04 75);
+  --accent: oklch(0.58 0.17 25);
+  --accent-foreground: oklch(0.96 0.02 85);
+  --border: oklch(0.32 0.04 45);
+  --input: oklch(0.32 0.04 45);
+  --ring: oklch(0.82 0.13 85);
+  --grid-line: rgba(233, 196, 106, 0.05);
+  --node-role: oklch(0.82 0.13 85);
+  --node-project: oklch(0.62 0.17 25);
+  --node-tech: oklch(0.72 0.08 60);
+}
+
+html[data-look="harry-potter"] body {
+  background-image: radial-gradient(ellipse 70% 45% at 50% 0%, oklch(0.28 0.06 60 / 0.45), transparent 70%);
+  background-attachment: fixed;
+}
+
+html[data-look="harry-potter"] :is(h1, h2) {
+  text-shadow: 0 0 26px oklch(0.82 0.13 85 / 0.25);
+}
+
+/* Forest at dusk: green-black, pale parchment, elven gold and leaf green. */
+html[data-look="lord-of-the-rings"] {
+  --background: oklch(0.14 0.025 155);
+  --foreground: oklch(0.93 0.03 95);
+  --card: oklch(0.19 0.03 155);
+  --card-foreground: oklch(0.93 0.03 95);
+  --popover: oklch(0.19 0.03 155);
+  --popover-foreground: oklch(0.93 0.03 95);
+  --primary: oklch(0.83 0.12 82);
+  --primary-foreground: oklch(0.16 0.03 155);
+  --secondary: oklch(0.25 0.035 155);
+  --secondary-foreground: oklch(0.93 0.03 95);
+  --muted: oklch(0.25 0.035 155);
+  --muted-foreground: oklch(0.77 0.035 110);
+  --accent: oklch(0.72 0.11 150);
+  --accent-foreground: oklch(0.16 0.03 155);
+  --border: oklch(0.31 0.04 150);
+  --input: oklch(0.31 0.04 150);
+  --ring: oklch(0.83 0.12 82);
+  --grid-line: rgba(226, 192, 110, 0.05);
+  --node-role: oklch(0.83 0.12 82);
+  --node-project: oklch(0.72 0.11 150);
+  --node-tech: oklch(0.7 0.07 120);
+}
+
+html[data-look="lord-of-the-rings"] body {
+  background-image: radial-gradient(ellipse 80% 50% at 30% 100%, oklch(0.26 0.05 150 / 0.45), transparent 70%);
+  background-attachment: fixed;
+}
+
+html[data-look="lord-of-the-rings"] :is(h1, h2) {
+  text-shadow: 0 0 24px oklch(0.83 0.12 82 / 0.22);
+}
+
+/* Winter: cold slate, frost-white text, ice blue and one ember of fire. */
+html[data-look="game-of-thrones"] {
+  --background: oklch(0.15 0.018 250);
+  --foreground: oklch(0.95 0.01 230);
+  --card: oklch(0.2 0.02 250);
+  --card-foreground: oklch(0.95 0.01 230);
+  --popover: oklch(0.2 0.02 250);
+  --popover-foreground: oklch(0.95 0.01 230);
+  --primary: oklch(0.84 0.08 225);
+  --primary-foreground: oklch(0.17 0.02 250);
+  --secondary: oklch(0.26 0.025 250);
+  --secondary-foreground: oklch(0.95 0.01 230);
+  --muted: oklch(0.26 0.025 250);
+  --muted-foreground: oklch(0.77 0.025 235);
+  --accent: oklch(0.7 0.17 45);
+  --accent-foreground: oklch(0.17 0.02 250);
+  --border: oklch(0.32 0.03 245);
+  --input: oklch(0.32 0.03 245);
+  --ring: oklch(0.84 0.08 225);
+  --grid-line: rgba(190, 225, 255, 0.05);
+  --node-role: oklch(0.84 0.08 225);
+  --node-project: oklch(0.7 0.17 45);
+  --node-tech: oklch(0.72 0.05 230);
+}
+
+html[data-look="game-of-thrones"] body {
+  background-image: radial-gradient(ellipse 80% 45% at 50% 0%, oklch(0.27 0.04 240 / 0.5), transparent 70%);
+  background-attachment: fixed;
+}
+
+html[data-look="game-of-thrones"] :is(h1, h2) {
+  text-shadow: 0 0 22px oklch(0.9 0.04 225 / 0.22);
+}
+
+/* Every look is dark, so the light/dark switch steps aside, keeping its slot. */
+html[data-look] .mode-toggle {
   visibility: hidden;
 }
 

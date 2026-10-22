@@ -2,6 +2,9 @@
 export const LOOKS = [
   { id: "default", label: "Default" },
   { id: "star-wars", label: "Star Wars" },
+  { id: "harry-potter", label: "Harry Potter" },
+  { id: "lord-of-the-rings", label: "Lord of the Rings" },
+  { id: "game-of-thrones", label: "Game of Thrones" },
 ] as const
 
 export type LookId = (typeof LOOKS)[number]["id"]

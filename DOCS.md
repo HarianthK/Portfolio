@@ -166,3 +166,25 @@ crawl text. A look evokes its source with original drawing and colour only, and
 the source's name appears only as the plain-text label in the menu. The one
 exception by choice is the Star Wars ships above: original drawings of
 recognisable designs.
+
+### Harry Potter, Lord of the Rings and Game of Thrones
+
+Three more looks follow the same pattern, sharing `components/looks/look-kit.ts`: a page-wide
+canvas that idles when nothing moves, pauses in a hidden tab and draws one still frame with reduced
+motion; dividers that draw in as each section scrolls into view; headings revealed once; and a
+pointer helper that ignores clicks on anything a visitor reads or uses.
+
+- Harry Potter: candlelit palette, floating candles (dimmed by half over the text column), gold
+  sparkles from the cursor and bursts on background clicks, gold ink dividers from a wax seal,
+  headings that bleed in like ink, a parchment glow on hovered cards.
+- Lord of the Rings: forest palette, wandering elven lights and falling gold leaves, a soft light
+  that follows the cursor, a few lights released on background clicks, map-line dividers with a
+  compass star, headings that glow in from fire to gold.
+- Game of Thrones: winter palette, snow in three depths with gusts of wind, frost creeping in at the
+  screen's edges, dragonfire embers on background clicks, patterned steel blade dividers with a
+  glint, headings that thaw from frost.
+
+All three are dark, so the light/dark toggle hides for any look. Everything is original drawing and
+CSS; the only use of the names is the picker's labels. Checked in headless Chrome: no script errors,
+every divider drawn and no heading hidden under reduced motion, and switching through every look and
+back to Default leaves the page with exactly the canvases, styles and elements it started with.
