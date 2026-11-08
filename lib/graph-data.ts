@@ -148,7 +148,7 @@ const baseNodes: GraphNode[] = [
     id: "archival-system",
     label: "Archival Inventory System",
     kind: "project",
-    detail: "Indexed and reported across a 2.5M+ item physical and digital repository",
+    detail: "Inventory and reporting system indexing 9,500+ records",
     meta: "ASU Library Systems",
     section: "foundations",
   },
@@ -163,9 +163,9 @@ const baseNodes: GraphNode[] = [
   },
   {
     id: "o-search",
-    label: "~35% faster contextual search",
+    label: "~35% less search time",
     kind: "outcome",
-    detail: "Reduction in contextual search time after graph modelling",
+    detail: "Contextual search time after modelling relationships explicitly",
     section: "now",
   },
   {
@@ -174,13 +174,6 @@ const baseNodes: GraphNode[] = [
     kind: "outcome",
     detail: "Ingestion, validation and indexing workflows in production",
     section: "now",
-  },
-  {
-    id: "o-monitoring",
-    label: "~60% less manual monitoring",
-    kind: "outcome",
-    detail: "Agent orchestration replacing hand-watched supply-chain signals",
-    section: "work",
   },
   {
     id: "o-repository",
@@ -257,7 +250,6 @@ const baseLinks: GraphLink[] = [
   { source: "info-catalog", target: "o-assets", kind: "produced" },
   { source: "kg-systems", target: "o-search", kind: "produced" },
   { source: "info-catalog", target: "o-uptime", kind: "produced" },
-  { source: "langgraph", target: "o-monitoring", kind: "produced" },
   { source: "archival-system", target: "o-visibility", kind: "produced" },
   { source: "archival-system", target: "o-dedupe", kind: "produced" },
 
@@ -295,7 +287,7 @@ const baseLinks: GraphLink[] = [
 ]
 
 // The personal projects come from the Built section, so the graph can't drift from it.
-const PROJECT_ID: Record<string, string> = { "LangGraph Agentic Platform": "langgraph" }
+const PROJECT_ID: Record<string, string> = { "LangGraph Form Agent": "langgraph" }
 const projectId = (name: string) => PROJECT_ID[name] ?? name.toLowerCase().replace(/[^a-z0-9]+/g, "-")
 
 // Stack entries that become tool nodes even though nothing else on the graph uses them yet.

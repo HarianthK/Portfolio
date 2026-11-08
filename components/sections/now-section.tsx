@@ -78,7 +78,7 @@ export function NowSection() {
             <div className="mt-12 max-w-xs">
               <FigureBlock
                 value="~35%"
-                label="Faster contextual search"
+                label="Less contextual search time"
                 context="After modelling relationships explicitly rather than inferring them."
               />
             </div>

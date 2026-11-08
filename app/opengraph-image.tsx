@@ -5,7 +5,7 @@ export const size = {
   height: 630,
 }
 export const contentType = "image/png"
-export const alt = "Harianth Kalavala — AI Engineer"
+export const alt = "Harianth Kalavala, AI Engineer"
 
 const BG = "#0a0704"
 const FG = "#f8f5ef"
@@ -22,7 +22,7 @@ const TECH = "#4a9fc4"
 const EYEBROW = "AI ENGINEER · PHOENIX, ARIZONA"
 const NAME = "Harianth Kalavala"
 const LINE = "I build retrieval systems that turn unstructured data into something production can depend on."
-const METRICS = "100K+ data assets · ~35% faster retrieval"
+const METRICS = "100K+ data assets · ~35% less search time"
 
 /**
  * Satori can't read the app's next/font faces, so the two that carry the

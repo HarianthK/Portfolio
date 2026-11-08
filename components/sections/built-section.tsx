@@ -13,17 +13,13 @@ export type Project = {
 
 export const PROJECTS: Project[] = [
   {
-    name: "LangGraph Agentic Platform",
+    // Describes what the linked repo does; the old supply-chain text did not match it. See DOCS.md.
+    name: "LangGraph Form Agent",
     summary:
-      "A multi-agent system for supply chain resilience: real-time news analytics, geospatial risk scoring, and automated alerting. I designed the orchestration layer: state management, tool routing, memory, and the LLM decision loops.",
-    stack: ["LangGraph", "LangChain", "Python", "LLMs"],
+      "An agent that registers a business through a web form on its own, built in a one-day sprint. A LangGraph state graph runs three steps, extract, validate and submit: it gathers location and demographic data from API Ninjas, has Mistral running locally on Ollama pick the business's NAICS industry code, saves the record to PostgreSQL and fills in the form with Selenium, behind a FastAPI service and an Angular dashboard.",
+    stack: ["LangGraph", "Python", "Ollama", "Selenium", "Angular"],
     href: "https://github.com/HarianthK/Langgraph-agent-automation",
     hrefLabel: "View code",
-    figure: {
-      value: "~60%",
-      label: "Less manual monitoring",
-      context: "Agent orchestration replacing hand-watched supply-chain signals.",
-    },
   },
   {
     // Describes what actually loads, because a claim that does not survive a
@@ -80,14 +76,14 @@ export const PROJECTS: Project[] = [
     figure: {
       value: "33",
       label: "Pull requests upstream",
-      context: "Sent to 28 projects and 25 maintainers, 13 merged as of November 2026; the live page has today's count. Each one is a bug proved with a program before it was sent.",
+      context: "Sent to 28 projects and 25 maintainers, 13 merged as of November 2026; the live page has today's count. Most fix a bug, shown first with a program that reproduces it.",
     },
   },
   {
     // Written to find out what the operating system's resolver hides.
     name: "Resolve",
     summary:
-      "A DNS resolver in one Python file, no libraries: it builds the query bytes, starts at a root server and follows each referral down itself instead of asking someone else's resolver to do it. Ask it for en.wikipedia.org with -v and you watch a root server hand it to .org, .org hand it to Wikimedia, and Wikimedia answer with an alias it then chases from scratch. It handles the parts that make real name servers awkward: compression pointers into the same packet, referrals that arrive without the addresses they refer to, and replies too big for a UDP packet, which have to be asked again over TCP. Since then it has learned what a resolver run in production does: it caches answers and missing names for as long as their records allow, offers EDNS0 so big answers fit in one packet, believes each server only about its own zone, and tells each server only the next label down, so the root learns you wanted something in .org and nothing more. Run with --serve and it becomes a small DNS server that other programs on the machine can ask, keeping missing names, empty answers and failures apart the way a real one must.",
+      "A DNS resolver in one Python file, no libraries: it builds the query bytes, starts at a root server and follows each referral down itself instead of asking someone else's resolver to do it. Ask it for en.wikipedia.org with -v and you watch a root server hand it to .org, .org hand it to Wikimedia, and Wikimedia answer with an alias it then chases again from the .org servers it already knows. It handles the parts that make real name servers awkward: compression pointers into the same packet, referrals that arrive without the addresses they refer to, and replies too big for a UDP packet, which have to be asked again over TCP. Since then it has learned what a resolver run in production does: it caches answers and missing names for as long as their records allow, offers EDNS0 so big answers fit in one packet, believes each server only about its own zone, and tells each server only the next label down, so the root learns you wanted something in .org and nothing more. Run with --serve and it becomes a small DNS server that other programs on the machine can ask, keeping missing names, empty answers and failures apart the way a real one must.",
     stack: ["Python", "DNS", "Sockets"],
     href: "https://github.com/HarianthK/resolve",
     hrefLabel: "View code",
@@ -101,14 +97,14 @@ export const PROJECTS: Project[] = [
     // A file format is only understood when somebody else's program reads your output.
     name: "deflate",
     summary:
-      "A gzip compressor built from its two ideas: LZ77, which replaces anything already seen with a pointer back to the earlier copy, and Huffman coding, which spends fewer bits on the symbols that occur most. It writes real .gz files, picks the cheapest of the format's three block types so incompressible input never grows, and every test hands the file to Python's gzip, to zlib and to the gzip program, because a compressor checked by its own decompressor only proves the two share the same misunderstanding. It reads gzip files too, but for the same reason its decompressor is only ever tested on files zlib wrote, at every level, and on broken ones it must refuse. The same compressor writes PNGs, and turns a picture of 256 colours or fewer into a palette, which halves a chart.",
+      "A gzip compressor built from its two ideas: LZ77, which replaces anything already seen with a pointer back to the earlier copy, and Huffman coding, which spends fewer bits on the symbols that occur most. It writes real .gz files, picks the cheapest of the format's three block types so incompressible input grows by at most the 5 bytes a stored block needs, and every test hands the file to Python's gzip, to zlib and to the gzip program, because a compressor checked by its own decompressor only proves the two share the same misunderstanding. It reads gzip files too, and its decompressor is tested on files zlib wrote at every level, and on broken ones it must refuse. The same compressor writes PNGs, and turns a picture of 256 colours or fewer into a palette, which halves a chart.",
     stack: ["Python", "DEFLATE", "Huffman"],
     href: "https://github.com/HarianthK/deflate",
     hrefLabel: "View code",
     figure: {
-      value: "1 to 3%",
-      label: "Off gzip -9 on real text",
-      context: "Smaller than gzip on repetitive input. Lazy matching, gzip's own trick of checking whether a match one byte later is longer, closed most of the gap that was there.",
+      value: "7 of 7",
+      label: "Inputs no bigger than gzip -9",
+      context: "At -9 against gzip -9, from repeated text and random bytes to 59 KB of Rust. At its default level it is 0.3% bigger on the Rust file and smaller or level on the rest.",
     },
   },
   {
@@ -129,7 +125,7 @@ export const PROJECTS: Project[] = [
     // The checks avoid comparing pictures, which only ever says something changed.
     name: "trace-rays",
     summary:
-      "A ray tracer in one Python file: spheres on a checkered floor with shadows, reflections, a highlight and a glass ball that turns the floor behind it upside down, written to a PNG it encodes itself. Since then: triangle meshes, a lens that blurs what is out of focus, and a lamp with a size, so shadows soften at their edges. Every pixel is one question asked backwards, from the eye rather than the lamp, and shadows and reflections are the same question asked again from the surface. The checks never compare pictures: they pin the geometry, compare one point of floor with and without the sphere that shadows it, and let Pillow decode the PNG.",
+      "A ray tracer in one Python file: spheres on a checkered floor with shadows, reflections, a highlight and a glass ball that turns the floor behind it upside down, written to a PNG it encodes itself. Since then: triangle meshes, a lens that blurs what is out of focus, and a lamp with a size, so shadows soften at their edges. Every pixel is one question asked backwards, from the eye rather than the lamp, and shadows and reflections are the same question asked again from the surface. The checks never compare against a saved picture: they pin the geometry, compare one point of floor with and without the sphere that shadows it, and let Pillow decode the PNG.",
     stack: ["Python", "Graphics"],
     href: "https://github.com/HarianthK/trace-rays",
     hrefLabel: "View code",
@@ -162,7 +158,7 @@ export const PROJECTS: Project[] = [
     href: "https://github.com/HarianthK/ember",
     hrefLabel: "View code",
     figure: {
-      value: "3 to 5x",
+      value: "3 to 6.7x",
       label: "Faster than a tree-walker",
       context: "Over the same syntax tree, on recursion, a tight loop and a closure called a million times; level with CPython on recursion and just ahead of it on the closure.",
     },
@@ -190,8 +186,8 @@ export const PROJECTS: Project[] = [
     href: "https://harianthk.github.io/chip8/",
     hrefLabel: "Play it",
     figure: {
-      value: "86",
-      label: "Programs quietly running wrong",
+      value: "88",
+      label: "Programs it was reading wrong",
       context: "Six instructions have two accepted readings, and the archive records which each program expects. It had been ignoring that. It reads them now.",
     },
   },
@@ -199,7 +195,7 @@ export const PROJECTS: Project[] = [
 
 // The AI work gets the full treatment; the rest sit in a compact list with the
 // detail behind "More", so every claim stays on the page. See DOCS.md.
-const FEATURED = ["LangGraph Agentic Platform", "Retrace", "Upstream"]
+const FEATURED = ["LangGraph Form Agent", "Retrace", "Upstream"]
 
 // Sentences end at a stop followed by a capital, so ".gz" and ".org" do not end one.
 function lead(summary: string, sentences = 1) {

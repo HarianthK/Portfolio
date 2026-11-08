@@ -14,6 +14,28 @@ argument rests on its claims being checkable, so the entry now describes what
 actually loads: type-ahead search, points totalled per division, competition
 history and eligibility. Both endpoints it names are real.
 
+## A claim audit, 2026-11-08
+
+Every claim a visitor can read was checked against its source: the project
+repositories, GitHub's search for the pull request counts, and the live sites.
+Ten failed. The worst was the first AI entry. It described a multi-agent
+supply-chain system with news analytics, geospatial risk scoring and a ~60%
+figure, and linked a repository that is a one-day agent which fills in a
+business registration form. Nothing in the repository backed the description
+or the number, so the entry now describes what the code does, under the name
+LangGraph Form Agent, with no figure, and the ~60% node is gone from the
+graph. If the supply-chain system exists somewhere else, it needs its own
+link before it comes back.
+
+The rest were smaller: deflate said incompressible input never grows (it can
+grow by 5 bytes) and quoted a gap to gzip that later work closed, ember's
+speed-up range stopped at 5x when its table reaches 6.7x, CHIP-8 said 86
+programs where its own notes say 88, Resolve said an alias is chased from
+scratch when it starts from servers it already knows, and Upstream said every
+pull request was a bug fix. The ~35% figure was worded four ways, two of which
+said faster when the measurement was time saved; it now reads as less search
+time everywhere, as the résumé has it.
+
 ## The figure is the part worth arguing over
 
 Each project carries one number. The temptation is to reach for the biggest one,
