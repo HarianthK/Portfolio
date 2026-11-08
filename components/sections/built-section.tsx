@@ -235,6 +235,7 @@ function Featured({ project, i }: { project: Project; i: number }) {
         <Stack items={project.stack} />
         {rest ? (
           <ReadMore
+            name={project.name}
             link={link}
             more={<p className="max-w-xl text-base leading-relaxed text-muted-foreground">{rest}</p>}
           />
@@ -265,6 +266,7 @@ function Compact({ project }: { project: Project }) {
       <p className="mt-3 text-base leading-relaxed text-muted-foreground">{first}</p>
       <Stack items={project.stack} />
       <ReadMore
+        name={project.name}
         link={<ProjectLink project={project} />}
         more={
           <>
@@ -303,7 +305,8 @@ function ProjectLink({ project, className }: { project: Project; className?: str
       )}
     >
       <span className="border-b border-primary/40 pb-0.5 hover:border-primary">
-        {project.hrefLabel} →
+        {project.hrefLabel} <span className="sr-only">for {project.name}</span>
+        <span aria-hidden>→</span>
       </span>
     </a>
   )
@@ -316,7 +319,7 @@ export function BuiltSection() {
     <section id="built" className="relative px-6 py-28 md:px-14 md:py-36">
       <div className="mx-auto max-w-6xl">
         <p className="font-mono text-xs uppercase tracking-[0.3em] text-primary">
-          <span aria-hidden className="text-primary/70">04</span> Built
+          <span aria-hidden className="text-primary/90">04</span> Built
         </p>
         <h2 className="mt-4 max-w-lg font-serif text-4xl leading-tight text-foreground md:text-5xl">
           Outside the day job

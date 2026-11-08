@@ -360,3 +360,18 @@ actually on screen: each frame the outermost node's projected position sets the 
 graph fills 84% of the box at whatever angle it has turned to and edges never run off it. The hero
 text is centred on the graph's middle and starts at the same left edge as every section below
 (`max(3.5rem, (100cqw - 72rem) / 2)`, measured against the hero itself, so a scrollbar can't skew it).
+
+## Accessibility and weight, 2026-11-08
+
+An audit measured the page rather than reading it. Visitors who ask for reduced
+motion still got the hero's two second camera intro, because the setting is
+only known after the first render and the intro had already started; it now
+snaps to the framed view instead. The shared button's focus ring was drawn at
+half strength, under the 3:1 a focus indicator needs. framer-motion was loaded
+only to draw the two pixel scroll bar, 55 KB of a phone's first load, so the
+bar is now a CSS scroll-driven animation and browsers without that simply have
+no bar; lenis, the Radix dialog and sonner were installed and unused, and went
+with it, as did a preloaded italic the page never set. Phones now load the
+explorer's live graph only on a tap, as the hero already did, so a phone that
+scrolls the whole page loads no three.js at all. Every Read more and View code
+names its project for screen readers, and the page declares its canonical URL.

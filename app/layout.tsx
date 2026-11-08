@@ -18,7 +18,7 @@ import "./globals.css"
 const display = Instrument_Serif({
   subsets: ["latin"],
   weight: "400",
-  style: ["normal", "italic"],
+  style: ["normal"],
   variable: "--font-display",
 })
 
@@ -52,6 +52,7 @@ export const metadata: Metadata = {
     template: "%s | Harianth Kalavala",
   },
   description,
+  alternates: { canonical: "/" },
   openGraph: {
     title,
     description,

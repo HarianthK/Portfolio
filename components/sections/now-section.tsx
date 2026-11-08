@@ -7,7 +7,7 @@ export function NowSection() {
     <section id="now" className="section-grid relative px-6 py-28 md:px-14 md:py-36">
       <div className="mx-auto max-w-6xl">
         <p className="font-mono text-xs uppercase tracking-[0.3em] text-primary">
-          <span aria-hidden className="text-primary/70">02</span> Now
+          <span aria-hidden className="text-primary/90">02</span> Now
         </p>
 
         <div className="mt-10 grid gap-14 lg:grid-cols-[minmax(0,20rem)_minmax(0,1fr)] lg:gap-20">

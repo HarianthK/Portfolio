@@ -7,7 +7,7 @@ export function StorySection() {
         {/* Left margin: the year, as a date stamp on the whole section. */}
         <div className="lg:pt-3">
           <p className="font-mono text-xs uppercase tracking-[0.3em] text-primary">
-            <span aria-hidden className="text-primary/70">01</span> Why
+            <span aria-hidden className="text-primary/90">01</span> Why
           </p>
           <p
             aria-hidden

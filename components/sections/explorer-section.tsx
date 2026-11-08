@@ -49,7 +49,7 @@ export function ExplorerSection({ fallback }: { fallback?: ReactNode }) {
         <div className="mx-auto flex max-w-6xl flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="font-mono text-xs uppercase tracking-[0.3em] text-primary">
-              <span aria-hidden className="text-primary/70">03</span> Explore
+              <span aria-hidden className="text-primary/90">03</span> Explore
             </p>
             <h2 className="mt-4 max-w-lg font-serif text-4xl leading-tight text-foreground md:text-5xl">
               The whole thing, as a graph
@@ -94,6 +94,7 @@ export function ExplorerSection({ fallback }: { fallback?: ReactNode }) {
           highlight={FILTERS[active].kinds}
           framing="comfortable"
           fallback={fallback}
+          tapToLoad
           className="relative h-[min(60vh,115vw)] min-h-[22rem] overflow-hidden md:h-[70vh] md:min-h-[26rem] rounded-xl border border-border bg-muted/20"
         />
       </div>

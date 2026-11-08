@@ -4,7 +4,7 @@ import { useId, useState, type ReactNode } from "react"
 import { ChevronDown } from "lucide-react"
 
 // The extra text stays in the page, only hidden, so it is still indexed and every claim is there.
-export function ReadMore({ more, link }: { more: ReactNode; link: ReactNode }) {
+export function ReadMore({ more, link, name }: { more: ReactNode; link: ReactNode; name: string }) {
   const [open, setOpen] = useState(false)
   const id = useId()
   return (
@@ -22,6 +22,7 @@ export function ReadMore({ more, link }: { more: ReactNode; link: ReactNode }) {
           className="inline-flex min-h-11 items-center gap-1 font-mono text-xs text-foreground/80 underline decoration-dotted underline-offset-4 transition-colors hover:text-foreground"
         >
           {open ? "Show less" : "Read more"}
+          <span className="sr-only"> about {name}</span>
           <ChevronDown aria-hidden className={`size-3.5 transition-transform ${open ? "rotate-180" : ""}`} />
         </button>
       </div>

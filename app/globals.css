@@ -337,6 +337,20 @@ html[data-look] #explorer .rounded-xl.border {
   section[id] {
     scroll-margin-top: 5rem;
   }
+  .scroll-progress {
+    transform: scaleX(0);
+  }
+  @supports (animation-timeline: scroll()) {
+    .scroll-progress {
+      animation: grow-progress linear both;
+      animation-timeline: scroll(root);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .scroll-progress {
+      display: none;
+    }
+  }
   a:focus-visible,
   button:focus-visible,
   input:focus-visible {
@@ -477,5 +491,11 @@ html[data-look] #explorer .rounded-xl.border {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+@keyframes grow-progress {
+  to {
+    transform: scaleX(1);
   }
 }

@@ -367,6 +367,12 @@ function Scene({
       is precisely backwards for a reveal. This accelerates away from the nodes
       and settles softly.
     */
+    // The reduced-motion setting is only known after the first render, so the intro may have started; snap instead.
+    if (introRunning.current && prefersReducedMotion) {
+      camera.position.setLength(desired)
+      introRunning.current = false
+      return
+    }
     if (introRunning.current) {
       intro.current = Math.min(1, intro.current + delta / INTRO_DURATION)
       /*
