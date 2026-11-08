@@ -11,7 +11,7 @@ export function StorySection() {
           </p>
           <p
             aria-hidden
-            className="mt-6 hidden font-serif text-7xl leading-none text-primary/20 lg:block"
+            className="mt-6 hidden font-serif text-7xl leading-none text-primary/35 lg:block"
           >
             2023
           </p>

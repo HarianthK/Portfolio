@@ -334,6 +334,9 @@ html[data-look] #explorer .rounded-xl.border {
   html {
     scroll-behavior: smooth;
   }
+  section[id] {
+    scroll-margin-top: 5rem;
+  }
   a:focus-visible,
   button:focus-visible,
   input:focus-visible {

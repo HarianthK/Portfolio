@@ -85,7 +85,7 @@ export default function RootLayout({
           <ScrollProgress />
           {/* The nav bar is gone with the single-page layout, so the theme
               control lives on its own in the corner. */}
-          <header className="fixed right-4 top-4 z-50 flex items-center rounded-full border border-border/60 bg-background/80 p-0.5 backdrop-blur">
+          <header className="fixed right-4 top-4 z-50 flex items-center rounded-full border border-border/60 bg-background/60 p-0.5 backdrop-blur-md">
             <CornerResume />
             <LookPicker />
             <ThemeToggle />
