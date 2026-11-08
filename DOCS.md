@@ -253,11 +253,15 @@ graph or an edge points at nothing.
 **Labels are HTML, not sprites.** Canvas sprites were drawn at a world size, so they shrank to
 7 to 9 px when the camera pulled back, were blurred by the depth of field pass and sat behind edges.
 Now each label is a span over the canvas at 12 px (14 px for the root), coloured with
-`--foreground` and haloed with `--background`, so it follows the theme and every look for free.
+`--foreground` on a small chip of `--background` at 72%, so it follows the theme and every look for
+free and no edge strikes through the text (a text halo let thin light-theme edges show through).
 Each frame (`components/graph/graph-labels.ts`) places labels most important first, trying below,
 above, right and left of the node, and takes the first spot that is inside the frame and clear of
-every other label and every node bigger than a tool dot; with no spot it hides. Small screens
-therefore show fewer labels without a separate rule. The hero labels only `HERO_LABELS`; the
+every other label and every node bigger than a tool dot, and that is not nearer some other node than
+its own (otherwise the name reads as the neighbour's); with no spot it hides. A spot pushed more than
+12 px back inside the frame counts as no spot, for the same reason. The owner's name never hides: it
+tries a ring of spots at growing distances, nearest first, and if none is clear takes the one that
+covers the fewest nodes. Small screens therefore show fewer labels without a separate rule. The hero labels only `HERO_LABELS`; the
 explorer labels roles, schools and projects, or every lit node under a filter; hover or a tap
 always labels the node.
 
@@ -274,11 +278,23 @@ the hero shows a still SVG of the same graph, laid out once on the server with d
 ships with r3f-forcegraph) and coloured with the same CSS tokens, so it needs no JavaScript. The
 live graph loads only on the "Explore it live" button. Every stage, desktop included, now fetches
 three.js only when it comes within 800 px of the screen, and the explorer shows the still picture
-as its loading state. Measured on a 390 px wide load: 11 scripts, 569 KB transferred (1.86 MB
+(with its names) as its loading state. The still stays under the canvas and fades out once the live
+graph has drawn its first assembled frame, not when the WebGL context is created; the explorer skips
+the assembling animation and lands straight on its framing so the two pictures cross rather than cut.
+
+The still's labels are placed once for a phone-width box, so each is anchored from the edge that
+faces its node (a left-placed label by `right`, an above-placed one by `bottom`, centred ones by
+their middle); the gap to the node then holds at any width. The still does not name the root: it
+sits in the densest part of a fixed layout where every spot either covers a node or sits nearer a
+neighbour, and the big name is directly under the picture on the screens that show it. Measured on a 390 px wide load: 11 scripts, 569 KB transferred (1.86 MB
 decoded) and 2 WebGL canvases before; 10 scripts, 196 KB (0.63 MB decoded) and no canvas after.
 
 **Desktop hero.** From `lg` the words take the left column and the graph the right, each in its
 own space, instead of the graph above and an empty right half under it. The camera fits the
 graph's depth as well as its width, since the graph turns, and fog density scales with camera
 distance so the wider framing doesn't wash the light theme out. The explorer starts from a
-different side and frames tighter than the hero, so the second view isn't a repeat.
+different side and frames tighter than the hero, so the second view isn't a repeat. It fits what is
+actually on screen: each frame the outermost node's projected position sets the distance, so the
+graph fills 84% of the box at whatever angle it has turned to and edges never run off it. The hero
+text is centred on the graph's middle and starts at the same left edge as every section below
+(`max(3.5rem, (100cqw - 72rem) / 2)`, measured against the hero itself, so a scrollbar can't skew it).
