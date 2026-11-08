@@ -86,7 +86,7 @@ const PROJECTS: Project[] = [
     // Written to find out what the operating system's resolver hides.
     name: "Resolve",
     summary:
-      "A DNS resolver in one Python file, no libraries: it builds the query bytes, starts at a root server and follows each referral down itself instead of asking someone else's resolver to do it. Ask it for en.wikipedia.org with -v and you watch a root server hand it to .org, .org hand it to Wikimedia, and Wikimedia answer with an alias it then chases from scratch. It handles the parts that make real name servers awkward: compression pointers into the same packet, referrals that arrive without the addresses they refer to, and replies too big for a UDP packet, which have to be asked again over TCP. Since then it has learned what a resolver run in production does: it caches answers and missing names for as long as their records allow, offers EDNS0 so big answers fit in one packet, believes each server only about its own zone, and tells each server only the next label down, so the root learns you wanted something in .org and nothing more.",
+      "A DNS resolver in one Python file, no libraries: it builds the query bytes, starts at a root server and follows each referral down itself instead of asking someone else's resolver to do it. Ask it for en.wikipedia.org with -v and you watch a root server hand it to .org, .org hand it to Wikimedia, and Wikimedia answer with an alias it then chases from scratch. It handles the parts that make real name servers awkward: compression pointers into the same packet, referrals that arrive without the addresses they refer to, and replies too big for a UDP packet, which have to be asked again over TCP. Since then it has learned what a resolver run in production does: it caches answers and missing names for as long as their records allow, offers EDNS0 so big answers fit in one packet, believes each server only about its own zone, and tells each server only the next label down, so the root learns you wanted something in .org and nothing more. Run with --serve and it becomes a small DNS server that other programs on the machine can ask, keeping missing names, empty answers and failures apart the way a real one must.",
     stack: ["Python", "DNS", "Sockets"],
     href: "https://github.com/HarianthK/resolve",
     hrefLabel: "View code",
@@ -100,7 +100,7 @@ const PROJECTS: Project[] = [
     // A file format is only understood when somebody else's program reads your output.
     name: "deflate",
     summary:
-      "A gzip compressor built from its two ideas: LZ77, which replaces anything already seen with go back and copy, and Huffman coding, which spends fewer bits on the symbols that occur most. It writes real .gz files, picks the cheapest of the format's three block types so incompressible input never grows, and every test hands the file to Python's gzip, to zlib and to the gzip program, because a compressor checked by its own decompressor only proves the two share the same misunderstanding. It reads gzip files too, but for the same reason its decompressor is only ever tested on files zlib wrote, at every level, and on broken ones it must refuse.",
+      "A gzip compressor built from its two ideas: LZ77, which replaces anything already seen with go back and copy, and Huffman coding, which spends fewer bits on the symbols that occur most. It writes real .gz files, picks the cheapest of the format's three block types so incompressible input never grows, and every test hands the file to Python's gzip, to zlib and to the gzip program, because a compressor checked by its own decompressor only proves the two share the same misunderstanding. It reads gzip files too, but for the same reason its decompressor is only ever tested on files zlib wrote, at every level, and on broken ones it must refuse. The same compressor writes PNGs, and turns a picture of 256 colours or fewer into a palette, which halves a chart.",
     stack: ["Python", "DEFLATE", "Huffman"],
     href: "https://github.com/HarianthK/deflate",
     hrefLabel: "View code",
@@ -111,10 +111,24 @@ const PROJECTS: Project[] = [
     },
   },
   {
+    // Each half is checked by somebody else's: Pillow reads what it writes, libjpeg wrote what it reads.
+    name: "jpeg",
+    summary:
+      "A JPEG encoder and decoder in one Python file with no dependencies. It writes baseline and progressive .jpg files any viewer opens, with Huffman tables built for the picture and restart markers, and reads the baseline, progressive and arithmetic-coded files other programs wrote, turning a phone photo upright from its EXIF tag. Every file it writes is decoded by Pillow, and the files its reader is tested on were written by libjpeg, so neither half is only ever checked against itself.",
+    stack: ["Python", "JPEG", "DCT"],
+    href: "https://github.com/HarianthK/jpeg",
+    hrefLabel: "View code",
+    figure: {
+      value: "0.18 dB",
+      label: "Behind libjpeg at most",
+      context: "From quality 25 to 90 on every picture in the test, and never more than 3% bigger, with Pillow decoding both files and measuring how close the pixels came back.",
+    },
+  },
+  {
     // The checks avoid comparing pictures, which only ever says something changed.
     name: "trace-rays",
     summary:
-      "A ray tracer in one Python file: spheres on a checkered floor with shadows, reflections, a highlight and a glass ball that turns the floor behind it upside down, written to a PNG it encodes itself. Every pixel is one question asked backwards, from the eye rather than the lamp, and shadows and reflections are the same question asked again from the surface. The checks never compare pictures: they pin the geometry, compare one point of floor with and without the sphere that shadows it, and let Pillow decode the PNG.",
+      "A ray tracer in one Python file: spheres on a checkered floor with shadows, reflections, a highlight and a glass ball that turns the floor behind it upside down, written to a PNG it encodes itself. Since then: triangle meshes, a lens that blurs what is out of focus, and a lamp with a size, so shadows soften at their edges. Every pixel is one question asked backwards, from the eye rather than the lamp, and shadows and reflections are the same question asked again from the surface. The checks never compare pictures: they pin the geometry, compare one point of floor with and without the sphere that shadows it, and let Pillow decode the PNG.",
     stack: ["Python", "Graphics"],
     href: "https://github.com/HarianthK/trace-rays",
     hrefLabel: "View code",
@@ -125,10 +139,24 @@ const PROJECTS: Project[] = [
     },
   },
   {
+    // The fast part of a SAT solver is knowing which dead ends not to walk into twice.
+    name: "sat",
+    summary:
+      "A SAT solver in one Python file: give it a formula of true or false variables and it finds values that make every clause true, or proves there are none. It is CDCL, the algorithm behind every modern solver, with watched literals, learned clauses, restarts, and clause deletion and minimization as Glucose and MiniSat do them. A no comes with a DRAT proof, the format SAT competitions require, which it can check on its own, and it solves under assumptions as MiniSat does, so one solver can be asked many questions and keep what it learned between them.",
+    stack: ["Python", "SAT", "Logic"],
+    href: "https://github.com/HarianthK/sat",
+    hrefLabel: "View code",
+    figure: {
+      value: "6 to 48x",
+      label: "Fewer dead ends than DPLL",
+      context: "Conflicts on random formulas from 40 to 100 variables, against the plain backtracking solver kept in the same file. The gap grows with size.",
+    },
+  },
+  {
     // Built in five phases, each checked by breaking it on purpose before moving on.
     name: "ember",
     summary:
-      "A programming language written in Rust with no dependencies: a compiler to bytecode, a stack virtual machine, closures that share the variables they capture, lists and maps, a mark and sweep garbage collector and a REPL. Breaking each phase on purpose found two bugs from the first week, errors reported on the wrong line and every accented string corrupted, and two collector rules no test depended on. A tree-walking interpreter was written only to race it. A misspelt name or map key now suggests the one probably meant, the way Python does.",
+      "A programming language written in Rust with no dependencies: a compiler to bytecode, a stack virtual machine, closures that share the variables they capture, lists and maps, a mark and sweep garbage collector and a REPL. Breaking each phase on purpose found two bugs from the first week, errors reported on the wrong line and every accented string corrupted, and two collector rules no test depended on. A tree-walking interpreter was written only to race it. A misspelt name or map key now suggests the one probably meant, the way Python does. It has since gained try and catch, default parameters, ** for powers and xs[a:b] slices.",
     stack: ["Rust", "Compilers", "Garbage collection"],
     href: "https://github.com/HarianthK/ember",
     hrefLabel: "View code",
@@ -156,7 +184,7 @@ const PROJECTS: Project[] = [
     // The figure is the bug it was hiding, not the coverage. See DOCS.md.
     name: "CHIP-8",
     summary:
-      "A virtual machine from 1977, rebuilt from its instruction set and running in a browser, with both of the extensions people later built on it: SUPER-CHIP's larger screen and scrolling, and XO-CHIP's second colour plane, sixty four kilobytes of memory and waveform sound. Every program in the community archive runs, and because none of them record how they are played, the page works out which keys each one watches by playing it. It can also read any program back as Octo source, telling code from sprites by walking every path the machine could take; all 104 listings compile back to the identical bytes through Octo's own compiler. It is also the machine Nibble compiles for.",
+      "A virtual machine from 1977, rebuilt from its instruction set and running in a browser, with both of the extensions people later built on it: SUPER-CHIP's larger screen and scrolling, and XO-CHIP's second colour plane, sixty four kilobytes of memory and waveform sound. Every program in the community archive runs, and because none of them record how they are played, the page works out which keys each one watches by playing it. It can also read any program back as Octo source, telling code from sprites by walking every path the machine could take; all 104 listings compile back to the identical bytes through Octo's own compiler. Hold Backspace and the game runs backwards, up to ten seconds, with every frame of every archive program checked to come back exactly. It is also the machine Nibble compiles for.",
     stack: ["JavaScript", "Canvas", "Web Audio"],
     href: "https://harianthk.github.io/chip8/",
     hrefLabel: "Play it",
