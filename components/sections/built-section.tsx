@@ -1,4 +1,5 @@
 import { FigureBlock } from "@/components/figure-block"
+import { ReadMore } from "@/components/read-more"
 import { cn } from "@/lib/utils"
 
 export type Project = {
@@ -63,9 +64,9 @@ export const PROJECTS: Project[] = [
     href: "https://retrace-llm.vercel.app/?sample=1",
     hrefLabel: "Open the sample",
     figure: {
-      value: "4",
-      label: "File shapes read",
-      context: "Every reader is checked in headless Chrome against the same five spans, which must give the same tree whichever shape they arrive in. The two Phoenix readers were corrected against exports from a Phoenix run locally.",
+      value: "4 of 6",
+      label: "Instrumentor fixes merged",
+      context: "One each into Arize's OpenInference, Traceloop's OpenLLMetry, OpenLIT and Comet's Opik, as of November 2026; the first merged the same day. Every file shape Retrace reads is checked against the same five spans.",
     },
   },
   {
@@ -100,7 +101,7 @@ export const PROJECTS: Project[] = [
     // A file format is only understood when somebody else's program reads your output.
     name: "deflate",
     summary:
-      "A gzip compressor built from its two ideas: LZ77, which replaces anything already seen with go back and copy, and Huffman coding, which spends fewer bits on the symbols that occur most. It writes real .gz files, picks the cheapest of the format's three block types so incompressible input never grows, and every test hands the file to Python's gzip, to zlib and to the gzip program, because a compressor checked by its own decompressor only proves the two share the same misunderstanding. It reads gzip files too, but for the same reason its decompressor is only ever tested on files zlib wrote, at every level, and on broken ones it must refuse. The same compressor writes PNGs, and turns a picture of 256 colours or fewer into a palette, which halves a chart.",
+      "A gzip compressor built from its two ideas: LZ77, which replaces anything already seen with a pointer back to the earlier copy, and Huffman coding, which spends fewer bits on the symbols that occur most. It writes real .gz files, picks the cheapest of the format's three block types so incompressible input never grows, and every test hands the file to Python's gzip, to zlib and to the gzip program, because a compressor checked by its own decompressor only proves the two share the same misunderstanding. It reads gzip files too, but for the same reason its decompressor is only ever tested on files zlib wrote, at every level, and on broken ones it must refuse. The same compressor writes PNGs, and turns a picture of 256 colours or fewer into a palette, which halves a chart.",
     stack: ["Python", "DEFLATE", "Huffman"],
     href: "https://github.com/HarianthK/deflate",
     hrefLabel: "View code",
@@ -170,7 +171,7 @@ export const PROJECTS: Project[] = [
     // Worth building only because the machine under it was already proven.
     name: "Nibble",
     summary:
-      "A small language that compiles to CHIP-8 machine code, written for the emulator below. Variables, arrays, constants, sprites, routines, loops, collisions, numbers and text: press compile and play it, with the real output shown as bytes under the screen and read back as Octo source beside them. Meteors, a dodging game with a score, three lives and a proper ending, comes to 418 of them, down from 504 as the compiler learned to flip a skip instead of jumping and to share one copy of what it repeats. Snake, Pong and Breakout followed once there were arrays, and Lights Out once there were bit operators; multiplication, which the machine lacks, is built from shifts and adds. Every program was recorded frame by frame before each change and matched exactly after.",
+      "A small language that compiles to CHIP-8 machine code, written for the CHIP-8 emulator in this list. Variables, arrays, constants, sprites, routines, loops, collisions, numbers and text: press compile and play it, with the real output shown as bytes under the screen and read back as Octo source beside them. Meteors, a dodging game with a score, three lives and a proper ending, comes to 418 of them, down from 504 as the compiler learned to flip a skip instead of jumping and to share one copy of what it repeats. Snake, Pong and Breakout followed once there were arrays, and Lights Out once there were bit operators; multiplication, which the machine lacks, is built from shifts and adds. Every program was recorded frame by frame before each change and matched exactly after.",
     stack: ["JavaScript", "Compilers", "Canvas"],
     href: "https://nibble-lang.vercel.app",
     hrefLabel: "Write a program",
@@ -184,7 +185,7 @@ export const PROJECTS: Project[] = [
     // The figure is the bug it was hiding, not the coverage. See DOCS.md.
     name: "CHIP-8",
     summary:
-      "A virtual machine from 1977, rebuilt from its instruction set and running in a browser, with both of the extensions people later built on it: SUPER-CHIP's larger screen and scrolling, and XO-CHIP's second colour plane, 64 KB of memory and waveform sound. Every program in the community archive runs, and because none of them record how they are played, the page works out which keys each one watches by playing it. It can also read any program back as Octo source, telling code from sprites by walking every path the machine could take; every listing compiles back to the identical bytes through Octo's own compiler. Hold Backspace and the game runs backwards, up to ten seconds, with every frame of every archive program checked to come back exactly. It is also the machine Nibble compiles for.",
+      "A virtual machine from 1977, rebuilt from its instruction set and running in a browser, with both of the extensions people later built on it: SUPER-CHIP's larger screen and scrolling, and XO-CHIP's second colour plane, 64 KB of memory and waveform sound. Because none of the archive's programs record how they are played, the page works out which keys each one watches by playing it. It can also read any program back as Octo source, telling code from sprites by walking every path the machine could take; every listing compiles back to the identical bytes through Octo's own compiler. Hold Backspace and the game runs backwards, up to ten seconds, with every frame of every archive program checked to come back exactly. It is also the machine Nibble compiles for.",
     stack: ["JavaScript", "Canvas", "Web Audio"],
     href: "https://harianthk.github.io/chip8/",
     hrefLabel: "Play it",
@@ -200,17 +201,27 @@ export const PROJECTS: Project[] = [
 // detail behind "More", so every claim stays on the page. See DOCS.md.
 const FEATURED = ["LangGraph Agentic Platform", "Retrace", "Upstream"]
 
-// The first sentence, up to a stop followed by a capital, so ".gz" and ".org" do not end it.
-function lead(summary: string) {
-  const m = summary.match(/^(.+?[.!?])\s+(?=[A-Z])/)
-  return m ? [m[1], summary.slice(m[0].length)] : [summary, ""]
+// Sentences end at a stop followed by a capital, so ".gz" and ".org" do not end one.
+function lead(summary: string, sentences = 1) {
+  let at = 0
+  for (let n = 0; n < sentences; n++) {
+    const m = summary.slice(at).match(/^(.+?[.!?])\s+(?=[A-Z])/)
+    if (!m) return [summary, ""]
+    at += m[0].length
+  }
+  return [summary.slice(0, at).trim(), summary.slice(at)]
 }
+
+// Labels are written to stand alone in capitals; after a number they read as a phrase.
+const inSentence = (label: string) => (/^[A-Z][a-z]/.test(label) ? label[0].toLowerCase() + label.slice(1) : label)
 
 function Featured({ project, i }: { project: Project; i: number }) {
   const hasFigure = Boolean(project.figure)
+  const [first, rest] = lead(project.summary, 2)
   // Alternate the figure's side so the eye keeps moving, but only when
   // there is one, or the text gets squeezed into an empty grid cell.
   const figureLeft = hasFigure && i % 2 === 1
+  const link = <ProjectLink project={project} />
   return (
     <article
       className={cn(
@@ -223,12 +234,17 @@ function Featured({ project, i }: { project: Project; i: number }) {
       )}
     >
       <div className={cn(figureLeft && "md:order-2")}>
-        <h3 className="font-serif text-3xl leading-tight text-foreground">{project.name}</h3>
-        <p className="mt-4 max-w-xl text-base leading-relaxed text-muted-foreground">
-          {project.summary}
-        </p>
+        <h4 className="font-serif text-3xl leading-tight text-foreground">{project.name}</h4>
+        <p className="mt-4 max-w-xl text-base leading-relaxed text-muted-foreground">{first}</p>
         <Stack items={project.stack} />
-        <ProjectLink project={project} className="mt-5" />
+        {rest ? (
+          <ReadMore
+            link={link}
+            more={<p className="max-w-xl text-base leading-relaxed text-muted-foreground">{rest}</p>}
+          />
+        ) : (
+          <div className="mt-2">{link}</div>
+        )}
       </div>
       {project.figure && (
         <div className={cn(figureLeft && "md:order-1")}>
@@ -243,40 +259,33 @@ function Compact({ project }: { project: Project }) {
   const [first, rest] = lead(project.summary)
   return (
     <article className="border-t border-border pt-6">
-      <h3 className="font-mono text-xl text-foreground">{project.name}</h3>
+      <h4 className="font-mono text-xl text-foreground">{project.name}</h4>
       {project.figure && (
         <p className="mt-3 font-mono text-sm text-primary">
           {project.figure.value}{" "}
-          <span className="text-xs uppercase tracking-[0.15em] text-foreground/80">
-            {project.figure.label}
-          </span>
+          <span className="text-foreground/80">{inSentence(project.figure.label)}</span>
         </p>
       )}
       <p className="mt-3 text-base leading-relaxed text-muted-foreground">{first}</p>
-      {(rest || project.figure) && (
-        <details className="group mt-2">
-          <summary className="inline-flex min-h-11 cursor-pointer list-none items-center font-mono text-xs text-muted-foreground transition-colors hover:text-foreground [&::-webkit-details-marker]:hidden">
-            <span className="group-open:hidden">More +</span>
-            <span className="hidden group-open:inline">Less −</span>
-          </summary>
-          {rest && <p className="text-base leading-relaxed text-muted-foreground">{rest}</p>}
-          {project.figure && (
-            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-              <span className="font-mono text-primary">{project.figure.value}</span>{" "}
-              {project.figure.context}
-            </p>
-          )}
-        </details>
-      )}
       <Stack items={project.stack} />
-      <ProjectLink project={project} className="mt-3" />
+      <ReadMore
+        link={<ProjectLink project={project} />}
+        more={
+          <>
+            {rest && <p className="text-base leading-relaxed text-muted-foreground">{rest}</p>}
+            {project.figure && (
+              <p className="text-sm leading-relaxed text-muted-foreground">{project.figure.context}</p>
+            )}
+          </>
+        }
+      />
     </article>
   )
 }
 
 function Stack({ items }: { items: string[] }) {
   return (
-    <ul className="mt-5 flex flex-wrap gap-x-4 gap-y-2">
+    <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-2">
       {items.map((item) => (
         <li key={item} className="font-mono text-xs text-muted-foreground">
           {item}
@@ -317,16 +326,19 @@ export function BuiltSection() {
           Outside the day job
         </h2>
 
-        <div className="mt-16 space-y-20">
+        <h3 className="mt-16 font-mono text-xs uppercase tracking-[0.25em] text-primary">
+          AI and LLM work
+        </h3>
+        <div className="mt-6 space-y-20">
           {featured.map((project, i) => (
             <Featured key={project.name} project={project} i={i} />
           ))}
         </div>
 
-        <h3 className="mt-28 font-serif text-3xl leading-tight text-foreground md:text-4xl">
-          More projects
+        <h3 className="mt-28 font-mono text-xs uppercase tracking-[0.25em] text-primary">
+          Systems, apps and experiments
         </h3>
-        <div className="mt-12 grid gap-x-14 gap-y-12 md:grid-cols-2">
+        <div className="mt-6 grid gap-x-14 gap-y-12 md:grid-cols-2">
           {rest.map((project) => (
             <Compact key={project.name} project={project} />
           ))}

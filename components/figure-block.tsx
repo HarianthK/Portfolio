@@ -19,7 +19,7 @@ export function FigureBlock({
   return (
     <div className="pt-1 md:border-t md:border-primary/25 md:pt-4">
       <p className="font-mono text-4xl leading-none text-primary md:text-5xl">{value}</p>
-      <p className="mt-3 font-mono text-[0.7rem] uppercase tracking-[0.2em] text-foreground/80">
+      <p className="mt-3 font-mono text-xs uppercase tracking-[0.2em] text-foreground/80">
         {label}
       </p>
       {context && (

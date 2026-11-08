@@ -1,8 +1,8 @@
 export const LINKS = [
-  { label: "hkalaval@asu.edu", href: "mailto:hkalaval@asu.edu", primary: true },
+  { label: "Résumé", href: "/resume.pdf", external: true, primary: true },
+  { label: "hkalaval@asu.edu", href: "mailto:hkalaval@asu.edu" },
   { label: "GitHub", href: "https://github.com/HarianthK", external: true },
   { label: "LinkedIn", href: "https://www.linkedin.com/in/harianthk/", external: true },
-  { label: "Résumé", href: "/resume.pdf", external: true },
 ]
 
 /**
@@ -35,7 +35,7 @@ export function ContactSection() {
                 <a
                   href={link.href}
                   {...(link.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-                  className={`inline-block border-b pb-1 font-mono text-sm transition-colors ${
+                  className={`inline-flex min-h-11 items-center border-b font-mono text-sm transition-colors ${
                     link.primary
                       ? "border-primary/40 text-primary hover:border-primary"
                       : "border-border text-muted-foreground hover:text-foreground"

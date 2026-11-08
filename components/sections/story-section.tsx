@@ -11,7 +11,7 @@ export function StorySection() {
   return (
     <section id="story" className="relative px-6 py-32 md:px-14 md:py-44">
       <h2 className="sr-only">Why</h2>
-      <div className="mx-auto grid max-w-6xl gap-y-12 lg:grid-cols-[minmax(0,10rem)_minmax(0,38rem)_minmax(0,1fr)] lg:gap-x-16">
+      <div className="mx-auto grid max-w-6xl gap-y-12 lg:grid-cols-[minmax(0,10rem)_minmax(0,38rem)] lg:gap-x-16 xl:grid-cols-[minmax(0,10rem)_minmax(0,38rem)_minmax(0,1fr)]">
         {/* Left margin — the year, as a date stamp on the whole section. */}
         <div className="lg:pt-3">
           <p className="font-mono text-xs uppercase tracking-[0.3em] text-primary">
@@ -40,14 +40,14 @@ export function StorySection() {
             </p>
             <p>
               That instinct turned out to be most of the job: asking what a system is actually
-              being asked for, rather than what it was originally designed to answer.
+              being asked for, rather than what it was originally designed to answer. The model is rarely the hard part.
             </p>
           </div>
         </div>
 
         {/* Right margin — the sentence the section exists to land, lifted out
             of the body so it can be read on its own. */}
-        <div className="lg:pt-24">
+        <div className="lg:col-start-2 xl:col-start-auto xl:pt-24">
           <p className="border-l border-primary/30 pl-6 font-serif text-2xl leading-snug text-foreground/90 lg:text-[1.75rem]">
             The useful part is rarely the model.
           </p>

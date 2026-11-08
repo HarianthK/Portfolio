@@ -5,6 +5,7 @@ import { Analytics } from "@vercel/analytics/next"
 import { siteUrl } from "@/lib/site"
 import { ScrollProgress } from "@/components/scroll-progress"
 import { ThemeProvider } from "@/components/theme-provider"
+import { CornerResume } from "@/components/corner-resume"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { LookPicker } from "@/components/look-picker"
 import { lookBootScript } from "@/lib/looks"
@@ -79,14 +80,7 @@ export default function RootLayout({
           {/* The nav bar is gone with the single-page layout, so the theme
               control lives on its own in the corner. */}
           <header className="fixed right-4 top-4 z-50 flex items-center rounded-full border border-border/60 bg-background/80 p-0.5 backdrop-blur">
-            <a
-              href="/resume.pdf"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hidden min-h-11 items-center px-3 font-mono text-xs uppercase tracking-[0.2em] sm:inline-flex text-muted-foreground transition-colors hover:text-foreground"
-            >
-              Résumé
-            </a>
+            <CornerResume />
             <LookPicker />
             <ThemeToggle />
           </header>

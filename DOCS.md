@@ -34,6 +34,13 @@ was happening.
 
 **Nibble** shows the byte count, because a compiler's output is the point.
 
+**Retrace** showed the four file shapes it reads until 2026-11-08. A second
+review called it the weakest number on the strongest AI project, and it was:
+the fact a hiring engineer cares about is that the fixes behind it went into
+the projects that write these traces. It now shows 4 of 6 instrumentor fixes
+merged, one each into OpenInference, OpenLLMetry, OpenLIT and Opik, dated so
+the number cannot quietly go wrong.
+
 Counts written into sentences go stale without anyone noticing. The archive
 gained a program in September and the CHIP-8 entry had been claiming a total, so
 the entries now avoid totals that the world can change underneath them.
@@ -65,6 +72,13 @@ page and still has to survive a click. The first sentence is found by a stop
 followed by a capital letter, which keeps ".gz" and ".org" from ending it.
 The names in the list are set in mono, so "deflate" and "ember" read as the
 repository names they are rather than as typos.
+
+The second review found the featured entries were now the hardest part to
+read, so they show their first two sentences and the rest sits behind "Read
+more", the same control the compact cards use. It is a real button on the row
+with the link, and the hidden text stays in the page, so search engines and
+screen readers still have every claim. The two groups are labelled "AI and LLM
+work" and "Systems, apps and experiments".
 
 Every section now shares one width, max-w-6xl. They had three, and the section
 labels stepped in and out as you scrolled.
