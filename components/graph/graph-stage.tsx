@@ -120,7 +120,7 @@ export function GraphStage({
       {fallback && (
         <div
           aria-hidden
-          className={`pointer-events-none absolute inset-0 transition-opacity duration-500 ${fallbackClass}`}
+          className={`pointer-events-none absolute inset-0 transition-opacity duration-500 motion-reduce:transition-none ${fallbackClass}`}
         >
           {fallback}
         </div>

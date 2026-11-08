@@ -28,7 +28,7 @@ function Dot({ family, palette }: { family: Family; palette: GraphPalette }) {
 
 /**
  * The graph as a tool rather than wallpaper. Full-bleed, dark, and the only
- * place on the page where it's interactive — which is what lets every other
+ * place on the page where it's interactive, which is what lets every other
  * section be plain readable text.
  */
 export function ExplorerSection({ fallback }: { fallback?: ReactNode }) {
@@ -37,7 +37,7 @@ export function ExplorerSection({ fallback }: { fallback?: ReactNode }) {
   const [isTouch, setIsTouch] = useState(false)
 
   // Hover doesn't exist on touch, so the instructions shouldn't claim it does.
-  // Checks pointer coarseness as well as hover — some devices report one but
+  // Checks pointer coarseness as well as hover, some devices report one but
   // not the other, and a narrow desktop window still has a mouse.
   useEffect(() => {
     setIsTouch(window.matchMedia("(hover: none), (pointer: coarse)").matches)
@@ -94,7 +94,7 @@ export function ExplorerSection({ fallback }: { fallback?: ReactNode }) {
           highlight={FILTERS[active].kinds}
           framing="comfortable"
           fallback={fallback}
-          className="relative h-[70vh] min-h-[26rem] overflow-hidden rounded-xl border border-border bg-muted/20"
+          className="relative h-[min(60vh,115vw)] min-h-[22rem] overflow-hidden md:h-[70vh] md:min-h-[26rem] rounded-xl border border-border bg-muted/20"
         />
       </div>
     </section>

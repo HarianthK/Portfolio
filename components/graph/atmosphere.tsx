@@ -13,7 +13,7 @@ import * as THREE from "three"
  * separates "a diagram on a dark background" from "an object photographed in a
  * room".
  *
- * Drawn as a single `Points` object — one draw call for the whole field, which
+ * Drawn as a single `Points` object, one draw call for the whole field, which
  * is why this costs almost nothing next to the nodes themselves.
  */
 export function Atmosphere({
@@ -117,7 +117,7 @@ export function Atmosphere({
   })
 
   return (
-    // Dust must never intercept the pointer — the nodes underneath it are the
+    // Dust must never intercept the pointer, the nodes underneath it are the
     // only thing meant to be hoverable.
     <points ref={pointsRef} geometry={geometry} material={material} raycast={() => {}} />
   )
