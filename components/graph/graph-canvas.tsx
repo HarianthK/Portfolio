@@ -33,19 +33,22 @@ export type GraphFraming = "immersive" | "comfortable"
 
 /** The graph is always centred on the origin, so that's where the lens focuses. */
 const FOCUS_TARGET = new THREE.Vector3(0, 0, 0)
+// How much of the explorer box the outermost nodes reach: 8% to spare on each side.
+const FILL = 0.84
+const ndc = new THREE.Vector3()
 
 /*
   The opening move.
 
   The page used to fade a finished graph in and leave it turning, which is
-  atmosphere without an event — nothing to actually watch. Instead the camera
+  atmosphere without an event, nothing to actually watch. Instead the camera
   starts inside the cloud, close enough that a couple of nodes fill the frame,
   and retreats until the whole structure resolves around it. The nodes are
   igniting family by family while that happens, so the reveal and the assembly
   land together.
 
   Long enough to read as a camera move rather than a zoom, short enough that
-  nobody is kept waiting to use the page — and it can be interrupted at any
+  nobody is kept waiting to use the page, and it can be interrupted at any
   point by touching the graph.
 */
 const INTRO_DURATION = 3.1
@@ -63,7 +66,7 @@ type Props = {
   framing?: GraphFraming
   onNodeFocus?: (node: GraphNode | null) => void
   onNodeSelect?: (node: GraphNode) => void
-  /** Stops the render loop entirely — used while the stage is off screen. */
+  /** Stops the render loop entirely, used while the stage is off screen. */
   paused?: boolean
   /** A node tapped or clicked open, which keeps its label up. */
   pinnedId?: string | null
@@ -93,6 +96,7 @@ function Scene({
   onNodeSelect,
   pinnedId = null,
   labelLayer,
+  onReady,
 }: Props & { labelLayer: RefObject<HTMLDivElement | null> }) {
   const graphRef = useRef<GraphHandle | undefined>(undefined)
   const groupRef = useRef<THREE.Group>(null)
@@ -100,7 +104,7 @@ function Scene({
   const { gl, camera, size } = useThree()
 
   // Once the visitor grabs the graph they own the camera, until the highlight
-  // or the scrolled-to section changes — otherwise auto-framing would fight
+  // or the scrolled-to section changes, otherwise auto-framing would fight
   // their dragging.
   const userControlled = useRef(false)
   useEffect(() => {
@@ -108,7 +112,7 @@ function Scene({
   }, [highlight, focus])
 
   // r3f-forcegraph mutates the objects it's given (it writes x/y/z onto each
-  // node), so it gets copies — otherwise the module-level data in graph-data.ts
+  // node), so it gets copies, otherwise the module-level data in graph-data.ts
   // would accumulate simulation state across remounts.
   const graphData = useMemo(
     () => ({
@@ -175,11 +179,14 @@ function Scene({
   // Drives the assemble-on-arrival animation. Reduced motion skips it whole.
   const entranceElapsed = useRef(0)
   const entranceDone = useRef(false)
-  const entrancePlayed = useRef(false)
+  // The explorer crossfades from its still picture, so it arrives assembled.
+  const entrancePlayed = useRef(framing === "comfortable")
+  const readySent = useRef(false)
+  const framedOnce = useRef(false)
 
   /*
-    The opening camera move. Only the hero performs it — and only once, so that
-    scrolling back up to the top doesn't replay it every time — and reduced
+    The opening camera move. Only the hero performs it, and only once, so that
+    scrolling back up to the top doesn't replay it every time, and reduced
     motion skips it entirely, landing straight on the framed view.
   */
   const intro = useRef(0)
@@ -188,7 +195,7 @@ function Scene({
   /*
     Switching theme throws away every node object and builds new ones, because
     the colours and the label textures are baked in at construction. Those new
-    objects are born at zero scale, waiting for the entrance to grow them — and
+    objects are born at zero scale, waiting for the entrance to grow them, and
     the entrance had already run and marked itself finished, so nothing ever
     did. Every node vanished and only the edges were left.
 
@@ -212,13 +219,13 @@ function Scene({
   */
   const [linksIn, setLinksIn] = useState(false)
   useEffect(() => {
-    if (prefersReducedMotion) {
+    if (prefersReducedMotion || framing === "comfortable") {
       setLinksIn(true)
       return
     }
     const timer = setTimeout(() => setLinksIn(true), (ENTRANCE_TOTAL - 0.3) * 1000)
     return () => clearTimeout(timer)
-  }, [prefersReducedMotion])
+  }, [prefersReducedMotion, framing])
 
   // The hero names only a few nodes; the explorer names the structure, or every lit node under a filter.
   const labelRank = useCallback(
@@ -239,13 +246,30 @@ function Scene({
     // Fog scales with the camera's distance, so a wider framing doesn't wash the whole graph out.
     if (scene.fog instanceof THREE.FogExp2) scene.fog.density = 0.44 / Math.max(camera.position.length(), 1)
     camera.updateMatrixWorld()
-    placeLabels(labels.current, objects, camera as THREE.PerspectiveCamera, size.width, size.height, labelRank)
+    const edge = framing === "comfortable" ? 8 : 4
+    placeLabels(labels.current, objects, camera as THREE.PerspectiveCamera, size.width, size.height, labelRank, edge)
+    // Ready once there is a graph on screen, not when the context is made, so the still fades into it.
+    if (!readySent.current && objects.size > 0 && (entranceDone.current || framing === "immersive")) {
+      readySent.current = true
+      onReady?.()
+    }
   })
+
+  // The widest node on screen, in clip space, with the camera as it stands.
+  const extent = (list: THREE.Object3D[]) => {
+    camera.updateMatrixWorld()
+    let e = 0.01
+    for (const object of list) {
+      object.getWorldPosition(ndc).project(camera)
+      e = Math.max(e, Math.abs(ndc.x), Math.abs(ndc.y))
+    }
+    return e
+  }
 
   function advance(delta: number) {
     graphRef.current?.tickFrame()
 
-    // Frame-rate independent easing — same feel on a 60Hz and 144Hz display.
+    // Frame-rate independent easing, same feel on a 60Hz and 144Hz display.
     const ease = 1 - Math.exp(-5.5 * delta)
 
     if (!entranceDone.current) {
@@ -263,7 +287,7 @@ function Scene({
     if (!group || objects.size === 0) return
 
     /*
-      What the camera frames. Without a scroll focus this is the whole graph —
+      What the camera frames. Without a scroll focus this is the whole graph , 
       filter chips dim nodes rather than removing them, so re-fitting to the lit
       ones would make the camera lurch on every chip press.
 
@@ -293,7 +317,7 @@ function Scene({
 
     /*
       Lean the whole graph a few degrees towards the pointer. It's a small
-      angle on purpose — enough that the scene feels like it's aware of you and
+      angle on purpose, enough that the scene feels like it's aware of you and
       has volume, not so much that it fights the orbit controls or makes people
       seasick. Heavily damped, so a fast mouse doesn't whip it around.
     */
@@ -320,7 +344,18 @@ function Scene({
     const hFov = 2 * Math.atan(Math.tan(vFov / 2) * (size.width / size.height))
     // The hero fits its own column; the explorer zooms in a little to fill its box.
     const margin = framing === "immersive" ? 1.35 : 0.86
-    const desired = (radius / Math.tan(Math.min(vFov, hFov) / 2)) * margin
+    let desired = (radius / Math.tan(Math.min(vFov, hFov) / 2)) * margin
+    if (framing === "comfortable" && !focus) {
+      // Fit what is actually on screen, so the box is filled at any angle and nothing runs off it.
+      if (!framedOnce.current) {
+        framedOnce.current = true
+        group.position.copy(centre).negate()
+        camera.position.setLength(desired)
+        for (let i = 0; i < 4; i++) camera.position.setLength(camera.position.length() * (extent(framed) / FILL))
+        return
+      }
+      desired = camera.position.length() * (extent(framed) / FILL)
+    }
 
     /*
       The opening pull-back, on the hero only. The explorer is somewhere people
@@ -348,14 +383,14 @@ function Scene({
       return
     }
 
-    // Only the distance is touched, never the direction — that leaves
+    // Only the distance is touched, never the direction, that leaves
     // OrbitControls' rotation and auto-rotate free to do their own thing.
     camera.position.setLength(THREE.MathUtils.damp(camera.position.length(), desired, 4.5, delta))
   }
 
   /**
    * Hit testing is done here rather than through the graph library's hover
-   * callback, which reported entering a node but never leaving one — so the
+   * callback, which reported entering a node but never leaving one, so the
    * first node touched stayed described in the corner regardless of where the
    * cursor went afterwards.
    *
@@ -455,7 +490,7 @@ function Scene({
           linkOpacity={linksIn ? (theme === "light" ? 0.3 : 0.22) : 0}
           linkWidth={0.4}
           // Particles travelling the edges read as data moving through the
-          // graph — the thing these systems actually do. Held back with the
+          // graph, the thing these systems actually do. Held back with the
           // edges they travel along.
           linkDirectionalParticles={prefersReducedMotion || !linksIn ? 0 : 2}
           linkDirectionalParticleWidth={1.1}
@@ -477,7 +512,7 @@ function Scene({
         minDistance={80}
         maxDistance={1400}
         /* Slower than it was, and no longer the only movement in the scene.
-           A constant even spin is the least cinematic move there is — it reads
+           A constant even spin is the least cinematic move there is, it reads
            as a screensaver. Most of the motion now comes from the parallax
            below, which responds to the viewer instead of ignoring them. */
         autoRotate={!prefersReducedMotion}
@@ -489,7 +524,7 @@ function Scene({
 
       {/* Atmosphere is part of the same argument as the rim light: something
           has to sit between the eye and the subject for the scene to have
-          depth. Dark only — on paper, floating motes are just specks. */}
+          depth. Dark only, on paper, floating motes are just specks. */}
       {theme === "dark" && !prefersReducedMotion && <Atmosphere color={palette.role} />}
 
       {/* The filmic pass, and dark-theme only for the same reason bloom is:
@@ -497,13 +532,13 @@ function Scene({
           pale background there is nothing brighter than the page to add.
 
           Order matters. Depth of field runs first so bloom spreads from an
-          already-blurred image — the other way round, bloom haloes the sharp
+          already-blurred image, the other way round, bloom haloes the sharp
           edges and the blur then smears the haloes. */}
       {!prefersReducedMotion && theme === "dark" && (
         <EffectComposer>
           {/*
-            Focus is pinned to the graph's centre — which is the origin, since
-            the group is positioned to put it there and the controls orbit it —
+            Focus is pinned to the graph's centre, which is the origin, since
+            the group is positioned to put it there and the controls orbit it , 
             rather than a hand-tuned distance. A fixed `focusDistance` is in
             normalised units against the far plane, and at far=4000 the value
             that looked right on paper put the focal plane roughly 250 units in
@@ -533,7 +568,7 @@ export default function GraphCanvas({ paused = false, onReady, ...props }: Props
   /*
     Render at the display's own resolution. This was capped at 1.75 to protect
     the frame rate, which on a retina screen meant drawing 23% fewer pixels than
-    the panel had — the graph was being magnified, and it read as blurry.
+    the panel had, the graph was being magnified, and it read as blurry.
 
     Multisampling is dropped in exchange on those screens. At two device pixels
     per CSS pixel the geometry edges are already sampled finely enough that MSAA
@@ -555,7 +590,7 @@ export default function GraphCanvas({ paused = false, onReady, ...props }: Props
     return () => document.removeEventListener("visibilitychange", handleVisibility)
   }, [])
 
-  // The page mounts two of these — the hero and the explorer. Left running,
+  // The page mounts two of these, the hero and the explorer. Left running,
   // both drive a full render loop with a bloom pass whether or not they're on
   // screen, which measured at 15fps. Only the visible one should be drawing.
   const running = tabVisible && !paused
@@ -571,13 +606,12 @@ export default function GraphCanvas({ paused = false, onReady, ...props }: Props
         near: 1,
         far: 4000,
       }}
-      onCreated={() => onReady?.()}
       gl={{ antialias, powerPreference: "high-performance" }}
       dpr={dpr}
       frameloop={running ? "always" : "never"}
       style={{ position: "absolute", inset: 0 }}
     >
-      <Scene {...props} labelLayer={labelLayer} />
+      <Scene {...props} labelLayer={labelLayer} onReady={onReady} />
     </Canvas>
     <div ref={labelLayer} className="pointer-events-none absolute inset-0 overflow-hidden" />
     </>

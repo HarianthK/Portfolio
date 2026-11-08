@@ -14,7 +14,7 @@ export function PortfolioPage() {
       <HeroSection />
       <StorySection />
       <NowSection />
-      <ExplorerSection fallback={<StaticGraph caption="Loading the graph" />} />
+      <ExplorerSection fallback={<StaticGraph labels caption="Loading the graph" />} />
       <BuiltSection />
       <FoundationsSection />
       <ContactSection />

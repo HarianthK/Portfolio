@@ -9,9 +9,15 @@ export type Label = {
   shown: boolean
   side: Side
   radius: number
+  self: boolean
 }
 
-const HALO = "0 0 2px var(--background), 0 0 4px var(--background), 0 0 8px var(--background)"
+// A backing chip rather than a text halo, so an edge never strikes through a name.
+export const CHIP = {
+  background: "color-mix(in oklab, var(--background) 72%, transparent)",
+  padding: "1px 5px",
+  borderRadius: "4px",
+}
 
 export function makeLabels(layer: HTMLElement, nodes: GraphNode[]): Map<string, Label> {
   const labels = new Map<string, Label>()
@@ -28,12 +34,12 @@ export function makeLabels(layer: HTMLElement, nodes: GraphNode[]): Map<string, 
       fontWeight: "600",
       lineHeight: "1.2",
       color: "var(--foreground)",
-      textShadow: HALO,
+      ...CHIP,
       opacity: "0",
       willChange: "transform",
     })
     layer.appendChild(el)
-    labels.set(node.id, { el, w: 0, h: 0, shown: false, side: "below", radius: NODE_SIZE[node.kind] })
+    labels.set(node.id, { el, w: 0, h: 0, shown: false, side: "below", radius: NODE_SIZE[node.kind], self: node.kind === "self" })
   }
   measureLabels(labels)
   return labels
@@ -50,7 +56,7 @@ const v = new THREE.Vector3()
 const world = new THREE.Vector3()
 
 export type Box = { x: number; y: number; w: number; h: number }
-type Side = "below" | "above" | "right" | "left"
+export type Side = "below" | "above" | "right" | "left"
 const SIDES: Side[] = ["below", "above", "right", "left"]
 export const overlaps = (a: Box, b: Box, pad = 0) =>
   a.x < b.x + b.w + pad && a.x + a.w + pad > b.x && a.y < b.y + b.h + pad && a.y + a.h + pad > b.y
@@ -60,12 +66,12 @@ export function findSpot(
   w: number,
   h: number,
   node: { cx: number; cy: number; r: number },
-  frame: { width: number; height: number; gap: number; edge: number },
+  frame: { width: number; height: number; gap: number; edge: number; slack?: number },
   blocked: (box: Box) => boolean,
   prefer: Side = "below",
 ): { box: Box; side: Side } | null {
   const { cx, cy, r } = node
-  const { gap, edge } = frame
+  const { gap, edge, slack = Infinity } = frame
   for (const side of [prefer, ...SIDES.filter((s) => s !== prefer)]) {
     const x = side === "right" ? cx + r + gap : side === "left" ? cx - r - gap - w : cx - w / 2
     const y = side === "below" ? cy + r + gap : side === "above" ? cy - r - gap - h : cy - h / 2
@@ -75,15 +81,51 @@ export function findSpot(
       w,
       h,
     }
+    // Pushed far back inside the frame, a label stops reading as its node's.
+    if (Math.abs(box.x - x) + Math.abs(box.y - y) > slack) continue
     if (!blocked(box)) return { box, side }
   }
   return null
 }
 
-/**
- * Most important first, each label tries below, above, right and left of its node and takes the first
- * spot clear of every node and every label already placed; if none is clear it hides. null rank = no label.
- */
+/** The owner's name: the nearest clear, unambiguous spot, else the nearest that does least harm. */
+export function findSelfSpot(
+  w: number,
+  h: number,
+  node: { cx: number; cy: number; r: number },
+  frame: { width: number; height: number; gap: number; edge: number },
+  blockedByLabel: (box: Box) => boolean,
+  nodes: Box[],
+  ambiguous: (box: Box) => boolean,
+): { box: Box; side: Side } {
+  const { cx, cy, r } = node
+  const { gap, edge } = frame
+  let best: { box: Box; side: Side; hits: number } | null = null
+  for (const k of [1, 1.5, 2, 3, 4, 6]) {
+    for (let i = 0; i < 16; i++) {
+      // Below first, then sweeping both ways round to above.
+      const a = Math.PI / 2 + (i % 2 ? 1 : -1) * Math.ceil(i / 2) * (Math.PI / 8)
+      const dx = Math.cos(a)
+      const dy = Math.sin(a)
+      const x = cx + dx * (r + gap * k + w / 2) - w / 2
+      const y = cy + dy * (r + gap * k + h / 2) - h / 2
+      const box = {
+        x: Math.min(Math.max(x, edge), frame.width - w - edge),
+        y: Math.min(Math.max(y, edge), frame.height - h - edge),
+        w,
+        h,
+      }
+      const side: Side = dy > 0.7 ? "below" : dy < -0.7 ? "above" : dx > 0 ? "right" : "left"
+      const hits =
+        nodes.filter((n) => overlaps(box, n)).length + (blockedByLabel(box) ? 0.5 : 0) + (ambiguous(box) ? 3 : 0)
+      if (hits === 0) return { box, side }
+      if (!best || hits < best.hits) best = { box, side, hits }
+    }
+  }
+  return best!
+}
+
+// Most important first; each label takes the first side clear of nodes and placed labels, else hides.
 export function placeLabels(
   labels: Map<string, Label>,
   objects: Map<string, THREE.Object3D>,
@@ -91,6 +133,7 @@ export function placeLabels(
   width: number,
   height: number,
   rank: (id: string) => number | null,
+  edge = 4,
 ) {
   const tanHalf = Math.tan((camera.fov * Math.PI) / 360)
   const discs = new Map<string, { cx: number; cy: number; r: number; depth: number }>()
@@ -118,22 +161,34 @@ export function placeLabels(
   })
   wanted.sort((a, b) => a.rank - b.rank || a.depth - b.depth)
 
-  // Tool dots are small enough to sit under a label's halo; everything bigger is kept clear.
-  const nodeBoxes = [...discs]
-    .filter(([id]) => (labels.get(id)?.radius ?? 0) > NODE_SIZE.tech)
-    .map(([, d]) => ({ x: d.cx - d.r, y: d.cy - d.r, w: d.r * 2, h: d.r * 2 }))
+  // Tool dots are small enough to sit under a label's chip; everything bigger is kept clear.
+  const big = [...discs].filter(([id]) => (labels.get(id)?.radius ?? 0) > NODE_SIZE.tech)
+  const nodeBoxes = big.map(([, d]) => ({ x: d.cx - d.r, y: d.cy - d.r, w: d.r * 2, h: d.r * 2 }))
+  // Nodes a label could be mistaken for: every big one, and any dot that is itself labelled.
+  const rivals = new Map(big)
+  wanted.forEach(({ id }) => rivals.set(id, discs.get(id)!))
+  // The owner's label keeps a little more room from nodes than the rest.
+  const padded = nodeBoxes.map((n) => ({ x: n.x - 3, y: n.y - 3, w: n.w + 6, h: n.h + 6 }))
   const placed: Box[] = []
-  const frame = { width, height, gap: 3, edge: 4 }
+  const frame = { width, height, gap: 3, edge, slack: 12 }
   for (const { id, label, rank: r } of wanted) {
     const disc = discs.get(id)!
     // Newcomers need a little extra room, and a shown label keeps its side, so nothing flickers.
     const pad = label.shown ? 1 : 6
+    const byLabel = (box: Box) => placed.some((p) => overlaps(box, p, pad))
     // Its own node counts too: a label pushed back inside the frame can land on it.
-    const blocked = (box: Box) =>
-      placed.some((p) => overlaps(box, p, pad)) || nodeBoxes.some((n) => overlaps(box, n))
-    let spot = findSpot(label.w, label.h, disc, frame, blocked, label.shown ? label.side : "below")
-    // The root and whatever is under the pointer always get a label.
-    if (!spot && r <= 0) spot = findSpot(label.w, label.h, disc, frame, () => false)
+    const byNode = (box: Box) => nodeBoxes.some((n) => overlaps(box, n))
+    // A label nearer another node than its own reads as that node's, so it is skipped.
+    const ambiguous = (box: Box) => {
+      const own = edgeGap(box, disc)
+      for (const [other, d] of rivals) if (other !== id && edgeGap(box, d) < own) return true
+      return false
+    }
+    let spot = label.self
+      ? findSelfSpot(label.w, label.h, disc, frame, byLabel, padded, ambiguous)
+      : findSpot(label.w, label.h, disc, frame, (b) => byLabel(b) || byNode(b) || ambiguous(b), label.shown ? label.side : "below")
+    // Whatever is under the pointer always gets a label.
+    if (!spot && r <= 0) spot = findSpot(label.w, label.h, disc, { ...frame, slack: Infinity }, () => false)
     if (!spot) {
       hide(label)
       continue
@@ -153,4 +208,11 @@ function hide(label: Label) {
   if (!label.shown) return
   label.shown = false
   label.el.style.opacity = "0"
+}
+
+/** Distance from a node's rim to the nearest point of a box. */
+export function edgeGap(box: Box, d: { cx: number; cy: number; r: number }) {
+  const dx = Math.max(box.x - d.cx, 0, d.cx - box.x - box.w)
+  const dy = Math.max(box.y - d.cy, 0, d.cy - box.y - box.h)
+  return Math.hypot(dx, dy) - d.r
 }
