@@ -1,5 +1,5 @@
 import { forceCollide, forceLink, forceManyBody, forceSimulation, forceX, forceY } from "d3-force-3d"
-import { findSpot, overlaps, type Box } from "@/components/graph/graph-labels"
+import { CHIP, findSpot, overlaps, type Box, type Side } from "@/components/graph/graph-labels"
 import { HERO_LABELS, NODE_FAMILY, NODE_SIZE, links, nodes, type NodeKind } from "@/lib/graph-data"
 
 // The same graph laid out once on the server, for phones and as the loading picture. See DOCS.md.
@@ -38,30 +38,26 @@ const layout = (() => {
   const byId = new Map(points.map((p) => [p.id, p]))
   const segments = links.map((l) => [byId.get(l.source)!, byId.get(l.target)!])
 
-  // ponytail: label widths guessed from a 12px mono advance on a phone-width box; good enough for nine names.
-  const scale = 360 / w
+  // ponytail: label widths guessed from a 12px mono advance on the phone box (300 to 360px wide); good enough for nine names.
+  const scale = 330 / w
   const nodeBoxes = points.filter((p) => p.kind !== "tech").map((p) => {
     const r = NODE_SIZE[p.kind]
     return { x: p.x - r, y: p.y - r, w: r * 2, h: r * 2 }
   })
   const placed: Box[] = []
-  const labelled: { point: Point; box: Box }[] = []
-  for (const point of points.filter((p) => HERO_LABELS.has(p.id))) {
+  const labelled: { point: Point; box: Box; side: Side }[] = []
+  // The root sits in the densest spot, where its name would cover a node; the name is right below anyway.
+  for (const point of points.filter((p) => HERO_LABELS.has(p.id) && p.kind !== "self")) {
     const node = { cx: point.x, cy: point.y, r: NODE_SIZE[point.kind] }
-    const w0 = (point.label.length * 7.3 + 6) / scale
+    const w0 = (point.label.length * 7.3 + 10) / scale
     const h0 = 17 / scale
     const frame = { width: w, height: h, gap: 3 / scale, edge: 2 }
-    const spot = findSpot(
-      w0,
-      h0,
-      node,
-      frame,
-      (box) => placed.some((q) => overlaps(box, q, 4 / scale)) || nodeBoxes.some((n) => overlaps(box, n)),
-    )
-    const final = spot ?? (point.kind === "self" ? findSpot(w0, h0, node, frame, () => false) : null)
-    if (!final) continue
-    placed.push(final.box)
-    labelled.push({ point, box: final.box })
+    const byLabel = (box: Box) => placed.some((q) => overlaps(box, q, 4 / scale))
+    const byNode = (box: Box) => nodeBoxes.some((n) => overlaps(box, n))
+    const spot = findSpot(w0, h0, node, frame, (box) => byLabel(box) || byNode(box))
+    if (!spot) continue
+    placed.push(spot.box)
+    labelled.push({ point, ...spot })
   }
   return { points, segments, labelled, w, h }
 })()
@@ -96,16 +92,11 @@ export function StaticGraph({ labels = false, caption }: { labels?: boolean; cap
           ))}
         </svg>
         {labels &&
-          labelled.map(({ point: p, box }) => (
+          labelled.map(({ point: p, box, side }) => (
             <span
               key={p.id}
               className="absolute whitespace-nowrap font-mono font-semibold leading-tight text-foreground"
-              style={{
-                left: `${((box.x / w) * 100).toFixed(2)}%`,
-                top: `${((box.y / h) * 100).toFixed(2)}%`,
-                fontSize: 12,
-                textShadow: "0 0 2px var(--background), 0 0 4px var(--background), 0 0 8px var(--background)",
-              }}
+              style={{ ...anchor(box, side, w, h), fontSize: 12, ...CHIP }}
             >
               {p.label}
             </span>
@@ -118,4 +109,16 @@ export function StaticGraph({ labels = false, caption }: { labels?: boolean; cap
       )}
     </div>
   )
+}
+
+const pct = (n: number) => `${(n * 100).toFixed(2)}%`
+
+// Anchored from the edge facing the node, so the gap to it holds as the box grows past the layout width.
+function anchor(box: Box, side: Side, w: number, h: number) {
+  const cx = (box.x + box.w / 2) / w
+  const cy = (box.y + box.h / 2) / h
+  if (side === "left") return { right: pct(1 - (box.x + box.w) / w), top: pct(cy), translate: "0 -50%" }
+  if (side === "right") return { left: pct(box.x / w), top: pct(cy), translate: "0 -50%" }
+  if (side === "above") return { left: pct(cx), bottom: pct(1 - (box.y + box.h) / h), translate: "-50% 0" }
+  return { left: pct(cx), top: pct(box.y / h), translate: "-50% 0" }
 }
