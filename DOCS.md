@@ -109,25 +109,31 @@ A look is a palette plus optional effects. The palette is a
 `html[data-look="..."]` block in `globals.css` that redefines the same tokens
 `:root` and `.dark` use, so every component picks it up with no changes. Every
 look is dark (a choice, not a constraint; a light parchment Harry Potter would
-work): picking one switches the theme to dark and hides (but keeps the space of)
-the light/dark switch, so nothing in the corner moves. The visitor's own theme is
+work): picking one switches the theme to dark and removes the light/dark switch
+from the corner pill (the pill is pinned right, so nothing else moves). The visitor's own theme is
 saved under `look-prev-theme` on the way in and restored when they pick Default.
-The 3D graph still keys off the theme, which is why a look forces dark rather than
-leaving the toggle usable.
+The graph follows the look through the `--node-*` tokens, re-read when `data-look`
+changes.
 
 The picker button names the active look (label and tooltip) and shows a dot in
-its colour; each option has a background, primary and accent swatch. Opening the
+its colour; each option shows the look's primary and accent as two dots on a disc
+of its background, ringed so the disc shows on a dark menu. The swatch values are
+copies of the tokens in `globals.css` (a look's tokens only exist under its own
+`data-look`, so the picker cannot read them); each token block says so. Arrowing
+through the options previews each look but skips the Star Wars jump, which plays
+only on a click or Space. Opening the
 menu focuses the chosen option, Escape and light-dismiss come from the popover.
 Hovering or focusing the button fetches all four effect chunks (about 22 KB), so
 a choice does not wait on the network.
 
 To add a look:
 
-1. Add `{ id, label }` to `LOOKS` in `lib/looks.ts`.
+1. Add `{ id, label, swatch }` to `LOOKS` in `lib/looks.ts`.
 2. Add a `html[data-look="id"]` token block to `globals.css`.
 3. If it has motion, write the effect in `components/looks/` and register it in
-   `EFFECTS` in `components/look-picker.tsx` with `dynamic(..., { ssr: false })`.
-   Add the id to `DARK_ONLY` if it only works on a dark page.
+   `LOADERS` in `components/look-picker.tsx`.
+4. For a heading face, declare it in `app/layout.tsx` with `preload: false` and a
+   `variable`, and set `font-family` in the look's block in `globals.css`.
 
 Effects load lazily because the default visitor should download nothing for a
 theme they never chose. Each look has one entry file (`components/looks/star-wars.tsx`)
@@ -238,8 +244,13 @@ recognisable designs.
   elsewhere), use fewer particles there, pause in a hidden tab, and draw one
   still frame with reduced motion or Save-Data. Changing reduced motion
   mid-visit remounts the look.
-- Fonts: each look's heading face comes from `next/font/google` with
-  `preload: false` inside the look's chunk, so Default visitors never fetch it.
+- Fonts: the heading faces are declared in `app/layout.tsx` with `next/font/google`,
+  `preload: false` and a CSS variable, and used from the look blocks in
+  `globals.css`. The boot script sets `data-look` before paint, so the face (or its
+  metric-matched fallback) applies from the first frame and never reflows the page
+  late; a browser fetches a face only when rendered text uses it, so Default
+  visitors download nothing. Each face is sized so the page grows little against
+  Default (numbers below).
 
 ### Harry Potter, Lord of the Rings and Game of Thrones
 
@@ -251,15 +262,18 @@ pointer helper that ignores clicks on anything a visitor reads or uses.
 - Harry Potter: candlelit palette, IM Fell English headings, floating candles with dim wax, gold
   sparkles from the cursor and bursts on background clicks, gold ink dividers from a wax seal,
   headings that bleed in like ink, a parchment glow on hovered cards.
-- Lord of the Rings: forest palette, Uncial Antiqua headings, wandering elven lights and autumn
+- Lord of the Rings: forest palette, Cormorant Garamond headings (Uncial Antiqua turned "AI Engineer at"
+  into "λI Ensineer αc", and even as a lone initial its A reads as a lambda), wandering elven lights and autumn
   leaves, a journey map down the left margin (dotted route, hills, trees and a gold ring that
-  travels down it with the scroll, fading out beside sections whose text reaches the edge), a soft
+  travels down it with the scroll and flares once on reaching Contact, fading out beside sections whose text reaches the edge), a soft
   light that follows the cursor, map-line dividers with a compass star, headings that glow in from
   fire to gold.
 - Game of Thrones: ice and fire. Cinzel headings, snow in three depths with gusts of wind that
   turns into rising embers further down the page, frost at the screen's edges, longsword dividers
   (pommel, grip, crossguard, fullered blade) with a glint, embers on background clicks, headings
-  that thaw from frost, and all-cold graph node tokens. Everything is original drawing and
+  that thaw from frost, and an ice-and-fire graph (ice roles, ember projects, steel tech). Past
+  the hero, flakes over the text are drawn smaller than a full stop, and fire in the margins
+  burns bigger with a glow. Everything is original drawing and
 CSS; the only use of the names is the picker's labels. Checked in headless Chrome: no script errors,
 every divider drawn and no heading hidden under reduced motion, and switching through every look and
 back to Default leaves the page with exactly the canvases, styles and elements it started with.

@@ -57,7 +57,7 @@ export default function StarWarsSky({ jump }: { jump: boolean }) {
         }
       }
       ctx.globalAlpha = 1
-    }, { onResize: (w, h) => (stars = makeStars(w, h)) })
+    }, { mask: 0.3, onResize: (w, h) => (stars = makeStars(w, h)) })
 
     return sky.stop
   }, [jump])

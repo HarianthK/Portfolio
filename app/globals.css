@@ -98,6 +98,7 @@
 
 /* Opt-in fan looks (see DOCS.md). The html prefix outranks :root and .dark. */
 html[data-look="star-wars"] {
+  /* Background, primary and accent are copied as the swatch in lib/looks.ts. */
   --background: oklch(0.13 0.03 268);
   --foreground: oklch(0.96 0.01 250);
   --card: oklch(0.18 0.035 266);
@@ -118,7 +119,7 @@ html[data-look="star-wars"] {
   --grid-line: rgba(140, 170, 255, 0.06);
   --node-role: oklch(0.86 0.16 90);
   --node-project: oklch(0.74 0.14 235);
-  --node-tech: oklch(0.72 0.1 200);
+  --node-tech: oklch(0.6 0.05 240);
 }
 
 html[data-look="star-wars"] body {
@@ -136,6 +137,7 @@ html[data-look="star-wars"] a:hover {
 
 /* Candlelit stone: warm near-black, parchment text, gold and a deep crimson. */
 html[data-look="harry-potter"] {
+  /* Background, primary and accent are copied as the swatch in lib/looks.ts. */
   --background: oklch(0.15 0.022 45);
   --foreground: oklch(0.93 0.03 85);
   --card: oklch(0.2 0.028 45);
@@ -155,7 +157,7 @@ html[data-look="harry-potter"] {
   --ring: oklch(0.82 0.13 85);
   --grid-line: rgba(233, 196, 106, 0.05);
   --node-role: oklch(0.82 0.13 85);
-  --node-project: oklch(0.62 0.17 25);
+  --node-project: oklch(0.5 0.12 22);
   --node-tech: oklch(0.72 0.08 60);
 }
 
@@ -168,8 +170,20 @@ html[data-look="harry-potter"] :is(h1, h2) {
   text-shadow: 0 0 26px oklch(0.82 0.13 85 / 0.25);
 }
 
+/* Heading faces are declared in app/layout.tsx; a browser fetches one only once a look uses it.
+   They run wider than the default serif, so a wrapped heading splits evenly. */
+html[data-look] main h2 {
+  text-wrap: balance;
+}
+
+html[data-look="harry-potter"] main h2 {
+  font-family: var(--font-look-hp), var(--font-serif);
+  letter-spacing: -0.01em;
+}
+
 /* Forest at dusk: green-black, pale parchment, elven gold and leaf green. */
 html[data-look="lord-of-the-rings"] {
+  /* Background, primary and accent are copied as the swatch in lib/looks.ts. */
   --background: oklch(0.14 0.025 155);
   --foreground: oklch(0.93 0.03 95);
   --card: oklch(0.19 0.03 155);
@@ -189,7 +203,7 @@ html[data-look="lord-of-the-rings"] {
   --ring: oklch(0.83 0.12 82);
   --grid-line: rgba(226, 192, 110, 0.05);
   --node-role: oklch(0.83 0.12 82);
-  --node-project: oklch(0.72 0.11 150);
+  --node-project: oklch(0.66 0.09 140);
   --node-tech: oklch(0.7 0.07 120);
 }
 
@@ -202,8 +216,13 @@ html[data-look="lord-of-the-rings"] :is(h1, h2) {
   text-shadow: 0 0 24px oklch(0.83 0.12 82 / 0.22);
 }
 
+html[data-look="lord-of-the-rings"] main h2 {
+  font-family: var(--font-look-lotr), var(--font-serif);
+}
+
 /* Winter: cold slate, frost-white text, ice blue and one ember of fire. */
 html[data-look="game-of-thrones"] {
+  /* Background, primary and accent are copied as the swatch in lib/looks.ts. */
   --background: oklch(0.15 0.018 250);
   --foreground: oklch(0.95 0.01 230);
   --card: oklch(0.2 0.02 250);
@@ -222,9 +241,9 @@ html[data-look="game-of-thrones"] {
   --input: oklch(0.32 0.03 245);
   --ring: oklch(0.84 0.08 225);
   --grid-line: rgba(190, 225, 255, 0.05);
-  /* All cold: ice, frost-violet and steel, so the graph sits in the winter instead of on fire. */
+  /* Ice and fire: ice roles, ember projects, steel tech. */
   --node-role: oklch(0.86 0.08 225);
-  --node-project: oklch(0.78 0.07 285);
+  --node-project: oklch(0.7 0.12 50);
   --node-tech: oklch(0.68 0.04 245);
 }
 
@@ -237,10 +256,21 @@ html[data-look="game-of-thrones"] :is(h1, h2) {
   text-shadow: 0 0 22px oklch(0.9 0.04 225 / 0.22);
 }
 
+html[data-look="game-of-thrones"] main h2 {
+  font-family: var(--font-look-got), var(--font-serif);
+  letter-spacing: 0.03em;
+  line-height: 1.15;
+  /* Capitals read larger and run wider, so the heading sizes step down by a fifth here. */
+  --text-4xl: 1.8rem;
+  --text-5xl: 2.4rem;
+  --text-7xl: 3.6rem;
+  --text-8xl: 4.8rem;
+}
+
 /* Every look is dark (the picker keeps and restores the visitor's own choice), so the light/dark
-   switch steps aside, keeping its slot. */
+   switch steps aside; the pill is pinned right, so nothing else moves. */
 html[data-look] .mode-toggle {
-  visibility: hidden;
+  display: none;
 }
 
 /* The Explorer graph is data: an opaque panel keeps a look's particles from passing as nodes. */

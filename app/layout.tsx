@@ -1,6 +1,6 @@
 import type React from "react"
 import type { Metadata } from "next"
-import { Instrument_Serif, JetBrains_Mono, Manrope } from "next/font/google"
+import { Cinzel, Cormorant_Garamond, IM_Fell_English, Instrument_Serif, JetBrains_Mono, Manrope } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { siteUrl } from "@/lib/site"
 import { ScrollProgress } from "@/components/scroll-progress"
@@ -31,6 +31,12 @@ const mono = JetBrains_Mono({
   subsets: ["latin"],
   variable: "--font-mono-data",
 })
+
+// Fan-look heading faces. Not preloaded, so a browser fetches one only when a look's CSS uses it.
+const lookHp = IM_Fell_English({ weight: "400", subsets: ["latin"], preload: false, variable: "--font-look-hp" })
+const lookLotr = Cormorant_Garamond({ weight: "600", subsets: ["latin"], preload: false, variable: "--font-look-lotr" })
+const lookGot = Cinzel({ weight: "600", subsets: ["latin"], preload: false, variable: "--font-look-got" })
+const lookFonts = [lookHp, lookLotr, lookGot].map((f) => f.variable).join(" ")
 
 const title = "Harianth Kalavala | AI Engineer"
 // This is what shows in search results and in a shared link, so it says what
@@ -69,7 +75,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${display.variable} ${body.variable} ${mono.variable}`}
+      className={`${display.variable} ${body.variable} ${mono.variable} ${lookFonts}`}
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: lookBootScript }} />
