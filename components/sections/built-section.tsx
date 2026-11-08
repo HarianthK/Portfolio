@@ -196,12 +196,120 @@ const PROJECTS: Project[] = [
   },
 ]
 
-// An asymmetric stack rather than a grid of equal cards, which would flatten
-// everything to the same importance. See DOCS.md.
+// The AI work gets the full treatment; the rest sit in a compact list with the
+// detail behind "More", so every claim stays on the page. See DOCS.md.
+const FEATURED = ["LangGraph Agentic Platform", "Retrace", "Upstream"]
+
+// The first sentence, up to a stop followed by a capital, so ".gz" and ".org" do not end it.
+function lead(summary: string) {
+  const m = summary.match(/^(.+?[.!?])\s+(?=[A-Z])/)
+  return m ? [m[1], summary.slice(m[0].length)] : [summary, ""]
+}
+
+function Featured({ project, i }: { project: Project; i: number }) {
+  const hasFigure = Boolean(project.figure)
+  // Alternate the figure's side so the eye keeps moving, but only when
+  // there is one, or the text gets squeezed into an empty grid cell.
+  const figureLeft = hasFigure && i % 2 === 1
+  return (
+    <article
+      className={cn(
+        "border-t border-border pt-10",
+        hasFigure && "grid gap-8 md:gap-14",
+        hasFigure &&
+          (figureLeft
+            ? "md:grid-cols-[minmax(0,16rem)_minmax(0,1fr)]"
+            : "md:grid-cols-[minmax(0,1fr)_minmax(0,16rem)]"),
+      )}
+    >
+      <div className={cn(figureLeft && "md:order-2")}>
+        <h3 className="font-serif text-3xl leading-tight text-foreground">{project.name}</h3>
+        <p className="mt-4 max-w-xl text-base leading-relaxed text-muted-foreground">
+          {project.summary}
+        </p>
+        <Stack items={project.stack} />
+        <ProjectLink project={project} className="mt-5" />
+      </div>
+      {project.figure && (
+        <div className={cn(figureLeft && "md:order-1")}>
+          <FigureBlock {...project.figure} />
+        </div>
+      )}
+    </article>
+  )
+}
+
+function Compact({ project }: { project: Project }) {
+  const [first, rest] = lead(project.summary)
+  return (
+    <article className="border-t border-border pt-6">
+      <h3 className="font-mono text-xl text-foreground">{project.name}</h3>
+      {project.figure && (
+        <p className="mt-3 font-mono text-sm text-primary">
+          {project.figure.value}{" "}
+          <span className="text-xs uppercase tracking-[0.15em] text-foreground/80">
+            {project.figure.label}
+          </span>
+        </p>
+      )}
+      <p className="mt-3 text-base leading-relaxed text-muted-foreground">{first}</p>
+      {(rest || project.figure) && (
+        <details className="group mt-2">
+          <summary className="inline-flex min-h-11 cursor-pointer list-none items-center font-mono text-xs text-muted-foreground transition-colors hover:text-foreground [&::-webkit-details-marker]:hidden">
+            <span className="group-open:hidden">More +</span>
+            <span className="hidden group-open:inline">Less −</span>
+          </summary>
+          {rest && <p className="text-base leading-relaxed text-muted-foreground">{rest}</p>}
+          {project.figure && (
+            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+              <span className="font-mono text-primary">{project.figure.value}</span>{" "}
+              {project.figure.context}
+            </p>
+          )}
+        </details>
+      )}
+      <Stack items={project.stack} />
+      <ProjectLink project={project} className="mt-3" />
+    </article>
+  )
+}
+
+function Stack({ items }: { items: string[] }) {
+  return (
+    <ul className="mt-5 flex flex-wrap gap-x-4 gap-y-2">
+      {items.map((item) => (
+        <li key={item} className="font-mono text-xs text-muted-foreground">
+          {item}
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+function ProjectLink({ project, className }: { project: Project; className?: string }) {
+  return (
+    <a
+      href={project.href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={cn(
+        "inline-flex min-h-11 items-center font-mono text-xs text-primary transition-colors",
+        className,
+      )}
+    >
+      <span className="border-b border-primary/40 pb-0.5 hover:border-primary">
+        {project.hrefLabel} →
+      </span>
+    </a>
+  )
+}
+
 export function BuiltSection() {
+  const featured = PROJECTS.filter((p) => FEATURED.includes(p.name))
+  const rest = PROJECTS.filter((p) => !FEATURED.includes(p.name))
   return (
     <section id="built" className="relative px-6 py-28 md:px-14 md:py-36">
-      <div className="mx-auto max-w-5xl">
+      <div className="mx-auto max-w-6xl">
         <p className="font-mono text-xs uppercase tracking-[0.3em] text-primary">
           <span aria-hidden className="text-primary/70">04</span> Built
         </p>
@@ -210,58 +318,18 @@ export function BuiltSection() {
         </h2>
 
         <div className="mt-16 space-y-20">
-          {PROJECTS.map((project, i) => {
-            const hasFigure = Boolean(project.figure)
-            // Alternate the figure's side so the eye keeps moving, but only when
-            // there is one, or the text gets squeezed into an empty grid cell.
-            const figureLeft = hasFigure && i % 2 === 1
+          {featured.map((project, i) => (
+            <Featured key={project.name} project={project} i={i} />
+          ))}
+        </div>
 
-            return (
-            <article
-              key={project.name}
-              className={cn(
-                "border-t border-border pt-10",
-                hasFigure && "grid gap-8 md:gap-14",
-                hasFigure &&
-                  (figureLeft
-                    ? "md:grid-cols-[minmax(0,16rem)_minmax(0,1fr)]"
-                    : "md:grid-cols-[minmax(0,1fr)_minmax(0,16rem)]"),
-              )}
-            >
-              <div className={cn(figureLeft && "md:order-2")}>
-                <h3 className="font-serif text-3xl leading-tight text-foreground">
-                  {project.name}
-                </h3>
-                <p className="mt-4 max-w-xl text-base leading-relaxed text-muted-foreground">
-                  {project.summary}
-                </p>
-
-                <ul className="mt-6 flex flex-wrap gap-x-4 gap-y-2">
-                  {project.stack.map((item) => (
-                    <li key={item} className="font-mono text-xs text-muted-foreground">
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-
-                <a
-                  href={project.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-7 inline-block border-b border-primary/40 pb-0.5 font-mono text-xs text-primary transition-colors hover:border-primary"
-                >
-                  {project.hrefLabel} →
-                </a>
-              </div>
-
-              {project.figure && (
-                <div className={cn(figureLeft && "md:order-1")}>
-                  <FigureBlock {...project.figure} />
-                </div>
-              )}
-            </article>
-            )
-          })}
+        <h3 className="mt-28 font-serif text-3xl leading-tight text-foreground md:text-4xl">
+          More projects
+        </h3>
+        <div className="mt-12 grid gap-x-14 gap-y-12 md:grid-cols-2">
+          {rest.map((project) => (
+            <Compact key={project.name} project={project} />
+          ))}
         </div>
       </div>
     </section>

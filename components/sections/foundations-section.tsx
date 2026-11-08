@@ -54,7 +54,7 @@ const EDUCATION = [
 export function FoundationsSection() {
   return (
     <section id="foundations" className="section-grid relative px-6 py-28 md:px-14 md:py-36">
-      <div className="mx-auto max-w-5xl">
+      <div className="mx-auto max-w-6xl">
         <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="font-mono text-xs uppercase tracking-[0.3em] text-primary">

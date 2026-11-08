@@ -54,6 +54,21 @@ The figure alternates sides so the eye keeps moving, but only on entries that
 have one. Without that condition the article became a grid with an empty cell
 and squeezed the text into 16rem.
 
+By November there were thirteen entries and Built ran to eleven phone screens
+of paragraphs at the same weight. A design review on 2026-11-08 pointed out
+that nobody reads thirteen essays and that the AI work was buried among the
+systems projects. So the three AI entries, LangGraph, Retrace and Upstream,
+keep the full treatment, and the other ten sit in a two column list: name,
+figure, first sentence, stack and link, with the rest of the paragraph and the
+figure's context behind "More". Nothing was cut, so every claim is still on the
+page and still has to survive a click. The first sentence is found by a stop
+followed by a capital letter, which keeps ".gz" and ".org" from ending it.
+The names in the list are set in mono, so "deflate" and "ember" read as the
+repository names they are rather than as typos.
+
+Every section now shares one width, max-w-6xl. They had three, and the section
+labels stepped in and out as you scrolled.
+
 ## Looks: opt-in fan themes
 
 Recruiters arrive from resume links, so nobody sees a fan theme unless they pick

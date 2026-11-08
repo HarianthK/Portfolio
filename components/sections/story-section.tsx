@@ -11,7 +11,7 @@ export function StorySection() {
   return (
     <section id="story" className="relative px-6 py-32 md:px-14 md:py-44">
       <h2 className="sr-only">Why</h2>
-      <div className="mx-auto grid max-w-368 gap-y-12 lg:grid-cols-[minmax(0,10rem)_minmax(0,38rem)_minmax(0,1fr)] lg:gap-x-16">
+      <div className="mx-auto grid max-w-6xl gap-y-12 lg:grid-cols-[minmax(0,10rem)_minmax(0,38rem)_minmax(0,1fr)] lg:gap-x-16">
         {/* Left margin — the year, as a date stamp on the whole section. */}
         <div className="lg:pt-3">
           <p className="font-mono text-xs uppercase tracking-[0.3em] text-primary">
