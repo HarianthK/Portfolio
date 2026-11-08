@@ -203,3 +203,48 @@ All three are dark, so the light/dark toggle hides for any look. Everything is o
 CSS; the only use of the names is the picker's labels. Checked in headless Chrome: no script errors,
 every divider drawn and no heading hidden under reduced motion, and switching through every look and
 back to Default leaves the page with exactly the canvases, styles and elements it started with.
+
+## The graph
+
+The hero and the Explore section draw the same graph. These are the choices behind it.
+
+**One source of truth.** The personal projects on the graph are built from `PROJECTS` in
+`built-section.tsx`: the name, the opening clause of the summary as the detail line, and the
+figure as the meta line. Stack entries become tool nodes when a tool node already exists, when two
+projects share it, or when it is listed in `EXTRA_TECH` (OpenTelemetry, Rust). Anything else in a
+stack gets no node rather than a node with one edge. The day-job nodes are still written by hand
+in `lib/graph-data.ts`. `node scripts/check-graph.cjs` fails if a Built project is missing from the
+graph or an edge points at nothing.
+
+**Labels are HTML, not sprites.** Canvas sprites were drawn at a world size, so they shrank to
+7 to 9 px when the camera pulled back, were blurred by the depth of field pass and sat behind edges.
+Now each label is a span over the canvas at 12 px (14 px for the root), coloured with
+`--foreground` and haloed with `--background`, so it follows the theme and every look for free.
+Each frame (`components/graph/graph-labels.ts`) places labels most important first, trying below,
+above, right and left of the node, and takes the first spot that is inside the frame and clear of
+every other label and every node bigger than a tool dot; with no spot it hides. Small screens
+therefore show fewer labels without a separate rule. The hero labels only `HERO_LABELS`; the
+explorer labels roles, schools and projects, or every lit node under a filter; hover or a tap
+always labels the node.
+
+**Colours follow the look.** In the default look the graph keeps its hand-tuned hexes
+(`FAMILY_COLOR` in `lib/graph-palette.ts`), and the default `--node-*` tokens in `globals.css` now
+hold the same values so the still picture and the legend agree. In a fan look the palette is read
+from that look's `--node-*`, `--foreground`, `--muted-foreground`, `--primary` and `--background`
+tokens, converted from oklch to hex through a 1 by 1 canvas because three.js can't parse oklch. A
+MutationObserver on `<html>` re-reads them when the theme class or `data-look` changes, and the node
+materials are rebuilt.
+
+**Phones get a picture first.** On `(max-width: 768px), (pointer: coarse)` or with Save-Data on,
+the hero shows a still SVG of the same graph, laid out once on the server with d3-force-3d (it
+ships with r3f-forcegraph) and coloured with the same CSS tokens, so it needs no JavaScript. The
+live graph loads only on the "Explore it live" button. Every stage, desktop included, now fetches
+three.js only when it comes within 800 px of the screen, and the explorer shows the still picture
+as its loading state. Measured on a 390 px wide load: 11 scripts, 569 KB transferred (1.86 MB
+decoded) and 2 WebGL canvases before; 10 scripts, 196 KB (0.63 MB decoded) and no canvas after.
+
+**Desktop hero.** From `lg` the words take the left column and the graph the right, each in its
+own space, instead of the graph above and an empty right half under it. The camera fits the
+graph's depth as well as its width, since the graph turns, and fog density scales with camera
+distance so the wider framing doesn't wash the light theme out. The explorer starts from a
+different side and frames tighter than the hero, so the second view isn't a repeat.

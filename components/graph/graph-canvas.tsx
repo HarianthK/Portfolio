@@ -1,14 +1,15 @@
 "use client"
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState, type RefObject } from "react"
 import { Canvas, useFrame, useThree } from "@react-three/fiber"
 import { OrbitControls } from "@react-three/drei"
 import { Bloom, DepthOfField, EffectComposer, Vignette } from "@react-three/postprocessing"
 import R3fForceGraph from "r3f-forcegraph"
-import { useTheme } from "next-themes"
 import * as THREE from "three"
 import { Atmosphere } from "@/components/graph/atmosphere"
+import { makeLabels, measureLabels, placeLabels, type Label } from "@/components/graph/graph-labels"
 import {
+  HERO_LABELS,
   links,
   nodes,
   nodesInSection,
@@ -24,8 +25,8 @@ import {
   disposeObject,
   radiusForNode,
   ENTRANCE_TOTAL,
-  FAMILY_COLOR,
 } from "@/lib/graph-visuals"
+import { useGraphPalette } from "@/lib/graph-palette"
 import { useSafeReducedMotion } from "@/lib/use-safe-reduced-motion"
 
 export type GraphFraming = "immersive" | "comfortable"
@@ -64,7 +65,14 @@ type Props = {
   onNodeSelect?: (node: GraphNode) => void
   /** Stops the render loop entirely — used while the stage is off screen. */
   paused?: boolean
+  /** A node tapped or clicked open, which keeps its label up. */
+  pinnedId?: string | null
+  onReady?: () => void
 }
+
+// Lower ranks claim label space first.
+const LABEL_RANK: Record<NodeKind, number> = { self: 0, role: 1, project: 2, education: 3, outcome: 4, tech: 5 }
+const nodeById = new Map(nodes.map((node) => [node.id, node]))
 
 type GraphHandle = {
   tickFrame: () => void
@@ -77,7 +85,15 @@ function boundsOf(objects: THREE.Object3D[]) {
   return box
 }
 
-function Scene({ highlight, focus = null, framing = "immersive", onNodeFocus, onNodeSelect }: Props) {
+function Scene({
+  highlight,
+  focus = null,
+  framing = "immersive",
+  onNodeFocus,
+  onNodeSelect,
+  pinnedId = null,
+  labelLayer,
+}: Props & { labelLayer: RefObject<HTMLDivElement | null> }) {
   const graphRef = useRef<GraphHandle | undefined>(undefined)
   const groupRef = useRef<THREE.Group>(null)
   const prefersReducedMotion = useSafeReducedMotion()
@@ -102,23 +118,38 @@ function Scene({ highlight, focus = null, framing = "immersive", onNodeFocus, on
     [],
   )
 
-  // Label colours are baked into a canvas texture when the sprite is made, so
-  // switching theme means rebuilding them rather than restyling in place.
-  const { resolvedTheme } = useTheme()
-  const theme = resolvedTheme === "light" ? "light" : "dark"
+  // Colours are baked into materials, so a theme or look change rebuilds the node objects.
+  const palette = useGraphPalette()
+  const theme = palette.theme
 
-  const { nodeObject, objects } = useMemo(() => createNodeObjectFactory(theme), [theme])
+  const { nodeObject, objects } = useMemo(() => createNodeObjectFactory(palette), [palette])
 
   // Fog tints whatever recedes into the distance, so it has to match the page
   // behind the canvas or the far side of the graph muddies in light mode.
   const { scene } = useThree()
 
   useEffect(() => {
-    scene.fog = new THREE.FogExp2(theme === "light" ? "#f7ecdd" : "#0a0704", 0.0016)
+    scene.fog = new THREE.FogExp2(palette.fog, 0.0016)
     return () => {
       scene.fog = null
     }
-  }, [scene, theme])
+  }, [scene, palette])
+
+  const labels = useRef<Map<string, Label>>(new Map())
+  useEffect(() => {
+    const layer = labelLayer.current
+    if (!layer) return
+    const made = makeLabels(layer, nodes)
+    labels.current = made
+    // Widths change once the web font arrives.
+    document.fonts?.ready.then(() => measureLabels(made))
+    return () => {
+      made.forEach((label) => label.el.remove())
+      labels.current = new Map()
+    }
+  }, [labelLayer])
+
+  const hoveredId = useRef<string | null>(null)
 
   // The previous set of meshes and textures is dropped when the theme changes,
   // and again on unmount; neither is reclaimed automatically.
@@ -189,7 +220,29 @@ function Scene({ highlight, focus = null, framing = "immersive", onNodeFocus, on
     return () => clearTimeout(timer)
   }, [prefersReducedMotion])
 
+  // The hero names only a few nodes; the explorer names the structure, or every lit node under a filter.
+  const labelRank = useCallback(
+    (id: string) => {
+      const node = nodeById.get(id)
+      if (!node) return null
+      if (id === hoveredId.current || id === pinnedId) return -1
+      if (activeIds && !activeIds.has(id)) return null
+      if (framing === "immersive") return HERO_LABELS.has(id) ? LABEL_RANK[node.kind] : null
+      if (!activeIds && (node.kind === "tech" || node.kind === "outcome")) return null
+      return LABEL_RANK[node.kind]
+    },
+    [activeIds, framing, pinnedId],
+  )
+
   useFrame((_, delta) => {
+    advance(delta)
+    // Fog scales with the camera's distance, so a wider framing doesn't wash the whole graph out.
+    if (scene.fog instanceof THREE.FogExp2) scene.fog.density = 0.44 / Math.max(camera.position.length(), 1)
+    camera.updateMatrixWorld()
+    placeLabels(labels.current, objects, camera as THREE.PerspectiveCamera, size.width, size.height, labelRank)
+  })
+
+  function advance(delta: number) {
     graphRef.current?.tickFrame()
 
     // Frame-rate independent easing — same feel on a 60Hz and 144Hz display.
@@ -233,7 +286,8 @@ function Scene({ highlight, focus = null, framing = "immersive", onNodeFocus, on
     // well past it, so a tight cluster gets its outermost labels sliced off by
     // the edge of the panel. The unfocused hero is meant to bleed, so it keeps
     // the tighter fit.
-    const radius = Math.max(span.x, span.y, focus ? 190 : 330) / 2 + (focus ? 46 : 0)
+    // z counts too: the graph turns, so its depth becomes width.
+    const radius = Math.max(span.x, span.y, span.z, focus ? 190 : 330) / 2 + (focus ? 46 : 0)
 
     group.position.lerp(centre.clone().negate(), ease)
 
@@ -264,7 +318,8 @@ function Scene({ highlight, focus = null, framing = "immersive", onNodeFocus, on
     const perspective = camera as THREE.PerspectiveCamera
     const vFov = (perspective.fov * Math.PI) / 180
     const hFov = 2 * Math.atan(Math.tan(vFov / 2) * (size.width / size.height))
-    const margin = framing === "immersive" ? 0.82 : 1.02
+    // The hero fits its own column; the explorer zooms in a little to fill its box.
+    const margin = framing === "immersive" ? 1.35 : 0.86
     const desired = (radius / Math.tan(Math.min(vFov, hFov) / 2)) * margin
 
     /*
@@ -296,7 +351,7 @@ function Scene({ highlight, focus = null, framing = "immersive", onNodeFocus, on
     // Only the distance is touched, never the direction — that leaves
     // OrbitControls' rotation and auto-rotate free to do their own thing.
     camera.position.setLength(THREE.MathUtils.damp(camera.position.length(), desired, 4.5, delta))
-  })
+  }
 
   /**
    * Hit testing is done here rather than through the graph library's hover
@@ -338,7 +393,10 @@ function Scene({ highlight, focus = null, framing = "immersive", onNodeFocus, on
 
   useEffect(() => {
     const canvas = gl.domElement
-    const clear = () => onNodeFocus?.(null)
+    const clear = () => {
+      hoveredId.current = null
+      onNodeFocus?.(null)
+    }
 
     const handleMove = (event: PointerEvent) => {
       const rect = canvas.getBoundingClientRect()
@@ -347,6 +405,7 @@ function Scene({ highlight, focus = null, framing = "immersive", onNodeFocus, on
 
       const node = nodeAtPointer(event)
       canvas.style.cursor = node ? "pointer" : "grab"
+      hoveredId.current = node?.id ?? null
       onNodeFocus?.(node)
     }
     const handleUp = (event: PointerEvent) => {
@@ -390,11 +449,10 @@ function Scene({ highlight, focus = null, framing = "immersive", onNodeFocus, on
           // times wider than the circle actually drawn, which made empty space
           // around a node report as a hover.
           nodeRelSize={1}
-          nodeColor={(node: GraphNode) => colorForNode(node, theme)}
-          // A neutral rule on paper, rather than another brown competing with
-          // the node inks.
-          linkColor={() => (theme === "light" ? "#6b5f52" : "#8a7a5f")}
-          linkOpacity={linksIn ? (theme === "light" ? 0.45 : 0.22) : 0}
+          nodeColor={(node: GraphNode) => colorForNode(node, palette)}
+          // Light edges are faint rules on paper, so they never outweigh the labels.
+          linkColor={() => palette.link}
+          linkOpacity={linksIn ? (theme === "light" ? 0.3 : 0.22) : 0}
           linkWidth={0.4}
           // Particles travelling the edges read as data moving through the
           // graph — the thing these systems actually do. Held back with the
@@ -402,7 +460,7 @@ function Scene({ highlight, focus = null, framing = "immersive", onNodeFocus, on
           linkDirectionalParticles={prefersReducedMotion || !linksIn ? 0 : 2}
           linkDirectionalParticleWidth={1.1}
           linkDirectionalParticleSpeed={0.004}
-          linkDirectionalParticleColor={() => "#f0b429"}
+          linkDirectionalParticleColor={() => palette.particle}
           d3AlphaDecay={0.018}
           d3VelocityDecay={0.32}
           warmupTicks={80}
@@ -432,7 +490,7 @@ function Scene({ highlight, focus = null, framing = "immersive", onNodeFocus, on
       {/* Atmosphere is part of the same argument as the rim light: something
           has to sit between the eye and the subject for the scene to have
           depth. Dark only — on paper, floating motes are just specks. */}
-      {theme === "dark" && !prefersReducedMotion && <Atmosphere color={FAMILY_COLOR.dark.role} />}
+      {theme === "dark" && !prefersReducedMotion && <Atmosphere color={palette.role} />}
 
       {/* The filmic pass, and dark-theme only for the same reason bloom is:
           these effects all work by adding light or crushing blacks, and on a
@@ -451,11 +509,8 @@ function Scene({ highlight, focus = null, framing = "immersive", onNodeFocus, on
             that looked right on paper put the focal plane roughly 250 units in
             front of the graph, so the entire scene blurred.
 
-            Deliberately restrained. Labels are sprites drawn with depth testing
-            off, so this pass blurs them according to whatever is behind them
-            rather than their own distance — push the blur any harder and the
-            node names go soft, which is the exact complaint this whole piece of
-            work exists to answer.
+            Deliberately restrained, so far nodes soften without smearing.
+            Labels are HTML above the canvas and never pass through this blur.
           */}
           <DepthOfField target={FOCUS_TARGET} focalLength={0.012} bokehScale={0.6} height={480} />
           {/* Eased down from 1.15. At native resolution the old value spread
@@ -471,7 +526,8 @@ function Scene({ highlight, focus = null, framing = "immersive", onNodeFocus, on
   )
 }
 
-export default function GraphCanvas({ paused = false, ...props }: Props) {
+export default function GraphCanvas({ paused = false, onReady, ...props }: Props) {
+  const labelLayer = useRef<HTMLDivElement>(null)
   const [tabVisible, setTabVisible] = useState(true)
 
   /*
@@ -505,17 +561,25 @@ export default function GraphCanvas({ paused = false, ...props }: Props) {
   const running = tabVisible && !paused
 
   return (
+    <>
     <Canvas
-      /* Starts deep inside the cloud. Matching the intro's opening distance
-         here matters: set it further out and the very first painted frame is
-         the wide shot, which shows the ending before the move begins. */
-      camera={{ position: [0, 7.4, 63.6], fov: 52, near: 1, far: 4000 }}
+      /* The hero starts deep inside the cloud for its intro; the explorer starts
+         from another side so it doesn't repeat the hero's picture. */
+      camera={{
+        position: props.framing === "comfortable" ? [70, 34, 26] : [0, 7.4, 63.6],
+        fov: 52,
+        near: 1,
+        far: 4000,
+      }}
+      onCreated={() => onReady?.()}
       gl={{ antialias, powerPreference: "high-performance" }}
       dpr={dpr}
       frameloop={running ? "always" : "never"}
       style={{ position: "absolute", inset: 0 }}
     >
-      <Scene {...props} />
+      <Scene {...props} labelLayer={labelLayer} />
     </Canvas>
+    <div ref={labelLayer} className="pointer-events-none absolute inset-0 overflow-hidden" />
+    </>
   )
 }

@@ -1,49 +1,10 @@
 import * as THREE from "three"
 import { NODE_FAMILY, NODE_SIZE, type GraphNode } from "@/lib/graph-data"
+import type { GraphPalette, GraphTheme } from "@/lib/graph-palette"
 
-/**
- * Colours live here as hex rather than being read from the CSS custom
- * properties in globals.css. The tokens there are authored in oklch, which
- * three.js won't parse reliably, and the WebGL scene needs numeric colour
- * anyway. The two sets are kept visually in sync by hand — CSS drives the DOM,
- * this drives the canvas.
- */
-/**
- * Two palettes, because the two themes are lit in opposite directions.
- *
- * Dark mode adds light: nodes are emissive and bloom makes them glow, so the
- * centre node is near-white and burns brightest of everything.
- *
- * Light mode can't add light — there's nowhere brighter than the page to go, so
- * bloom just washes everything to white. There it reads as a printed diagram
- * instead: saturated, darker inks with no glow, and the centre node is the
- * darkest mark on the page rather than the brightest.
- */
-export const FAMILY_COLOR = {
-  dark: {
-    self: "#fff4df", // near-white — burns brightest under bloom
-    role: "#f0b429", // amber — people, institutions
-    project: "#e07b39", // copper — things built, and what they produced
-    tech: "#4a9fc4", // cool — technology, deliberately recessive
-  },
-  /*
-    Not the dark palette darkened. That first attempt put amber at hue 38 and
-    copper at hue 22 — sixteen degrees apart, which on a warm background reads
-    as one brown. These are pushed apart to roughly 33 degrees and separated by
-    lightness too, so gold, brick and blue stay three distinct inks.
-  */
-  light: {
-    self: "#2b2318", // ink — the darkest mark, so it reads as the root
-    role: "#bd8410", // gold
-    project: "#9c2c1a", // brick — clearly red, not another orange
-    tech: "#22607d", // steel blue
-  },
-} as const
 
-export type GraphTheme = "dark" | "light"
-
-export function colorForNode(node: GraphNode, theme: GraphTheme = "dark"): string {
-  return FAMILY_COLOR[theme][NODE_FAMILY[node.kind]]
+export function colorForNode(node: GraphNode, palette: GraphPalette): string {
+  return palette[NODE_FAMILY[node.kind]]
 }
 
 /**
@@ -61,25 +22,6 @@ export function emissiveForNode(kind: GraphNode["kind"], theme: GraphTheme): num
 export function radiusForNode(node: GraphNode): number {
   return NODE_SIZE[node.kind]
 }
-
-/**
- * Which nodes carry a permanent label. Only the structural ones — labelling
- * outcomes and tech too collides badly in dense clusters. Everything else
- * reveals itself on hover.
- */
-export function isLabelled(node: GraphNode): boolean {
-  return node.kind === "self" || node.kind === "role" || node.kind === "project"
-}
-
-/**
- * Label colours per theme. Light text with a dark outline works on the near
- * black background but washes out badly on the light theme's beige, so the
- * light theme inverts it: dark text with a pale halo behind it.
- */
-const LABEL_COLORS = {
-  dark: { fill: "#f6efe4", outline: "rgba(10, 7, 4, 0.9)" },
-  light: { fill: "#2b1d0e", outline: "rgba(250, 244, 234, 0.95)" },
-} as const
 
 /**
  * A rim light, done the way film does it: bright where the surface turns away
@@ -130,101 +72,6 @@ function makeRimMaterial(color: string): THREE.ShaderMaterial {
     depthWrite: false,
     blending: THREE.AdditiveBlending,
   })
-}
-
-/**
- * Text rendered to a canvas and used as a sprite texture. Cheaper than a text
- * geometry library for a handful of labels, and it always faces the camera.
- */
-function makeLabelSprite(text: string, fill: string, outline: string): THREE.Sprite {
-  const padding = 24
-  const fontSize = 44
-  // Bold, not semibold. These end up only about ten pixels tall on screen, and
-  // at that size a lighter weight loses its stems to minification entirely.
-  const font = `700 ${fontSize}px ui-monospace, "JetBrains Mono", monospace`
-
-  const measure = document.createElement("canvas").getContext("2d")
-  if (measure) measure.font = font
-  const textWidth = measure ? measure.measureText(text).width : text.length * fontSize * 0.6
-
-  const canvas = document.createElement("canvas")
-  /*
-    Oversampling was a flat 2, which is a 1:1 texel-to-pixel match only on a
-    non-retina screen. On a device-pixel-ratio 2 display the label was being
-    magnified twice over and went soft — one of the two reasons the graph read
-    as blurry. Track the display instead, then clamp: the widest label is around
-    620 CSS px, so 4x would approach the 2048 texture limit on some GPUs.
-  */
-  const dpr = typeof window === "undefined" ? 1 : window.devicePixelRatio || 1
-  const untiled = (textWidth + padding * 2) * 2 * Math.min(dpr, 2)
-  const scale = untiled > 2048 ? (2048 / (textWidth + padding * 2)) : 2 * Math.min(dpr, 2)
-
-  canvas.width = (textWidth + padding * 2) * scale
-  canvas.height = (fontSize + padding) * scale
-
-  const ctx = canvas.getContext("2d")
-  if (ctx) {
-    ctx.scale(scale, scale)
-    ctx.font = font
-    ctx.textAlign = "center"
-    ctx.textBaseline = "middle"
-
-    const cx = canvas.width / (2 * scale)
-    const cy = canvas.height / (2 * scale)
-
-    /*
-      A halo in the opposing tone, so the text keeps its edge whatever it
-      passes in front of.
-
-      Was 7px wide, which is most of the width of a stem at this size. Once the
-      sprite is minified down to its on-screen size the halo and the glyph get
-      averaged together, and a pale halo around dark text simply erased it —
-      which is why the labels were unreadable on the light theme. Wide enough
-      to separate the text from what's behind it, narrow enough to survive.
-    */
-    ctx.lineJoin = "round"
-    ctx.miterLimit = 2
-    ctx.lineWidth = 3.5
-    ctx.strokeStyle = outline
-    ctx.strokeText(text, cx, cy)
-
-    ctx.fillStyle = fill
-    ctx.fillText(text, cx, cy)
-    // Twice, so the glyph core stays dominant over the halo once the whole
-    // thing is scaled down.
-    ctx.fillText(text, cx, cy)
-  }
-
-  const texture = new THREE.CanvasTexture(canvas)
-  texture.needsUpdate = true
-  texture.colorSpace = THREE.SRGBColorSpace
-  /*
-    These sprites are always seen much smaller than they're drawn, so how the
-    texture is *shrunk* matters far more than how it's stretched. Anisotropic
-    filtering keeps the strokes from dissolving into grey at a glancing angle,
-    which is most of what made the smaller labels illegible.
-  */
-  texture.generateMipmaps = true
-  texture.minFilter = THREE.LinearMipmapLinearFilter
-  texture.magFilter = THREE.LinearFilter
-  texture.anisotropy = 8
-
-  const sprite = new THREE.Sprite(
-    new THREE.SpriteMaterial({
-      map: texture,
-      transparent: true,
-      depthWrite: false,
-      // Keeps labels legible when they pass behind glowing nodes.
-      depthTest: false,
-    }),
-  )
-
-  const aspect = canvas.width / canvas.height
-  // Up from 4.5. The text was being drawn at roughly ten screen pixels tall,
-  // which is below the size at which this typeface holds together at all.
-  const height = 6.4
-  sprite.scale.set(height * aspect, height, 1)
-  return sprite
 }
 
 /** Which wave of the entrance a node belongs to. Lower arrives first. */
@@ -299,21 +146,21 @@ export function applyEntrance(
 
 /**
  * Builds the 3D object for a node: an emissive core so bloom has something to
- * catch, a soft outer shell for volume, and a label for the significant nodes.
+ * catch and a soft outer shell for volume. Labels are HTML (components/graph/graph-labels.ts).
  *
  * Objects are cached per node id — `nodeThreeObject` is called on every graph
  * refresh, and rebuilding geometry each time would leak GPU memory.
  */
-export function createNodeObjectFactory(theme: GraphTheme = "dark") {
+export function createNodeObjectFactory(palette: GraphPalette) {
   const cache = new Map<string, THREE.Object3D>()
-  const label = LABEL_COLORS[theme]
+  const theme = palette.theme
 
   function nodeObject(node: GraphNode): THREE.Object3D {
     const cached = cache.get(node.id)
     if (cached) return cached
 
     const group = new THREE.Group()
-    const color = colorForNode(node, theme)
+    const color = colorForNode(node, palette)
     const radius = radiusForNode(node)
 
     // Transparent in both cases so section de-emphasis can actually fade a node
@@ -366,18 +213,6 @@ export function createNodeObjectFactory(theme: GraphTheme = "dark") {
       // pointer registered a hit well outside the visible circle.
       halo.raycast = () => {}
       group.add(halo)
-    }
-
-    if (isLabelled(node)) {
-      const sprite = makeLabelSprite(node.label, label.fill, label.outline)
-      // Clears the node by half the label's own height, now that the label is
-      // taller — otherwise the descenders sit on top of the sphere.
-      sprite.position.set(0, radius + 6.5, 0)
-      // A label is a wide quad sitting above the node, and most of it is
-      // transparent — but raycasting doesn't care about transparency, so
-      // leaving it hittable made empty space next to the text report a hover.
-      sprite.raycast = () => {}
-      group.add(sprite)
     }
 
     group.userData.nodeId = node.id
@@ -440,23 +275,12 @@ export function applySectionEmphasis(
       }
     })
 
-    const sprite = object.children.find((child) => child instanceof THREE.Sprite) as
-      | THREE.Sprite
-      | undefined
-    if (sprite) {
-      const spriteMaterial = sprite.material as THREE.SpriteMaterial
-      spriteMaterial.opacity += (targetOpacity - spriteMaterial.opacity) * lerp
-    }
   })
 }
 
-/** Frees cached geometry, materials and label textures. */
+/** Frees cached geometry and materials. */
 export function disposeObject(root: THREE.Object3D) {
   const release = (material: THREE.Material) => {
-    // Label sprites carry a canvas texture that won't be reclaimed with the
-    // material on its own.
-    const map = (material as THREE.SpriteMaterial).map
-    map?.dispose()
     material.dispose()
   }
 
