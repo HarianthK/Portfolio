@@ -89,6 +89,8 @@ export default function GameOfThrones() {
       gust *= Math.pow(0.6, dt)
       const max = document.documentElement.scrollHeight - h
       const heat = max > 0 ? Math.max(0, (window.scrollY / max - 0.3) / 0.7) * 0.75 : 0
+      // Past the hero, flakes over the text shrink below a full stop so they never read as punctuation.
+      const c = window.scrollY > h * 0.6 ? sky.column() : null
       for (const f of flakes) {
         const fire = f.k < heat
         f.y += (fire ? -0.8 : 1) * f.vy * dt
@@ -97,13 +99,19 @@ export default function GameOfThrones() {
         if (f.y < -5) Object.assign(f, { y: h + 5, x: rand(0, w) })
         if (f.x > w + 5) f.x = -5
         if (f.x < -5) f.x = w + 5
+        ctx.shadowColor = "#ff8a3c"
         ctx.fillStyle = fire ? (f.k < heat * 0.4 ? "#ffc46a" : "#ff8a3c") : "#f2f7ff"
         ctx.globalAlpha = (0.2 + 0.5 * f.depth) * (fire ? 0.75 + 0.25 * Math.sin(now / 90 + f.phase * 5) : 1)
+        const inText = c !== null && f.x > c.left - 8 && f.x < c.right + 8
+        // Fire in the margins burns bigger, with a soft glow, so the warm half of the page shows.
+        const blaze = fire && !inText
+        ctx.shadowBlur = blaze ? 6 : 0
         ctx.beginPath()
-        ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2)
+        ctx.arc(f.x, f.y, inText ? Math.min(f.r, 0.8) : blaze ? f.r * 1.5 : f.r, 0, Math.PI * 2)
         ctx.fill()
       }
       ctx.globalAlpha = 1
+      ctx.shadowBlur = 0
     }, { mask: 0.25, onResize: (w, h) => {
       const n = isLite() ? 50 : 120
       flakes = Array.from({ length: n }, () => {
