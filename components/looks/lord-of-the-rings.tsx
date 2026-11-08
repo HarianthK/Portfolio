@@ -1,16 +1,11 @@
 "use client"
 
 import { useEffect } from "react"
-import { Uncial_Antiqua } from "next/font/google"
 import { addStyle, canvasLayer, decorate, isLite, isStill, pointer, rand } from "@/components/looks/look-kit"
-
-// A manuscript uncial for headings, fetched only with this look (preload off).
-const uncial = Uncial_Antiqua({ weight: "400", subsets: ["latin"], preload: false, display: "swap" })
 
 // Elven lights and autumn leaves behind the page, a journey map down the left margin, map-line
 // dividers and headings that glow in like writing in fire. See DOCS.md "Looks".
 const CSS = `
-html[data-look="lord-of-the-rings"] main h2 { font-family: ${uncial.style.fontFamily}, var(--font-serif); line-height: 1.15; }
 .me-map { position: absolute; top: 0; left: 6%; right: 6%; height: 16px; transform: translateY(-50%);
   display: flex; align-items: center; justify-content: center; pointer-events: none; z-index: 1; }
 .me-map i { position: absolute; left: 0; right: 0; height: 5px; transform: scaleX(0);

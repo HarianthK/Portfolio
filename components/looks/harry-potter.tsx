@@ -1,16 +1,11 @@
 "use client"
 
 import { useEffect } from "react"
-import { IM_Fell_English } from "next/font/google"
 import { addStyle, canvasLayer, decorate, isLite, pointer, rand } from "@/components/looks/look-kit"
-
-// An old-print revival for headings, fetched only with this look (preload off).
-const fell = IM_Fell_English({ weight: "400", subsets: ["latin"], preload: false, display: "swap" })
 
 // Floating candles behind the page, gold sparkles from the cursor and on background clicks,
 // ink dividers and headings. Original drawing only; see DOCS.md "Looks".
 const CSS = `
-html[data-look="harry-potter"] main h2 { font-family: ${fell.style.fontFamily}, var(--font-serif); letter-spacing: -0.01em; }
 .hp-ink { position: absolute; top: 0; left: 8%; right: 8%; height: 14px; transform: translateY(-50%);
   display: flex; align-items: center; pointer-events: none; z-index: 1; }
 .hp-ink::before { content: ""; flex: none; width: 14px; height: 14px; border-radius: 50%;

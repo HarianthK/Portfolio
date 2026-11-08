@@ -1,17 +1,11 @@
 "use client"
 
 import { useEffect } from "react"
-import { Cinzel } from "next/font/google"
 import { addStyle, canvasLayer, decorate, isLite, isStill, pointer, rand } from "@/components/looks/look-kit"
-
-// Inscriptional Roman capitals for headings, fetched only with this look (preload off).
-const cinzel = Cinzel({ weight: "600", subsets: ["latin"], preload: false, display: "swap" })
 
 // Ice and fire: snow behind the page that turns to rising embers down the page, frost at the
 // screen's edges, longsword dividers and headings that thaw in. See DOCS.md "Looks".
 const CSS = `
-html[data-look="game-of-thrones"] main h2 { font-family: ${cinzel.style.fontFamily}, var(--font-serif);
-  letter-spacing: 0.03em; line-height: 1.15; }
 .got-frost { position: fixed; inset: 0; pointer-events: none; z-index: -5; opacity: 0;
   background: radial-gradient(ellipse 75% 70% at 50% 50%, transparent 72%, rgb(200 228 255 / 0.10) 88%, rgb(220 238 255 / 0.22));
   box-shadow: inset 0 0 70px rgb(190 225 255 / 0.18); animation: got-creep 3s ease-out 0.3s forwards; }

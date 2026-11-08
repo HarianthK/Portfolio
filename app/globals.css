@@ -170,6 +170,17 @@ html[data-look="harry-potter"] :is(h1, h2) {
 
 /* Forest at dusk: green-black, pale parchment, elven gold and leaf green. */
 html[data-look="lord-of-the-rings"] {
+/* Heading faces are declared in app/layout.tsx; a browser fetches one only once a look uses it.
+   They run wider than the default serif, so a wrapped heading splits evenly. */
+html[data-look] main h2 {
+  text-wrap: balance;
+}
+
+html[data-look="harry-potter"] main h2 {
+  font-family: var(--font-look-hp), var(--font-serif);
+  letter-spacing: -0.01em;
+}
+
   --background: oklch(0.14 0.025 155);
   --foreground: oklch(0.93 0.03 95);
   --card: oklch(0.19 0.03 155);
@@ -205,6 +216,10 @@ html[data-look="lord-of-the-rings"] :is(h1, h2) {
 /* Winter: cold slate, frost-white text, ice blue and one ember of fire. */
 html[data-look="game-of-thrones"] {
   --background: oklch(0.15 0.018 250);
+html[data-look="lord-of-the-rings"] main h2 {
+  font-family: var(--font-look-lotr), var(--font-serif);
+}
+
   --foreground: oklch(0.95 0.01 230);
   --card: oklch(0.2 0.02 250);
   --card-foreground: oklch(0.95 0.01 230);
@@ -241,6 +256,17 @@ html[data-look="game-of-thrones"] :is(h1, h2) {
    switch steps aside, keeping its slot. */
 html[data-look] .mode-toggle {
   visibility: hidden;
+html[data-look="game-of-thrones"] main h2 {
+  font-family: var(--font-look-got), var(--font-serif);
+  letter-spacing: 0.03em;
+  line-height: 1.15;
+  /* Capitals read larger and run wider, so the heading sizes step down by a fifth here. */
+  --text-4xl: 1.8rem;
+  --text-5xl: 2.4rem;
+  --text-7xl: 3.6rem;
+  --text-8xl: 4.8rem;
+}
+
 }
 
 /* The Explorer graph is data: an opaque panel keeps a look's particles from passing as nodes. */
