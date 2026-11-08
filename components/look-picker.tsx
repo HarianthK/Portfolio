@@ -32,6 +32,8 @@ export function LookPicker() {
   const prevTheme = useRef<string | null>(null)
   const prefetched = useRef(false)
   const menu = useRef<HTMLDivElement>(null)
+  // Arrowing through the radios previews each look; only a deliberate pick plays the Star Wars jump.
+  const arrowed = useRef(false)
 
   useEffect(() => {
     // The boot script in layout has already applied any saved look to <html>.
@@ -83,7 +85,8 @@ export function LookPicker() {
       store.set(LOOK_STORAGE_KEY, next)
       setTheme("dark")
     }
-    setJump(next !== "default")
+    setJump(next !== "default" && !arrowed.current)
+    arrowed.current = false
     setLook(next)
   }
 
@@ -117,7 +120,7 @@ export function LookPicker() {
         popover="auto"
         className="fixed inset-auto right-4 top-16 m-0 rounded-lg border border-border bg-popover p-3 text-popover-foreground shadow-lg"
       >
-        <fieldset>
+        <fieldset onKeyDown={(e) => (arrowed.current = e.key.startsWith("Arrow"))}>
           <legend className="mb-2 font-mono text-[0.65rem] uppercase tracking-[0.25em] text-muted-foreground">
             Look
           </legend>
@@ -134,9 +137,14 @@ export function LookPicker() {
                 onChange={() => choose(option.id)}
                 className="accent-primary focus-visible:outline-none"
               />
-              <span aria-hidden className="flex overflow-hidden rounded-full border border-border">
-                {option.swatch.map((c) => (
-                  <span key={c} className="h-3.5 w-2.5" style={{ background: c }} />
+              {/* Primary and accent dots on a disc of the look's background, ringed so it shows on any menu. */}
+              <span
+                aria-hidden
+                className="flex items-center gap-0.5 rounded-full p-1 ring-1 ring-border"
+                style={{ background: option.swatch[0] }}
+              >
+                {option.swatch.slice(1).map((c) => (
+                  <span key={c} className="size-2.5 rounded-full" style={{ background: c }} />
                 ))}
               </span>
               {option.label}
