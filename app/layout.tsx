@@ -83,7 +83,7 @@ export default function RootLayout({
               href="/resume.pdf"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex min-h-11 items-center px-3 font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground transition-colors hover:text-foreground"
+              className="hidden min-h-11 items-center px-3 font-mono text-xs uppercase tracking-[0.2em] sm:inline-flex text-muted-foreground transition-colors hover:text-foreground"
             >
               Résumé
             </a>
