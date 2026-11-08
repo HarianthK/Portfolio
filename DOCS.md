@@ -83,6 +83,18 @@ work" and "Systems, apps and experiments".
 Every section now shares one width, max-w-6xl. They had three, and the section
 labels stepped in and out as you scrolled.
 
+## Section shapes
+
+Each section owns its own layout, because the template version repeated one
+shape all the way down and felt templated however good the graph was. Story
+keeps a narrow reading measure and lets the margins carry the year and one
+pulled line. Now gives a narrow rail to the role and its numbers and the wide
+column to the decision, since that is the part hiring teams read. Foundations
+is a table, to be scanned. Figures are one number given room to land, never a
+row of four stat tiles. The retrieval diagram in Now illustrates the idea, not
+any real system, and is two SVGs so its labels stay readable on a phone, where
+one wide drawing shrank them to about seven pixels.
+
 ## Looks: opt-in fan themes
 
 Recruiters arrive from resume links, so nobody sees a fan theme unless they pick

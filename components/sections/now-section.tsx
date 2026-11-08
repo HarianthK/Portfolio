@@ -1,11 +1,7 @@
 import { ChunkVsGraphDiagram } from "@/components/chunk-vs-graph-diagram"
 import { FigureBlock } from "@/components/figure-block"
 
-/**
- * Asymmetric on purpose: a narrow left rail carrying the role and its numbers,
- * and a wide right column carrying the decision. The decision is the part
- * hiring teams actually read, so it gets the space.
- */
+// A narrow rail for the role and numbers, a wide column for the decision hiring teams read.
 export function NowSection() {
   return (
     <section id="now" className="section-grid relative px-6 py-28 md:px-14 md:py-36">
@@ -15,7 +11,7 @@ export function NowSection() {
         </p>
 
         <div className="mt-10 grid gap-14 lg:grid-cols-[minmax(0,20rem)_minmax(0,1fr)] lg:gap-20">
-          {/* Left rail — who, where, and the numbers */}
+          {/* Left rail: who, where, and the numbers */}
           <div>
             <h2 className="font-serif text-4xl leading-tight text-foreground">
               AI Engineer at XNode AI
@@ -43,7 +39,7 @@ export function NowSection() {
             </div>
           </div>
 
-          {/* Right column — the decision */}
+          {/* Right column: the decision */}
           <div className="lg:pt-2">
             <p className="font-mono text-xs uppercase tracking-[0.25em] text-primary">
               The call that mattered

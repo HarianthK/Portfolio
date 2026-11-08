@@ -7,12 +7,7 @@ import { HeroSection } from "@/components/sections/hero-section"
 import { NowSection } from "@/components/sections/now-section"
 import { StorySection } from "@/components/sections/story-section"
 
-/**
- * Order matters: a person, then the current work and the thinking behind it,
- * then the graph as something to play with, then the record. Each section owns
- * its own layout — the previous version repeated one shape all the way down,
- * which is what made it feel templated no matter how good the graph was.
- */
+// A person, the current work, the graph to play with, then the record. Each section owns its layout.
 export function PortfolioPage() {
   return (
     <main>

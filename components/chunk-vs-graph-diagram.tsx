@@ -1,16 +1,4 @@
-/**
- * A conceptual illustration of the retrieval problem described in the "Now"
- * section: a relationship that spans several chunks doesn't survive being split
- * for similarity search, whereas modelling it explicitly keeps it intact.
- *
- * This illustrates the *idea*, not any particular system — it is not a diagram
- * of a real architecture and shouldn't be captioned as one.
- *
- * Built as two separate SVGs in a flex container rather than one wide drawing:
- * a single 520-unit-wide viewBox shrinks to about two-thirds on a phone, which
- * took the labels down to roughly seven pixels. Stacked, each half gets the
- * full column width and stays readable.
- */
+// Illustrates the idea in Now, not a real architecture. Two SVGs so labels stay readable on phones.
 
 function Caption({ children }: { children: React.ReactNode }) {
   return (

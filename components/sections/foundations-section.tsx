@@ -46,11 +46,7 @@ const EDUCATION = [
   },
 ]
 
-/**
- * A compact record rather than more prose. Everything before the current role
- * belongs here, and it's set as a table so it can be scanned in seconds instead
- * of read — a deliberately different shape to the sections around it.
- */
+// Earlier roles as a table, scanned rather than read. See DOCS.md, Section shapes.
 export function FoundationsSection() {
   return (
     <section id="foundations" className="section-grid relative px-6 py-28 md:px-14 md:py-36">

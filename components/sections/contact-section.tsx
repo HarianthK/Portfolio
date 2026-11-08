@@ -5,11 +5,7 @@ export const LINKS = [
   { label: "LinkedIn", href: "https://www.linkedin.com/in/harianthk/", external: true },
 ]
 
-/**
- * The close. Was a 672px column like the story section; now the headline runs
- * across the page at display size and the links sit out on the right, so the
- * last thing on the screen fills it rather than trailing off in the middle.
- */
+// The close: the headline across the page and the links out to the right.
 export function ContactSection() {
   return (
     <section id="contact" className="relative px-6 py-32 md:px-14 md:py-40">

@@ -1,18 +1,10 @@
-/**
- * Still the quietest thing on the page — no graph, no data. But it used to be a
- * 672px column floating in the middle of a 1920px screen, which read as a phone
- * layout stretched onto a desktop.
- *
- * The reading measure stays narrow, because that's what makes prose readable.
- * What changed is that the space around it now carries something: the year set
- * large in the left margin, and a line pulled out of the measure on the right.
- */
+// A narrow reading measure, with the year and a pulled line carrying the margins. See DOCS.md.
 export function StorySection() {
   return (
     <section id="story" className="relative px-6 py-32 md:px-14 md:py-44">
       <h2 className="sr-only">Why</h2>
       <div className="mx-auto grid max-w-6xl gap-y-12 lg:grid-cols-[minmax(0,10rem)_minmax(0,38rem)] lg:gap-x-16 xl:grid-cols-[minmax(0,10rem)_minmax(0,38rem)_minmax(0,1fr)]">
-        {/* Left margin — the year, as a date stamp on the whole section. */}
+        {/* Left margin: the year, as a date stamp on the whole section. */}
         <div className="lg:pt-3">
           <p className="font-mono text-xs uppercase tracking-[0.3em] text-primary">
             <span aria-hidden className="text-primary/70">01</span> Why
@@ -25,7 +17,7 @@ export function StorySection() {
           </p>
         </div>
 
-        {/* The measure. Unchanged width — this is the part being read. */}
+        {/* The measure. Unchanged width, since this is the part being read. */}
         <div>
           <p className="font-serif text-3xl leading-[1.25] text-foreground md:text-[2.6rem]">
             I finished my bachelor&apos;s in Hyderabad and moved to Arizona a few months later, in
@@ -45,7 +37,7 @@ export function StorySection() {
           </div>
         </div>
 
-        {/* Right margin — the sentence the section exists to land, lifted out
+        {/* Right margin: the sentence the section exists to land, lifted out
             of the body so it can be read on its own. */}
         <div className="lg:col-start-2 xl:col-start-auto xl:pt-24">
           <p className="border-l border-primary/30 pl-6 font-serif text-2xl leading-snug text-foreground/90 lg:text-[1.75rem]">

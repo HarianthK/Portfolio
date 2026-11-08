@@ -1,12 +1,4 @@
-/**
- * A single number given room to land.
- *
- * The metrics were previously buried mid-sentence in body copy, which is
- * exactly where someone scanning for thirty seconds misses them. This is
- * deliberately *not* a row of four stat tiles — that pattern is the one the
- * template version used. These are meant to punctuate a section, two or three
- * at most, at points where the eye is already resting.
- */
+// One number given room to land, not a row of stat tiles. See DOCS.md, Section shapes.
 export function FigureBlock({
   value,
   label,
