@@ -1,28 +1,34 @@
 import { GraphStage } from "@/components/graph/graph-stage"
+import { StaticGraph } from "@/components/graph/static-graph"
 import { LINKS } from "@/components/sections/contact-section"
 
-/**
- * The graph gets the top of the page to itself and the words sit underneath it
- * in their own band. Nothing is laid over the canvas, so no scrim is needed and
- * nothing has to be dimmed to stay readable.
- */
+// Graph and words never overlap, so no scrim: stacked on phones, side by side from lg. See DOCS.md.
 export function HeroSection() {
   return (
-    <section id="hero" className="relative flex min-h-screen flex-col">
-      <div className="relative flex-1 overflow-hidden">
-        <GraphStage framing="immersive" />
+    <section
+      id="hero"
+      className="relative flex min-h-screen flex-col lg:grid lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]"
+    >
+      <div className="relative min-h-[50vh] flex-1 overflow-hidden lg:order-2 lg:min-h-screen">
+        <GraphStage
+          framing="immersive"
+          tapToLoad
+          fallback={<StaticGraph labels />}
+          // Clear of the fixed corner controls on phones.
+          className="absolute inset-x-0 bottom-0 top-16 lg:top-0"
+        />
 
         {/* Fades the canvas into the band below so the join isn't a hard edge.
             Sits below the readout panel: as a later sibling it was painting
             over the panel, washing out the bottom of it. */}
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-32"
+          className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-24 lg:hidden"
           style={{ background: "linear-gradient(to bottom, transparent, var(--background))" }}
         />
       </div>
 
-      <div className="relative px-6 pb-14 md:px-14">
+      <div className="relative px-6 pb-14 md:px-14 lg:order-1 lg:flex lg:flex-col lg:justify-end lg:pb-24 lg:pr-0">
         <p className="font-mono text-xs uppercase tracking-[0.3em] text-primary">
           AI Engineer · Phoenix, Arizona
         </p>
@@ -31,7 +37,7 @@ export function HeroSection() {
         </h1>
         <p className="mt-6 max-w-xl text-lg leading-relaxed text-foreground/85 md:text-xl">
           I build retrieval and knowledge-graph systems that production can depend on, at XNode AI.
-          Above is my own work, modelled as the kind of graph I build for a living.
+          The picture is my own work, modelled as the kind of graph I build for a living.
         </p>
         {/* The ways to act, up where a recruiter lands rather than only at the bottom. */}
         <ul className="mt-8 flex flex-wrap gap-x-6 gap-y-1 font-mono text-sm">
