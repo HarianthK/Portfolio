@@ -48,9 +48,10 @@
   /* Knowledge-graph node families. Three categories so the graph reads as
      structured rather than a monochrome cloud: warm for people/work, cool for
      technology. Light theme runs them darker to hold contrast on beige. */
-  --node-role: oklch(0.52 0.16 48);
-  --node-project: oklch(0.56 0.15 35);
-  --node-tech: oklch(0.48 0.12 235);
+  /* Same inks as FAMILY_COLOR in lib/graph-palette.ts, so the still picture matches the live one. */
+  --node-role: #bd8410;
+  --node-project: #9c2c1a;
+  --node-tech: #22607d;
 }
 
 .dark {
@@ -90,9 +91,9 @@
 
   /* Brighter here on purpose — these get bloom applied over near-black, so they
      need headroom to glow rather than blow out to white. */
-  --node-role: oklch(0.81 0.14 78);
-  --node-project: oklch(0.7 0.13 48);
-  --node-tech: oklch(0.72 0.12 225);
+  --node-role: #f0b429;
+  --node-project: #e07b39;
+  --node-tech: #4a9fc4;
 }
 
 /* Opt-in fan looks (see DOCS.md). The html prefix outranks :root and .dark. */
