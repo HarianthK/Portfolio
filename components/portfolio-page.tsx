@@ -1,5 +1,6 @@
 import { BuiltSection } from "@/components/sections/built-section"
 import { ContactSection } from "@/components/sections/contact-section"
+import { StaticGraph } from "@/components/graph/static-graph"
 import { ExplorerSection } from "@/components/sections/explorer-section"
 import { FoundationsSection } from "@/components/sections/foundations-section"
 import { HeroSection } from "@/components/sections/hero-section"
@@ -18,7 +19,7 @@ export function PortfolioPage() {
       <HeroSection />
       <StorySection />
       <NowSection />
-      <ExplorerSection />
+      <ExplorerSection fallback={<StaticGraph caption="Loading the graph" />} />
       <BuiltSection />
       <FoundationsSection />
       <ContactSection />
