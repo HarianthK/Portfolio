@@ -1,26 +1,37 @@
 "use client"
 
 import { useEffect } from "react"
-import { addStyle, canvasLayer, decorate, isStill, pointer, rand } from "@/components/looks/look-kit"
+import { Cinzel } from "next/font/google"
+import { addStyle, canvasLayer, decorate, isLite, isStill, pointer, rand } from "@/components/looks/look-kit"
 
-// Snow on gusts of wind behind the page, frost at the screen's edges, dragonfire embers on
-// background clicks, steel blade dividers and headings that thaw in. See DOCS.md "Looks".
+// Inscriptional Roman capitals for headings, fetched only with this look (preload off).
+const cinzel = Cinzel({ weight: "600", subsets: ["latin"], preload: false, display: "swap" })
+
+// Ice and fire: snow behind the page that turns to rising embers down the page, frost at the
+// screen's edges, longsword dividers and headings that thaw in. See DOCS.md "Looks".
 const CSS = `
-.got-frost { position: fixed; inset: 0; pointer-events: none; z-index: 30; opacity: 0;
+html[data-look="game-of-thrones"] main h2 { font-family: ${cinzel.style.fontFamily}, var(--font-serif);
+  letter-spacing: 0.03em; line-height: 1.15; }
+.got-frost { position: fixed; inset: 0; pointer-events: none; z-index: -5; opacity: 0;
   background: radial-gradient(ellipse 75% 70% at 50% 50%, transparent 72%, rgb(200 228 255 / 0.10) 88%, rgb(220 238 255 / 0.22));
   box-shadow: inset 0 0 70px rgb(190 225 255 / 0.18); animation: got-creep 3s ease-out 0.3s forwards; }
 @keyframes got-creep { to { opacity: 1; } }
 
-.got-blade { position: absolute; top: 0; left: 7%; right: 7%; height: 12px; transform: translateY(-50%);
+.got-blade { position: absolute; top: 0; left: 7%; right: 7%; height: 26px; transform: translateY(-50%);
   display: flex; align-items: center; pointer-events: none; z-index: 1; }
 .got-blade[data-side="right"] { flex-direction: row-reverse; }
-.got-blade::before { content: ""; flex: none; width: 6px; height: 12px; border-radius: 2px; margin: 0 2px;
-  background: linear-gradient(#8a7a5c, #4b4130); box-shadow: 0 0 0 1px rgb(0 0 0 / 0.4); }
-.got-blade i { position: relative; flex: 1; height: 4px; overflow: hidden; transform: scaleX(0); transform-origin: left;
-  clip-path: polygon(0 0, 97% 0, 100% 50%, 97% 100%, 0 100%);
-  background: repeating-linear-gradient(115deg, #9aa6b2 0 6px, #6d7884 6px 9px, #b9c3cd 9px 14px, #7e8995 14px 18px);
-  box-shadow: 0 0 8px rgb(170 210 255 / 0.35); transition: transform 1s cubic-bezier(0.25, 0.8, 0.25, 1); }
-.got-blade[data-side="right"] i { transform-origin: right; clip-path: polygon(3% 0, 100% 0, 100% 100%, 3% 100%, 0 50%); }
+.got-blade::before { content: ""; flex: none; width: 11px; height: 11px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #c9d2dc, #6b7580 70%, #3c434b); box-shadow: 0 0 0 1px rgb(0 0 0 / 0.5); }
+.got-blade b { flex: none; width: 30px; height: 7px; border-radius: 2px; box-shadow: 0 0 0 1px rgb(0 0 0 / 0.4);
+  background: repeating-linear-gradient(60deg, #4a3a2a 0 3px, #2c2219 3px 5px); }
+.got-blade s { flex: none; width: 5px; height: 26px; border-radius: 3px; box-shadow: 0 0 0 1px rgb(0 0 0 / 0.4);
+  background: linear-gradient(90deg, #6b7580, #c9d2dc 50%, #6b7580); }
+.got-blade i { position: relative; flex: 1; height: 8px; overflow: hidden; transform: scaleX(0); transform-origin: left;
+  clip-path: polygon(0 0, 96% 15%, 100% 50%, 96% 85%, 0 100%);
+  background: linear-gradient(transparent 44%, rgb(40 50 62 / 0.55) 44% 56%, transparent 56%),
+    repeating-linear-gradient(100deg, #aeb8c3 0 9px, #98a3af 9px 15px, #b9c3cd 15px 22px, #a2adb8 22px 28px);
+  box-shadow: 0 0 10px rgb(170 210 255 / 0.3); transition: transform 1s cubic-bezier(0.25, 0.8, 0.25, 1); }
+.got-blade[data-side="right"] i { transform-origin: right; clip-path: polygon(4% 15%, 100% 0, 100% 100%, 4% 85%, 0 50%); }
 .got-blade i::after { content: ""; position: absolute; inset: 0; transform: translateX(-120%);
   background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.85), transparent); width: 30%; }
 .got-lit i { transform: scaleX(1); }
@@ -50,7 +61,7 @@ html[data-look="game-of-thrones"] :is(#built article, #foundations dl > div):is(
 }
 `
 
-type Flake = { x: number; y: number; r: number; vy: number; depth: number; phase: number }
+type Flake = { x: number; y: number; r: number; vy: number; depth: number; phase: number; k: number }
 type Ember = { x: number; y: number; vx: number; vy: number; t: number; life: number; r: number }
 
 export default function GameOfThrones() {
@@ -64,12 +75,13 @@ export default function GameOfThrones() {
       decorate("got", (i) => {
         const d = Object.assign(document.createElement("div"), { className: "got-blade" })
         d.dataset.side = i % 2 ? "right" : "left"
-        d.append(document.createElement("i"))
+        d.append(document.createElement("b"), document.createElement("s"), document.createElement("i"))
         return d
       }, "got-wait", "got-show"),
     )
 
-    // Snow in three depths; a gust every 6 to 14 seconds pushes it sideways, then dies away.
+    // Snow in three depths; a gust every 6 to 14 seconds pushes it sideways, then dies away. Further
+    // down the page more of it is fire: by Contact most particles are embers rising instead.
     let flakes: Flake[] = []
     let wind = 12, gust = 0, gustAt = performance.now() + rand(6000, 14000)
     let last = performance.now()
@@ -81,32 +93,36 @@ export default function GameOfThrones() {
         gustAt = now + rand(6000, 14000)
       }
       gust *= Math.pow(0.6, dt)
-      ctx.fillStyle = "#f2f7ff"
+      const max = document.documentElement.scrollHeight - h
+      const heat = max > 0 ? Math.max(0, (window.scrollY / max - 0.3) / 0.7) * 0.75 : 0
       for (const f of flakes) {
-        f.y += f.vy * dt
-        f.x += ((wind + gust) * f.depth + Math.sin(now / 1100 + f.phase) * 10) * dt
+        const fire = f.k < heat
+        f.y += (fire ? -0.8 : 1) * f.vy * dt
+        f.x += ((wind + gust) * f.depth * (fire ? 0.3 : 1) + Math.sin(now / 1100 + f.phase) * 10) * dt
         if (f.y > h + 5) Object.assign(f, { y: -5, x: rand(0, w) })
+        if (f.y < -5) Object.assign(f, { y: h + 5, x: rand(0, w) })
         if (f.x > w + 5) f.x = -5
         if (f.x < -5) f.x = w + 5
-        ctx.globalAlpha = 0.2 + 0.5 * f.depth
+        ctx.fillStyle = fire ? (f.k < heat * 0.4 ? "#ffc46a" : "#ff8a3c") : "#f2f7ff"
+        ctx.globalAlpha = (0.2 + 0.5 * f.depth) * (fire ? 0.75 + 0.25 * Math.sin(now / 90 + f.phase * 5) : 1)
         ctx.beginPath()
         ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2)
         ctx.fill()
       }
       ctx.globalAlpha = 1
-    }, (w, h) => {
-      const n = w < 640 ? 50 : 120
+    }, { mask: 0.25, onResize: (w, h) => {
+      const n = isLite() ? 50 : 120
       flakes = Array.from({ length: n }, () => {
         const depth = [0.35, 0.65, 1][Math.floor(rand(0, 3))]
-        return { x: rand(0, w), y: rand(0, h), r: 0.6 + 1.6 * depth, vy: 20 + 50 * depth, depth, phase: rand(0, 6) }
+        return { x: rand(0, w), y: rand(0, h), r: 0.6 + 1.6 * depth, vy: 20 + 50 * depth, depth, phase: rand(0, 6), k: Math.random() }
       })
-    })
+    } })
     cleanups.push(sky.stop)
 
     // Dragonfire: embers burst from the click, rise, flicker and burn out.
     let embers: Ember[] = []
     let flash: { x: number; y: number; t: number } | null = null
-    const fx = canvasLayer(40, (ctx, _w, _h, now) => {
+    const fx = canvasLayer(-5, (ctx, _w, _h, now) => {
       if (flash && now - flash.t < 350) {
         const q = (now - flash.t) / 350
         const g = ctx.createRadialGradient(flash.x, flash.y, 0, flash.x, flash.y, 90)

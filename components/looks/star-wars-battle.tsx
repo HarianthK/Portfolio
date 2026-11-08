@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect } from "react"
-import { useSafeReducedMotion } from "@/lib/use-safe-reduced-motion"
+import { fadeOverText, isLite, isStill } from "@/components/looks/look-kit"
 import { drawShip, type ShipKind } from "@/components/looks/star-wars-ships"
 
 // Background skirmishes behind the page. Timing and readability rules are in DOCS.md "Looks".
@@ -16,7 +16,7 @@ const LENGTH: Record<ShipKind, number> = { xwing: 56, tie: 40, falcon: 66, destr
 const DEPTHS = [
   { size: 1.6, alpha: 0.9, speed: 260, z: 1 },
   { size: 1.15, alpha: 0.7, speed: 190, z: 0.6 },
-  { size: 0.8, alpha: 0.5, speed: 140, z: 0.3 },
+  { size: 0.8, alpha: 0.35, speed: 140, z: 0.3 },
 ]
 const RED = "#ff5a36"
 const GREEN = "#4dff6a"
@@ -32,11 +32,8 @@ function bezier(p: Pt[], s: number): Pt {
 }
 
 export default function StarWarsBattle() {
-  const hookReduced = useSafeReducedMotion()
-
   useEffect(() => {
-    // The hook reads false on its first render, so check the query directly as well.
-    if (hookReduced || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return
+    if (isStill()) return
     // Test hook: ?sw-battle starts skirmishes every 6 s with a hit; ?sw-battle=falcon forces the Falcon.
     const q = new URLSearchParams(location.search)
     const test = q.has("sw-battle") ? q.get("sw-battle") || "on" : null
@@ -44,6 +41,7 @@ export default function StarWarsBattle() {
     const canvas = document.createElement("canvas")
     canvas.setAttribute("aria-hidden", "true")
     canvas.style.cssText = "position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:-10"
+    const unmask = fadeOverText(canvas, 0.25)
     document.body.append(canvas)
     const ctx = canvas.getContext("2d")!
 
@@ -69,10 +67,13 @@ export default function StarWarsBattle() {
       kick()
     }
 
-    // Half the fights on a wide screen keep to a side margin; the rest cross the whole sky behind the page.
-    function makePath(): Pt[] {
-      const margin = (w - 1024) / 2
-      if (margin >= 110 && Math.random() < 0.5) {
+    // Free width beside the 1152 px content column.
+    const margin = () => (w - 1152) / 2
+    // Near and mid fights keep to a side margin; only small, dim far ones cross behind the text.
+    function makePath(far: boolean): Pt[] {
+      const m = margin()
+      if (!far && m >= 110) {
+        const margin = m
         const x0 = Math.random() < 0.5 ? 40 : w - margin + 40
         const xs = () => rand(x0, x0 + margin - 80)
         const ys = [-90, h * 0.33, h * 0.66, h + 90]
@@ -85,8 +86,9 @@ export default function StarWarsBattle() {
     }
 
     function startBattle() {
-      const small = w < 640
-      const depth = pick(small ? DEPTHS.slice(1) : DEPTHS)
+      const small = isLite()
+      const m = margin()
+      const depth = m < 110 ? DEPTHS[2] : m < 200 ? pick(DEPTHS.slice(1)) : pick(DEPTHS)
       const falcon = test ? test === "falcon" : Math.random() < 0.2
       const ship = (kind: ShipKind, lag: number, off: number, amp: number, fire = ""): Ship =>
         ({ kind, lag, off, amp, phase: rand(0, 6), fire, next: 0, dead: false })
@@ -105,7 +107,7 @@ export default function StarWarsBattle() {
         if (!small && Math.random() < 0.35) ships.push(ship("xwing", 1.05, -20, 10, RED))
         if (!small && Math.random() < 0.5) ships.push(ship("tie", 1.3, 0, 12, GREEN))
       }
-      const path = makePath()
+      const path = makePath(depth === DEPTHS[2] && (m < 110 || Math.random() < 0.5))
       let len = 0
       for (let i = 1; i < 4; i++) len += Math.hypot(path[i].x - path[i - 1].x, path[i].y - path[i - 1].y)
       battles.push({
@@ -280,9 +282,10 @@ export default function StarWarsBattle() {
       clearTimeout(sdTimer)
       window.removeEventListener("resize", resize)
       document.removeEventListener("visibilitychange", onVisibility)
+      unmask()
       canvas.remove()
     }
-  }, [hookReduced])
+  }, [])
 
   return null
 }
