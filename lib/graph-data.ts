@@ -9,6 +9,8 @@
  * out: if a claim isn't backed by something real, it isn't a node.
  */
 
+import { PROJECTS } from "@/components/sections/built-section"
+
 export type NodeKind = "self" | "role" | "education" | "project" | "outcome" | "tech"
 
 export type EdgeKind = "worked-at" | "studied-at" | "built" | "built-with" | "produced" | "uses"
@@ -67,7 +69,7 @@ export const NODE_FAMILY: Record<NodeKind, "self" | "role" | "project" | "tech">
   tech: "tech",
 }
 
-export const nodes: GraphNode[] = [
+const baseNodes: GraphNode[] = [
   {
     id: "self",
     label: "Harianth Kalavala",
@@ -141,22 +143,6 @@ export const nodes: GraphNode[] = [
     detail: "Modelled relationships between data assets and business entities to improve RAG retrieval",
     meta: "Professional work",
     section: "now",
-  },
-  {
-    id: "langgraph",
-    label: "LangGraph Agentic Platform",
-    kind: "project",
-    detail: "Multi-agent system: real-time news analytics, geospatial risk scoring, automated alerting",
-    meta: "Personal project",
-    section: "work",
-  },
-  {
-    id: "registry-points",
-    label: "Registry Points",
-    kind: "project",
-    detail: "Type-ahead search over the dance registry: points per division, competition history, eligibility",
-    meta: "Personal project · live on Vercel",
-    section: "work",
   },
   {
     id: "archival-system",
@@ -251,15 +237,13 @@ export const nodes: GraphNode[] = [
   { id: "nextjs", label: "Next.js", kind: "tech" },
 ]
 
-export const links: GraphLink[] = [
+const baseLinks: GraphLink[] = [
   // Where he's been
   { source: "self", target: "xnode", kind: "worked-at" },
   { source: "self", target: "asu-library", kind: "worked-at" },
   { source: "self", target: "idori", kind: "worked-at" },
   { source: "self", target: "asu", kind: "studied-at" },
   { source: "self", target: "ngit", kind: "studied-at" },
-  { source: "self", target: "langgraph", kind: "built" },
-  { source: "self", target: "registry-points", kind: "built" },
 
   // What each role produced
   { source: "xnode", target: "info-catalog", kind: "built" },
@@ -292,16 +276,8 @@ export const links: GraphLink[] = [
   { source: "kg-systems", target: "rag", kind: "built-with" },
   { source: "kg-systems", target: "vector-db", kind: "built-with" },
 
-  { source: "langgraph", target: "langgraph-lib", kind: "built-with" },
-  { source: "langgraph", target: "langchain", kind: "built-with" },
   { source: "langgraph", target: "agentic", kind: "built-with" },
-  { source: "langgraph", target: "llms", kind: "built-with" },
-  { source: "langgraph", target: "python", kind: "built-with" },
 
-  { source: "registry-points", target: "react", kind: "built-with" },
-  { source: "registry-points", target: "nextjs", kind: "built-with" },
-  { source: "registry-points", target: "rest", kind: "built-with" },
-  { source: "registry-points", target: "javascript", kind: "built-with" },
 
   { source: "archival-system", target: "python", kind: "built-with" },
   { source: "archival-system", target: "sql", kind: "built-with" },
@@ -317,6 +293,70 @@ export const links: GraphLink[] = [
   { source: "xnode", target: "aws", kind: "uses" },
   { source: "etl", target: "postgres", kind: "uses" },
 ]
+
+// The personal projects come from the Built section, so the graph can't drift from it.
+const PROJECT_ID: Record<string, string> = { "LangGraph Agentic Platform": "langgraph" }
+const projectId = (name: string) => PROJECT_ID[name] ?? name.toLowerCase().replace(/[^a-z0-9]+/g, "-")
+
+// Stack entries that become tool nodes even though nothing else on the graph uses them yet.
+const EXTRA_TECH = new Set(["OpenTelemetry", "Rust"])
+
+/** The Built entry's opening clause: its first sentence, cut at a colon or a later comma. */
+export function openingClause(summary: string): string {
+  const sentence = summary.split(/\.(\s|$)/)[0].split(":")[0]
+  const comma = sentence.indexOf(", ", 40)
+  return comma > 0 ? sentence.slice(0, comma) : sentence
+}
+
+function deriveProjects() {
+  const techByLabel = new Map(baseNodes.filter((n) => n.kind === "tech").map((n) => [n.label, n.id]))
+  const uses = new Map<string, number>()
+  PROJECTS.forEach((p) => p.stack.forEach((t) => uses.set(t, (uses.get(t) ?? 0) + 1)))
+
+  const extraNodes: GraphNode[] = []
+  const extraLinks: GraphLink[] = []
+  for (const project of PROJECTS) {
+    const id = projectId(project.name)
+    extraNodes.push({
+      id,
+      label: project.name,
+      kind: "project",
+      detail: openingClause(project.summary),
+      meta: project.figure ? `${project.figure.value} · ${project.figure.label}` : "Personal project",
+      section: "work",
+    })
+    extraLinks.push({ source: "self", target: id, kind: "built" })
+    for (const tool of project.stack) {
+      let techId = techByLabel.get(tool)
+      if (!techId && ((uses.get(tool) ?? 0) > 1 || EXTRA_TECH.has(tool))) {
+        techId = tool.toLowerCase().replace(/[^a-z0-9]+/g, "-")
+        techByLabel.set(tool, techId)
+        extraNodes.push({ id: techId, label: tool, kind: "tech" })
+      }
+      if (techId) extraLinks.push({ source: id, target: techId, kind: "built-with" })
+    }
+  }
+  // Nibble compiles for the CHIP-8 machine; both Built entries say so.
+  extraLinks.push({ source: "nibble", target: "chip-8", kind: "uses" })
+  return { extraNodes, extraLinks }
+}
+
+const derived = deriveProjects()
+export const nodes: GraphNode[] = [...baseNodes, ...derived.extraNodes]
+export const links: GraphLink[] = [...baseLinks, ...derived.extraLinks]
+
+/** The few nodes the hero names outright; the rest reveal themselves on hover or tap. */
+export const HERO_LABELS = new Set([
+  "self",
+  "xnode",
+  "kg-systems",
+  "langgraph",
+  "retrace",
+  "upstream",
+  "trailblaze-az",
+  "chip-8",
+  "ember",
+])
 
 /** Node ids that belong to a section, for camera targeting and highlighting. */
 export function nodesInSection(section: SectionId): string[] {

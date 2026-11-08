@@ -1,7 +1,7 @@
 import { FigureBlock } from "@/components/figure-block"
 import { cn } from "@/lib/utils"
 
-type Project = {
+export type Project = {
   name: string
   summary: string
   stack: string[]
@@ -10,7 +10,7 @@ type Project = {
   figure?: { value: string; label: string; context: string }
 }
 
-const PROJECTS: Project[] = [
+export const PROJECTS: Project[] = [
   {
     name: "LangGraph Agentic Platform",
     summary:
