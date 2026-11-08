@@ -1,11 +1,16 @@
 "use client"
 
 import { useEffect } from "react"
-import { addStyle, canvasLayer, decorate, pointer, rand } from "@/components/looks/look-kit"
+import { IM_Fell_English } from "next/font/google"
+import { addStyle, canvasLayer, decorate, isLite, pointer, rand } from "@/components/looks/look-kit"
+
+// An old-print revival for headings, fetched only with this look (preload off).
+const fell = IM_Fell_English({ weight: "400", subsets: ["latin"], preload: false, display: "swap" })
 
 // Floating candles behind the page, gold sparkles from the cursor and on background clicks,
 // ink dividers and headings. Original drawing only; see DOCS.md "Looks".
 const CSS = `
+html[data-look="harry-potter"] main h2 { font-family: ${fell.style.fontFamily}, var(--font-serif); letter-spacing: -0.01em; }
 .hp-ink { position: absolute; top: 0; left: 8%; right: 8%; height: 14px; transform: translateY(-50%);
   display: flex; align-items: center; pointer-events: none; z-index: 1; }
 .hp-ink::before { content: ""; flex: none; width: 14px; height: 14px; border-radius: 50%;
@@ -19,9 +24,9 @@ const CSS = `
 .hp-wait { opacity: 0; }
 .hp-show { animation: hp-ink 1.2s ease-out both; }
 @keyframes hp-ink {
-  0% { opacity: 0; filter: blur(5px); letter-spacing: 0.06em; color: #b8323a; }
+  0% { opacity: 0; filter: blur(5px); color: #b8323a; }
   55% { opacity: 1; filter: blur(0.6px); }
-  100% { opacity: 1; filter: none; letter-spacing: normal; }
+  100% { opacity: 1; filter: none; }
 }
 
 html[data-look="harry-potter"] :is(#built article, #foundations dl > div) { position: relative; isolation: isolate; }
@@ -53,6 +58,7 @@ export default function HarryPotter() {
     )
 
     // Candles hang at fixed spots across the sky and bob; nearer ones are larger and brighter.
+    // The layer fades to a quarter over the text column, and the wax is never brighter than the text.
     let candles: Candle[] = []
     const sky = canvasLayer(-10, (ctx, w, h, now) => {
       const shift = window.scrollY * -0.04
@@ -60,17 +66,16 @@ export default function HarryPotter() {
         const x = c.x * w
         const y = c.y * h + Math.sin(now / 1900 + c.phase) * c.bob + shift * c.s
         const flick = 0.85 + 0.15 * Math.sin(now / 90 + c.phase * 7) * Math.sin(now / 230 + c.phase)
-        // Candles over the text column are dimmed by half so they never compete with it.
-        ctx.globalAlpha = (0.3 + 0.35 * c.s) * (c.x > 0.14 && c.x < 0.86 ? 0.5 : 1)
+        ctx.globalAlpha = 0.3 + 0.35 * c.s
         const glow = ctx.createRadialGradient(x, y - 22 * c.s, 0, x, y - 22 * c.s, 42 * c.s * flick)
         glow.addColorStop(0, "rgba(255, 214, 130, 0.55)")
         glow.addColorStop(1, "rgba(255, 170, 80, 0)")
         ctx.fillStyle = glow
         ctx.fillRect(x - 50 * c.s, y - 72 * c.s, 100 * c.s, 100 * c.s)
         const body = ctx.createLinearGradient(x - 4 * c.s, 0, x + 4 * c.s, 0)
-        body.addColorStop(0, "#d9cdb2")
-        body.addColorStop(0.5, "#f6efe0")
-        body.addColorStop(1, "#bfb196")
+        body.addColorStop(0, "#a8987a")
+        body.addColorStop(0.5, "#d2c3a2")
+        body.addColorStop(1, "#968868")
         ctx.fillStyle = body
         ctx.fillRect(x - 4 * c.s, y - 10 * c.s, 8 * c.s, 40 * c.s)
         ctx.fillStyle = "#3b2a1a"
@@ -81,17 +86,17 @@ export default function HarryPotter() {
         ctx.fill()
       }
       ctx.globalAlpha = 1
-    }, (w) => {
-      const n = w < 640 ? 7 : 13
+    }, { mask: 0.22, onResize: (w) => {
+      const n = isLite() ? 6 : 13
       candles = Array.from({ length: n }, (_, i) => ({
         x: (i + rand(0.2, 0.8)) / n, y: rand(0.12, 0.78), s: rand(0.55, 1.15), phase: rand(0, 6), bob: rand(4, 12),
       }))
-    })
+    } })
     cleanups.push(sky.stop)
 
     // Sparkles: a few from the cursor as it moves, a burst where the background is clicked.
     let sparks: Spark[] = []
-    const fx = canvasLayer(40, (ctx, _w, _h, now) => {
+    const fx = canvasLayer(-5, (ctx, _w, _h, now) => {
       sparks = sparks.filter((p) => now - p.t < p.life)
       ctx.globalCompositeOperation = "lighter"
       for (const p of sparks) {
