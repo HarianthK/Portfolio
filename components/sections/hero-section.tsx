@@ -7,7 +7,7 @@ export function HeroSection() {
   return (
     <section
       id="hero"
-      className="relative flex min-h-screen flex-col lg:grid lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]"
+      className="@container relative flex min-h-screen flex-col lg:grid lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]"
     >
       <div className="relative min-h-[50vh] flex-1 overflow-hidden lg:order-2 lg:min-h-screen">
         <GraphStage
@@ -28,7 +28,8 @@ export function HeroSection() {
         />
       </div>
 
-      <div className="relative px-6 pb-14 md:px-14 lg:order-1 lg:flex lg:flex-col lg:justify-end lg:pb-24 lg:pr-0">
+      {/* Centred on the graph's middle, and from lg on the same left edge as every section below. */}
+      <div className="relative px-6 pb-14 md:px-14 lg:order-1 lg:flex lg:flex-col lg:justify-center lg:pb-0 lg:pr-0 lg:pl-[max(3.5rem,calc((100cqw-72rem)/2))]">
         <p className="font-mono text-xs uppercase tracking-[0.3em] text-primary">
           AI Engineer · Phoenix, Arizona
         </p>
