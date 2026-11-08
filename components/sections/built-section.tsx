@@ -36,7 +36,7 @@ const PROJECTS: Project[] = [
     figure: {
       value: "10",
       label: "Dependencies, down from 53",
-      context: "Twenty-eight Radix packages removed for components that are a few lines of markup.",
+      context: "28 Radix packages removed for components that are a few lines of markup.",
     },
   },
   {
@@ -79,7 +79,7 @@ const PROJECTS: Project[] = [
     figure: {
       value: "33",
       label: "Pull requests upstream",
-      context: "Sent to twenty eight projects and twenty five maintainers, thirteen merged so far, each one a bug proved with a program before it was sent.",
+      context: "Sent to 28 projects and 25 maintainers, 13 merged as of November 2026; the live page has today's count. Each one is a bug proved with a program before it was sent.",
     },
   },
   {
@@ -184,7 +184,7 @@ const PROJECTS: Project[] = [
     // The figure is the bug it was hiding, not the coverage. See DOCS.md.
     name: "CHIP-8",
     summary:
-      "A virtual machine from 1977, rebuilt from its instruction set and running in a browser, with both of the extensions people later built on it: SUPER-CHIP's larger screen and scrolling, and XO-CHIP's second colour plane, sixty four kilobytes of memory and waveform sound. Every program in the community archive runs, and because none of them record how they are played, the page works out which keys each one watches by playing it. It can also read any program back as Octo source, telling code from sprites by walking every path the machine could take; all 104 listings compile back to the identical bytes through Octo's own compiler. Hold Backspace and the game runs backwards, up to ten seconds, with every frame of every archive program checked to come back exactly. It is also the machine Nibble compiles for.",
+      "A virtual machine from 1977, rebuilt from its instruction set and running in a browser, with both of the extensions people later built on it: SUPER-CHIP's larger screen and scrolling, and XO-CHIP's second colour plane, 64 KB of memory and waveform sound. Every program in the community archive runs, and because none of them record how they are played, the page works out which keys each one watches by playing it. It can also read any program back as Octo source, telling code from sprites by walking every path the machine could take; every listing compiles back to the identical bytes through Octo's own compiler. Hold Backspace and the game runs backwards, up to ten seconds, with every frame of every archive program checked to come back exactly. It is also the machine Nibble compiles for.",
     stack: ["JavaScript", "Canvas", "Web Audio"],
     href: "https://harianthk.github.io/chip8/",
     hrefLabel: "Play it",
