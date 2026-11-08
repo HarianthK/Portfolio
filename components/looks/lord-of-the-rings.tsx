@@ -76,6 +76,7 @@ export default function LordOfTheRings() {
     let marks: Mark[] = []
     let mouse: { x: number; y: number } | null = null
     let mapAlpha = 0
+    let arrived = 0
     let last = performance.now()
     const sky = canvasLayer(-10, (ctx, w, h, now) => {
       const dt = Math.min(0.05, (now - last) / 1000)
@@ -116,6 +117,13 @@ export default function LordOfTheRings() {
         ctx.globalCompositeOperation = "lighter"
         ctx.globalAlpha = 0.5 * mapAlpha
         ctx.drawImage(sprite, rx - 18, ry - 18, 36, 36)
+        // The ring arrives: reaching Contact makes it flare once, over 800 ms.
+        if (p > 0.98 && !arrived && !still) arrived = now
+        const q = arrived ? (now - arrived) / 800 : 1
+        if (q < 1) {
+          ctx.globalAlpha = Math.sin(q * Math.PI) * mapAlpha
+          ctx.drawImage(sprite, rx - 60, ry - 60, 120, 120)
+        }
         ctx.globalAlpha = mapAlpha
         ctx.globalCompositeOperation = "source-over"
         ctx.strokeStyle = "#e8c46c"

@@ -253,7 +253,7 @@ pointer helper that ignores clicks on anything a visitor reads or uses.
 - Lord of the Rings: forest palette, Cormorant Garamond headings (Uncial Antiqua turned "AI Engineer at"
   into "λI Ensineer αc", and even as a lone initial its A reads as a lambda), wandering elven lights and autumn
   leaves, a journey map down the left margin (dotted route, hills, trees and a gold ring that
-  travels down it with the scroll, fading out beside sections whose text reaches the edge), a soft
+  travels down it with the scroll and flares once on reaching Contact, fading out beside sections whose text reaches the edge), a soft
   light that follows the cursor, map-line dividers with a compass star, headings that glow in from
   fire to gold.
 - Game of Thrones: ice and fire. Cinzel headings, snow in three depths with gusts of wind that
