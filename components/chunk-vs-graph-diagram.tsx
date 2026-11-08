@@ -21,7 +21,7 @@ function Caption({ children }: { children: React.ReactNode }) {
 }
 
 function Footnote({ children }: { children: React.ReactNode }) {
-  return <p className="mt-2 font-mono text-xs text-muted-foreground/70">{children}</p>
+  return <p className="mt-2 font-mono text-xs text-muted-foreground">{children}</p>
 }
 
 function ChunkedPanel() {

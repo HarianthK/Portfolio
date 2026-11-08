@@ -51,14 +51,14 @@ export function LookPicker() {
         size="icon"
         popoverTarget="look-menu"
         aria-label="Choose a look"
-        className="text-muted-foreground hover:text-foreground"
+        className="size-11 rounded-full text-muted-foreground hover:text-foreground"
       >
         <Sparkles className="h-[1.1rem] w-[1.1rem]" />
       </Button>
       <div
         id="look-menu"
         popover="auto"
-        className="fixed inset-auto right-4 top-14 m-0 rounded-lg border border-border bg-popover p-3 text-popover-foreground shadow-lg"
+        className="fixed inset-auto right-4 top-16 m-0 rounded-lg border border-border bg-popover p-3 text-popover-foreground shadow-lg"
       >
         <fieldset>
           <legend className="mb-2 font-mono text-[0.65rem] uppercase tracking-[0.25em] text-muted-foreground">

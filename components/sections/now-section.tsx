@@ -11,7 +11,7 @@ export function NowSection() {
     <section id="now" className="section-grid relative px-6 py-28 md:px-14 md:py-36">
       <div className="mx-auto max-w-6xl">
         <p className="font-mono text-xs uppercase tracking-[0.3em] text-primary">
-          <span className="text-primary/50">02</span> Now
+          <span aria-hidden className="text-primary/70">02</span> Now
         </p>
 
         <div className="mt-10 grid gap-14 lg:grid-cols-[minmax(0,20rem)_minmax(0,1fr)] lg:gap-20">
@@ -20,7 +20,7 @@ export function NowSection() {
             <h2 className="font-serif text-4xl leading-tight text-foreground">
               AI Engineer at XNode AI
             </h2>
-            <p className="mt-3 font-mono text-xs text-muted-foreground/70">
+            <p className="mt-3 font-mono text-xs text-muted-foreground">
               06/2025 – Present · Remote
             </p>
 
@@ -68,13 +68,13 @@ export function NowSection() {
               <p className="text-foreground">
                 That&apos;s not a flaw in RAG so much as a question it was never shaped to answer.
                 So for relational queries I stopped asking retrieval to infer connections and
-                modelled them directly — entity and relationship extraction into Neo4j and Graphiti,
+                modelled them directly: entity and relationship extraction into Neo4j and Graphiti,
                 running alongside the vector layer rather than replacing it.
               </p>
               <p>
                 Building a graph with correct relations costs a significant number of tokens up
                 front: you pay once at ingestion instead of paying again at every query. It earns
-                that back only if the system answers enough relational questions to justify it —
+                that back only if the system answers enough relational questions to justify it,
                 which is exactly the bet worth checking before you make it.
               </p>
             </div>

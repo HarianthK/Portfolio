@@ -10,11 +10,12 @@
 export function StorySection() {
   return (
     <section id="story" className="relative px-6 py-32 md:px-14 md:py-44">
+      <h2 className="sr-only">Why</h2>
       <div className="mx-auto grid max-w-368 gap-y-12 lg:grid-cols-[minmax(0,10rem)_minmax(0,38rem)_minmax(0,1fr)] lg:gap-x-16">
         {/* Left margin — the year, as a date stamp on the whole section. */}
         <div className="lg:pt-3">
           <p className="font-mono text-xs uppercase tracking-[0.3em] text-primary">
-            <span className="text-primary/50">01</span> Why
+            <span aria-hidden className="text-primary/70">01</span> Why
           </p>
           <p
             aria-hidden
@@ -33,14 +34,13 @@ export function StorySection() {
 
           <div className="mt-10 space-y-6 text-lg leading-relaxed text-muted-foreground">
             <p>
-              I came for the master&apos;s at ASU, and I came to find out how somewhere else thinks
-              — a different country, different people, a different set of defaults about how things
+              I came for the master&apos;s at ASU, and I came to find out how somewhere else thinks:
+              a different country, different people, a different set of defaults about how things
               get built and why they get built that way.
             </p>
             <p>
-              That instinct turned out to be most of the job. The useful part of retrieval work is
-              rarely the model; it&apos;s asking what a system is actually being asked for, rather
-              than what it was originally designed to answer.
+              That instinct turned out to be most of the job: asking what a system is actually
+              being asked for, rather than what it was originally designed to answer.
             </p>
           </div>
         </div>

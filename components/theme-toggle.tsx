@@ -20,7 +20,7 @@ export function ThemeToggle() {
       variant="ghost"
       size="icon"
       onClick={() => setTheme(isDark ? "light" : "dark")}
-      className="mode-toggle text-muted-foreground hover:text-foreground"
+      className="mode-toggle size-11 rounded-full text-muted-foreground hover:text-foreground"
     >
       {mounted ? (
         isDark ? <Sun className="h-[1.1rem] w-[1.1rem]" /> : <Moon className="h-[1.1rem] w-[1.1rem]" />

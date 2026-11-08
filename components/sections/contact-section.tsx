@@ -1,4 +1,4 @@
-const LINKS = [
+export const LINKS = [
   { label: "hkalaval@asu.edu", href: "mailto:hkalaval@asu.edu", primary: true },
   { label: "GitHub", href: "https://github.com/HarianthK", external: true },
   { label: "LinkedIn", href: "https://www.linkedin.com/in/harianthk/", external: true },
@@ -15,7 +15,7 @@ export function ContactSection() {
     <section id="contact" className="relative px-6 py-32 md:px-14 md:py-40">
       <div className="mx-auto max-w-368">
         <p className="font-mono text-xs uppercase tracking-[0.3em] text-primary">
-          <span className="text-primary/50">06</span> Contact
+          <span aria-hidden className="text-primary/70">06</span> Contact
         </p>
 
         <div className="mt-10 grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)] lg:gap-20">
@@ -48,9 +48,9 @@ export function ContactSection() {
           </ul>
         </div>
 
-        <p className="mt-28 font-mono text-xs text-muted-foreground/50">
+        <footer className="mt-28 font-mono text-xs text-muted-foreground/80">
           © {new Date().getFullYear()} Harianth Kalavala
-        </p>
+        </footer>
       </div>
     </section>
   )

@@ -78,10 +78,18 @@ export default function RootLayout({
           <ScrollProgress />
           {/* The nav bar is gone with the single-page layout, so the theme
               control lives on its own in the corner. */}
-          <div className="fixed right-4 top-4 z-50 flex">
+          <header className="fixed right-4 top-4 z-50 flex items-center rounded-full border border-border/60 bg-background/80 p-0.5 backdrop-blur">
+            <a
+              href="/resume.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex min-h-11 items-center px-3 font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Résumé
+            </a>
             <LookPicker />
             <ThemeToggle />
-          </div>
+          </header>
           {children}
         </ThemeProvider>
         <Analytics />

@@ -33,7 +33,7 @@ export function ExplorerSection() {
         <div className="mx-auto flex max-w-6xl flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="font-mono text-xs uppercase tracking-[0.3em] text-primary">
-              <span className="text-primary/50">03</span> Explore
+              <span aria-hidden className="text-primary/70">03</span> Explore
             </p>
             <h2 className="mt-4 max-w-lg font-serif text-4xl leading-tight text-foreground md:text-5xl">
               The whole thing, as a graph

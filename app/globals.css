@@ -296,6 +296,13 @@ html[data-look] .mode-toggle {
   html {
     scroll-behavior: smooth;
   }
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
 }
 
 @keyframes float {

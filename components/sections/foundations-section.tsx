@@ -18,7 +18,7 @@ const ENTRIES: Entry[] = [
       "Managed data integrity across a 2.5M+ item physical and digital repository, one of the largest university collection systems in the US.",
       "Built an archival inventory and reporting system indexing 9,500+ records, improving operational visibility by 40%.",
       "Automated metadata validation and root-cause analysis in Python and SQL, cutting record duplication by 20%.",
-      "Tomalee Doan LibAid Award, 2nd place — Fall 2024.",
+      "Tomalee Doan LibAid Award, 2nd place, Fall 2024.",
     ],
   },
   {
@@ -58,7 +58,7 @@ export function FoundationsSection() {
         <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="font-mono text-xs uppercase tracking-[0.3em] text-primary">
-              <span className="text-primary/50">05</span> Foundations
+              <span aria-hidden className="text-primary/70">05</span> Foundations
             </p>
             <h2 className="mt-4 font-serif text-4xl leading-tight text-foreground md:text-5xl">
               Where the data instincts came from
@@ -81,7 +81,7 @@ export function FoundationsSection() {
             >
               <dt>
                 <p className="font-mono text-xs text-primary">{entry.period}</p>
-                <p className="mt-2 font-mono text-[0.7rem] uppercase tracking-wider text-muted-foreground/60">
+                <p className="mt-2 font-mono text-xs uppercase tracking-wider text-muted-foreground">
                   {entry.place}
                 </p>
               </dt>
