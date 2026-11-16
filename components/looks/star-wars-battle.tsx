@@ -72,7 +72,7 @@ export default function StarWarsBattle() {
     // Near and mid fights keep to a side margin; only small, dim far ones cross behind the text.
     function makePath(far: boolean): Pt[] {
       const m = margin()
-      if (!far && m >= 110) {
+      if (!far && m >= 170) {
         const margin = m
         const x0 = Math.random() < 0.5 ? 40 : w - margin + 40
         const xs = () => rand(x0, x0 + margin - 80)
@@ -88,7 +88,7 @@ export default function StarWarsBattle() {
     function startBattle() {
       const small = isLite()
       const m = margin()
-      const depth = m < 110 ? DEPTHS[2] : m < 200 ? pick(DEPTHS.slice(1)) : pick(DEPTHS)
+      const depth = m < 170 ? DEPTHS[2] : m < 200 ? pick(DEPTHS.slice(1)) : pick(DEPTHS)
       const falcon = test ? test === "falcon" : Math.random() < 0.2
       const ship = (kind: ShipKind, lag: number, off: number, amp: number, fire = ""): Ship =>
         ({ kind, lag, off, amp, phase: rand(0, 6), fire, next: 0, dead: false })

@@ -493,7 +493,7 @@ function Scene({
           nodeColor={(node: GraphNode) => colorForNode(node, palette)}
           // Light edges are faint rules on paper, so they never outweigh the labels.
           linkColor={() => palette.link}
-          linkOpacity={linksIn ? (theme === "light" ? 0.3 : 0.22) : 0}
+          linkOpacity={linksIn ? (theme === "light" ? 0.3 : 0.45) : 0}
           linkWidth={0.4}
           // Particles travelling the edges read as data moving through the
           // graph, the thing these systems actually do. Held back with the

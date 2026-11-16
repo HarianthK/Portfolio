@@ -23,7 +23,7 @@ export type GraphPalette = {
 
 // The default look keeps its hand-tuned hexes; a fan look supplies its own --node-* tokens.
 const DEFAULT: Record<GraphTheme, GraphPalette> = {
-  dark: { theme: "dark", ...FAMILY_COLOR.dark, link: "#8a7a5f", particle: "#f0b429", fog: "#0a0704" },
+  dark: { theme: "dark", ...FAMILY_COLOR.dark, link: "#c9b48c", particle: "#f0b429", fog: "#0a0704" },
   light: { theme: "light", ...FAMILY_COLOR.light, link: "#8c7f70", particle: "#bd8410", fog: "#f7ecdd" },
 }
 
