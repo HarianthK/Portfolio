@@ -26,11 +26,8 @@ type Props = {
   className?: string
 }
 
-/**
- * A contained stage for the graph, used twice on the page: once as the opening
- * image, once as the interactive explorer. Not a full-page backdrop: text over a
- * live scene needed so heavy a scrim that it turned the graph to mud.
- */
+// The graph's box, used as the opening image and as the explorer. Not a full-page backdrop:
+// text over a live scene needed so heavy a scrim that it turned the graph to mud.
 export function GraphStage({
   highlight = null,
   framing = "immersive",

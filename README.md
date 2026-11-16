@@ -51,9 +51,7 @@ Next.js and TypeScript, with Tailwind for styling.
 
 The graph is [react-three-fiber](https://r3f.docs.pmnd.rs/) over
 [three.js](https://threejs.org/), with a force-directed layout and a little
-post-processing for the glow and depth. Scrolling is smoothed by
-[Lenis](https://lenis.darkroom.engineering/), and the smaller animations are
-[Framer Motion](https://motion.dev).
+post-processing for the glow and depth.
 
 The link preview image and the tab icon are generated from the graph itself,
 so a shared link looks like the site rather than like a default.

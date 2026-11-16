@@ -287,7 +287,7 @@ function Scene({
     if (!group || objects.size === 0) return
 
     /*
-      What the camera frames. Without a scroll focus this is the whole graph , 
+      What the camera frames. Without a scroll focus this is the whole graph, since
       filter chips dim nodes rather than removing them, so re-fitting to the lit
       ones would make the camera lurch on every chip press.
 
@@ -544,7 +544,7 @@ function Scene({
         <EffectComposer>
           {/*
             Focus is pinned to the graph's centre, which is the origin, since
-            the group is positioned to put it there and the controls orbit it , 
+            the group is positioned to put it there and the controls orbit it,
             rather than a hand-tuned distance. A fixed `focusDistance` is in
             normalised units against the far plane, and at far=4000 the value
             that looked right on paper put the focal plane roughly 250 units in

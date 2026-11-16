@@ -499,3 +499,11 @@ html[data-look] #explorer .rounded-xl.border {
     transform: scaleX(1);
   }
 }
+
+/* Before Safari 17 the popover attribute is ignored, so the menu would sit open; hide the picker there. */
+@supports not selector(:popover-open) {
+  #look-menu,
+  [popovertarget="look-menu"] {
+    display: none;
+  }
+}
