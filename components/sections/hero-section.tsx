@@ -5,7 +5,7 @@ import { links } from "@/lib/site"
 const FACTS = [
   { term: "Now", value: "AI Engineer at XNode AI", detail: "06/2025 – Present · Remote" },
   { term: "Education", value: "M.S. Information Technology, ASU", detail: "GPA 4.0 / 4.0 · May 2025" },
-  { term: "Open source", value: "33 pull requests upstream", detail: "Thirteen merged so far" },
+  { term: "Open source", value: "33 pull requests upstream", detail: "Sixteen merged so far" },
 ]
 
 // Words first, graph beside them on wide screens and under them on phones.
