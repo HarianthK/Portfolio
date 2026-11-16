@@ -10,6 +10,8 @@ export type Label = {
   side: Side
   radius: number
   self: boolean
+  // The owner's last spot, as [distance step, angle step], tried first so the name holds still.
+  spot?: [number, number]
 }
 
 // A backing chip rather than a text halo, so an edge never strikes through a name.
@@ -97,30 +99,33 @@ export function findSelfSpot(
   blockedByLabel: (box: Box) => boolean,
   nodes: Box[],
   ambiguous: (box: Box) => boolean,
-): { box: Box; side: Side } {
+  last?: [number, number],
+): { box: Box; side: Side; spot: [number, number] } {
   const { cx, cy, r } = node
   const { gap, edge } = frame
-  let best: { box: Box; side: Side; hits: number } | null = null
-  for (const k of [1, 1.5, 2, 3, 4, 6]) {
-    for (let i = 0; i < 16; i++) {
-      // Below first, then sweeping both ways round to above.
-      const a = Math.PI / 2 + (i % 2 ? 1 : -1) * Math.ceil(i / 2) * (Math.PI / 8)
-      const dx = Math.cos(a)
-      const dy = Math.sin(a)
-      const x = cx + dx * (r + gap * k + w / 2) - w / 2
-      const y = cy + dy * (r + gap * k + h / 2) - h / 2
-      const box = {
-        x: Math.min(Math.max(x, edge), frame.width - w - edge),
-        y: Math.min(Math.max(y, edge), frame.height - h - edge),
-        w,
-        h,
-      }
-      const side: Side = dy > 0.7 ? "below" : dy < -0.7 ? "above" : dx > 0 ? "right" : "left"
-      const hits =
-        nodes.filter((n) => overlaps(box, n)).length + (blockedByLabel(box) ? 0.5 : 0) + (ambiguous(box) ? 3 : 0)
-      if (hits === 0) return { box, side }
-      if (!best || hits < best.hits) best = { box, side, hits }
+  const tries: [number, number][] = []
+  for (const k of [1, 1.5, 2, 3, 4, 6]) for (let i = 0; i < 16; i++) tries.push([k, i])
+  // The last spot goes first and wins ties, so a moving camera doesn't make the name hop.
+  if (last) tries.unshift(last)
+  let best: { box: Box; side: Side; spot: [number, number]; hits: number } | null = null
+  for (const [k, i] of tries) {
+    // Below first, then sweeping both ways round to above.
+    const a = Math.PI / 2 + (i % 2 ? 1 : -1) * Math.ceil(i / 2) * (Math.PI / 8)
+    const dx = Math.cos(a)
+    const dy = Math.sin(a)
+    const x = cx + dx * (r + gap * k + w / 2) - w / 2
+    const y = cy + dy * (r + gap * k + h / 2) - h / 2
+    const box = {
+      x: Math.min(Math.max(x, edge), frame.width - w - edge),
+      y: Math.min(Math.max(y, edge), frame.height - h - edge),
+      w,
+      h,
     }
+    const side: Side = dy > 0.7 ? "below" : dy < -0.7 ? "above" : dx > 0 ? "right" : "left"
+    const hits =
+      nodes.filter((n) => overlaps(box, n)).length + (blockedByLabel(box) ? 0.5 : 0) + (ambiguous(box) ? 3 : 0)
+    if (hits === 0) return { box, side, spot: [k, i] }
+    if (!best || hits < best.hits) best = { box, side, spot: [k, i], hits }
   }
   return best!
 }
@@ -184,8 +189,12 @@ export function placeLabels(
       for (const [other, d] of rivals) if (other !== id && edgeGap(box, d) < own) return true
       return false
     }
-    let spot = label.self
-      ? findSelfSpot(label.w, label.h, disc, frame, byLabel, padded, ambiguous)
+    const self = label.self
+      ? findSelfSpot(label.w, label.h, disc, frame, byLabel, padded, ambiguous, label.shown ? label.spot : undefined)
+      : null
+    if (self) label.spot = self.spot
+    let spot = self
+      ? self
       : findSpot(label.w, label.h, disc, frame, (b) => byLabel(b) || byNode(b) || ambiguous(b), label.shown ? label.side : "below")
     // Whatever is under the pointer always gets a label.
     if (!spot && r <= 0) spot = findSpot(label.w, label.h, disc, { ...frame, slack: Infinity }, () => false)
