@@ -53,3 +53,52 @@ the template version used and it flattened every project to the same importance.
 The figure alternates sides so the eye keeps moving, but only on entries that
 have one. Without that condition the article became a grid with an empty cell
 and squeezed the text into 16rem.
+
+## Default look redesign, 2026-11-15
+
+A review of the page as a stranger would meet it found five weaknesses.
+
+The opening screen was a graph with the name under it. The graph took three
+quarters of the first screen, the name and one muted sentence sat at the bottom,
+and nothing said where he works or how to reach him. On a phone the name started
+past the halfway mark.
+
+There was no way around the page. No header, no section links, and the résumé
+and email were only at the very bottom of roughly eleven thousand pixels.
+
+The order put the 2023 story before the current job, and the earlier roles and
+degrees after eleven long project entries. A recruiter looking for the record
+had to scroll past all of it.
+
+Small mono text was dimmed with opacity (stack lists, dates, places, section
+numbers, the copyright line), which took it below the 4.5 to 1 contrast AA asks
+for. Links had only the browser's faint default focus ring.
+
+Sections were padded by up to eleven rem top and bottom, which made a long page
+longer without adding any calm.
+
+What changed:
+
+- **Hero.** Words first. Role and city, the name, one sentence on what he
+  builds, then Get in touch, Résumé, GitHub and LinkedIn, then three facts:
+  current job, degree, upstream pull requests. Every one of those facts is
+  stated in full further down; the hero repeats them and adds none. The graph
+  sits beside the words on wide screens and under them on phones, and fades
+  into the page so the canvas has no visible edge.
+- **Header.** A fixed bar with the name, section links from tablet width up, the
+  résumé and the theme switch. It replaces the theme switch that used to float
+  alone in the corner. A skip link comes before it for keyboard users.
+- **Order.** Hero, Now, Foundations, Built, Explore, Why, Contact. Who he is,
+  what he does now, where he has been, what he has made, then the graph to play
+  with and the personal note before the close. Section numbers follow the new
+  order.
+- **Contrast and focus.** Dimmed text now uses the muted colour at full
+  strength, which passes AA in both themes. Every focusable element gets a
+  solid two pixel ring in the accent colour.
+- **Spacing.** Section padding is five rem on phones and seven on desktops, and
+  project entries sit closer together.
+- **Removed.** Seven keyframe animations in globals.css that nothing used.
+
+Left alone on purpose: all copy and figures, the palette, the three typefaces,
+the graph itself, and the alternating project layout described above. The site
+still opens in the dark theme whatever the system setting is.
