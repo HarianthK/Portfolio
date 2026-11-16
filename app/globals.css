@@ -89,7 +89,7 @@
   --sidebar-ring: oklch(0.81 0.14 78);
   --grid-line: rgba(200, 172, 120, 0.07);
 
-  /* Brighter here on purpose — these get bloom applied over near-black, so they
+  /* Brighter here on purpose, these get bloom applied over near-black, so they
      need headroom to glow rather than blow out to white. */
   --node-role: #f0b429;
   --node-project: #e07b39;
@@ -268,7 +268,7 @@ html[data-look="game-of-thrones"] main h2 {
 }
 
 /* Every look is dark (the picker keeps and restores the visitor's own choice), so the light/dark
-   switch steps aside; the pill is pinned right, so nothing else moves. */
+   switch steps aside; it is the last control in the header, so nothing else moves. */
 html[data-look] .mode-toggle {
   display: none;
 }
@@ -351,117 +351,20 @@ html[data-look] #explorer .rounded-xl.border {
       display: none;
     }
   }
-  a:focus-visible,
-  button:focus-visible,
-  input:focus-visible {
+  /* The skip link lands here; a ring round the whole page would say nothing. */
+  main:focus {
+    outline: none;
+  }
+  :focus-visible:not(main) {
     outline: 2px solid var(--ring);
     outline-offset: 3px;
     border-radius: 2px;
   }
 }
 
-@keyframes float {
-  0%,
-  100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-20px);
-  }
-}
-
-@keyframes pulse-glow {
-  0%,
-  100% {
-    opacity: 0.5;
-  }
-  50% {
-    opacity: 1;
-  }
-}
-
-/* Added new animations for enhanced visual effects */
-@keyframes gradient {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
-
-@keyframes shimmer {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(100%);
-  }
-}
-
-@keyframes glow-pulse {
-  0%,
-  100% {
-    box-shadow: 0 0 20px rgba(240, 180, 41, 0.28);
-  }
-  50% {
-    box-shadow: 0 0 40px rgba(240, 180, 41, 0.55);
-  }
-}
-
-@keyframes pulse-right {
-  from {
-    left: -12%;
-  }
-  to {
-    left: 112%;
-  }
-}
-
-@keyframes pulse-down {
-  from {
-    top: -12%;
-  }
-  to {
-    top: 112%;
-  }
-}
-
-.animate-float {
-  animation: float 6s ease-in-out infinite;
-}
-
-.animate-pulse-glow {
-  animation: pulse-glow 3s ease-in-out infinite;
-}
-
-/* Added new animation classes */
-.animate-gradient {
-  animation: gradient 8s ease infinite;
-}
-
-.animate-shimmer {
-  animation: shimmer 2s infinite;
-}
-
-.animate-glow-pulse {
-  animation: glow-pulse 2s ease-in-out infinite;
-}
-
-.animate-pulse-right {
-  animation: pulse-right linear infinite;
-}
-
-.animate-pulse-down {
-  animation: pulse-down linear infinite;
-}
-
 /*
   Content sections no longer sit over the 3D graph, so they have to carry
-  themselves. This is a faint measuring-grid — enough that a section reads as
+  themselves. This is a faint measuring-grid, enough that a section reads as
   deliberately surfaced rather than empty, quiet enough not to compete with
   text. Static by design; the moving version belongs to the graph.
 */

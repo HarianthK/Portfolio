@@ -8,7 +8,7 @@ export const LINKS = [
 // The close: the headline across the page and the links out to the right.
 export function ContactSection() {
   return (
-    <section id="contact" className="relative px-6 py-32 md:px-14 md:py-40">
+    <section id="contact" className="relative px-6 py-20 md:px-14 md:py-28">
       <div className="mx-auto max-w-6xl">
         <p className="font-mono text-xs uppercase tracking-[0.3em] text-primary">
           <span aria-hidden className="text-primary/90">06</span> Contact

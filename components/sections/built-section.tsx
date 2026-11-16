@@ -30,11 +30,6 @@ export const PROJECTS: Project[] = [
     stack: ["Next.js", "React", "REST APIs", "Vercel"],
     href: "https://registry-points.vercel.app",
     hrefLabel: "Visit site",
-    figure: {
-      value: "10",
-      label: "Dependencies, down from 53",
-      context: "28 Radix packages removed for components that are a few lines of markup.",
-    },
   },
   {
     // The scoring is the part worth describing, and it is checkable against the
@@ -129,11 +124,6 @@ export const PROJECTS: Project[] = [
     stack: ["Python", "Graphics"],
     href: "https://github.com/HarianthK/trace-rays",
     hrefLabel: "View code",
-    figure: {
-      value: "13",
-      label: "Breakages caught",
-      context: "The occlusion test, the PNG filter byte, the quadratic's roots and the surface normal first, then seven for the glass and two for its shadow, each removed on purpose and each failing a check.",
-    },
   },
   {
     // The fast part of a SAT solver is knowing which dead ends not to walk into twice.
@@ -316,10 +306,10 @@ export function BuiltSection() {
   const featured = PROJECTS.filter((p) => FEATURED.includes(p.name))
   const rest = PROJECTS.filter((p) => !FEATURED.includes(p.name))
   return (
-    <section id="built" className="relative px-6 py-28 md:px-14 md:py-36">
+    <section id="built" className="relative px-6 py-20 md:px-14 md:py-28">
       <div className="mx-auto max-w-6xl">
         <p className="font-mono text-xs uppercase tracking-[0.3em] text-primary">
-          <span aria-hidden className="text-primary/90">04</span> Built
+          <span aria-hidden className="text-primary/90">03</span> Built
         </p>
         <h2 className="mt-4 max-w-lg font-serif text-4xl leading-tight text-foreground md:text-5xl">
           Outside the day job
@@ -328,13 +318,13 @@ export function BuiltSection() {
         <h3 className="mt-16 font-mono text-xs uppercase tracking-[0.25em] text-primary">
           AI and LLM work
         </h3>
-        <div className="mt-6 space-y-20">
+        <div className="mt-6 space-y-14">
           {featured.map((project, i) => (
             <Featured key={project.name} project={project} i={i} />
           ))}
         </div>
 
-        <h3 className="mt-28 font-mono text-xs uppercase tracking-[0.25em] text-primary">
+        <h3 className="mt-20 font-mono text-xs uppercase tracking-[0.25em] text-primary">
           Systems, apps and experiments
         </h3>
         <div className="mt-6 grid gap-x-14 gap-y-12 md:grid-cols-2">

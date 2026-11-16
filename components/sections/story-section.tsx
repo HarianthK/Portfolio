@@ -1,13 +1,13 @@
 // A narrow reading measure, with the year and a pulled line carrying the margins. See DOCS.md.
 export function StorySection() {
   return (
-    <section id="story" className="relative px-6 py-32 md:px-14 md:py-44">
+    <section id="story" className="relative px-6 py-20 md:px-14 md:py-28">
       <h2 className="sr-only">Why</h2>
       <div className="mx-auto grid max-w-6xl gap-y-12 lg:grid-cols-[minmax(0,10rem)_minmax(0,38rem)] lg:gap-x-16 xl:grid-cols-[minmax(0,10rem)_minmax(0,38rem)_minmax(0,1fr)]">
         {/* Left margin: the year, as a date stamp on the whole section. */}
         <div className="lg:pt-3">
           <p className="font-mono text-xs uppercase tracking-[0.3em] text-primary">
-            <span aria-hidden className="text-primary/90">01</span> Why
+            <span aria-hidden className="text-primary/90">05</span> Why
           </p>
           <p
             aria-hidden

@@ -49,12 +49,12 @@ const EDUCATION = [
 // Earlier roles as a table, scanned rather than read. See DOCS.md, Section shapes.
 export function FoundationsSection() {
   return (
-    <section id="foundations" className="section-grid relative px-6 py-28 md:px-14 md:py-36">
+    <section id="foundations" className="section-grid relative px-6 py-20 md:px-14 md:py-28">
       <div className="mx-auto max-w-6xl">
         <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="font-mono text-xs uppercase tracking-[0.3em] text-primary">
-              <span aria-hidden className="text-primary/90">05</span> Foundations
+              <span aria-hidden className="text-primary/90">02</span> Foundations
             </p>
             <h2 className="mt-4 font-serif text-4xl leading-tight text-foreground md:text-5xl">
               Where the data instincts came from
