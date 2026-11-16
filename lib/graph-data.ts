@@ -1,7 +1,7 @@
 /**
  * The career as a knowledge graph.
  *
- * This isn't decoration — it's the same shape of structure Harianth builds at
+ * This isn't decoration, it's the same shape of structure Harianth builds at
  * work (entity/relationship extraction into a navigable graph), applied to his
  * own history. Nodes are real entities; edges are real, typed relationships.
  *
@@ -17,7 +17,7 @@ export type EdgeKind = "worked-at" | "studied-at" | "built" | "built-with" | "pr
 
 /**
  * Which scroll section pulls the camera to this node's cluster. "hero" and
- * "contact" deliberately own no nodes — both show the whole graph, so the piece
+ * "contact" deliberately own no nodes, both show the whole graph, so the piece
  * opens and closes on the complete picture.
  */
 export type SectionId = "hero" | "now" | "work" | "foundations" | "contact"
@@ -28,7 +28,7 @@ export type GraphNode = {
   kind: NodeKind
   /** One line, shown when the node is focused. */
   detail?: string
-  /** Secondary line — dates, org, scale. */
+  /** Secondary line, dates, org, scale. */
   meta?: string
   section?: SectionId
 }
@@ -40,7 +40,7 @@ export type GraphLink = {
 }
 
 /**
- * Visual weight per kind. The graph should read as hierarchy at a glance —
+ * Visual weight per kind. The graph should read as hierarchy at a glance,
  * you, then where you've been, then what came out of it, then the tools.
  */
 export const NODE_SIZE: Record<NodeKind, number> = {
@@ -54,7 +54,7 @@ export const NODE_SIZE: Record<NodeKind, number> = {
 
 /**
  * Three colour families, not six. Warm for people and institutions, copper for
- * things built and what they produced, cool for technology — so the graph has
+ * things built and what they produced, cool for technology, so the graph has
  * structure instead of being a monochrome cloud. Values are read from CSS
  * custom properties at runtime so both themes stay correct.
  */
@@ -131,7 +131,7 @@ const baseNodes: GraphNode[] = [
     label: "Enterprise Information Catalog",
     kind: "project",
     detail: "Unified metadata across PostgreSQL and 5+ sources for AI-powered discovery and lineage",
-    // Employer is named once, in the role node — professional work is attributed
+    // Employer is named once, in the role node, professional work is attributed
     // generically everywhere else.
     meta: "Professional work",
     section: "now",

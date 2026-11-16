@@ -9,7 +9,7 @@ export const contentType = "image/png"
 /**
  * A node with three neighbours rather than initials. Two reasons: a gradient
  * monogram is the stock look every site-builder ships, and at 32px two letters
- * are illegible anyway — a shape survives the size where text doesn't.
+ * are illegible anyway, a shape survives the size where text doesn't.
  */
 export default function Icon() {
   return new ImageResponse(

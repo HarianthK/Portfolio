@@ -8,12 +8,12 @@ export function colorForNode(node: GraphNode, palette: GraphPalette): string {
 }
 
 /**
- * How hard a node glows. Light mode runs almost flat — without bloom to catch
+ * How hard a node glows. Light mode runs almost flat, without bloom to catch
  * it, emissive only bleaches the colour out.
  */
 export function emissiveForNode(kind: GraphNode["kind"], theme: GraphTheme): number {
   // Flat on light. Any emissive lifts the colour toward white, which is exactly
-  // the wrong direction on paper — it's what made the inks look chalky.
+  // the wrong direction on paper, it's what made the inks look chalky.
   if (theme === "light") return 0
   if (kind === "self") return 2.4
   return kind === "tech" ? 0.7 : 1.6
@@ -31,7 +31,7 @@ export function radiusForNode(node: GraphNode): number {
  * were flat discs of colour with a glow bolted on, which is exactly why the
  * graph read as a diagram rather than a photograph of something.
  *
- * Additively blended, so it only ever adds light — over a near-black background
+ * Additively blended, so it only ever adds light, over a near-black background
  * that gives the edge of each node a filament brightness that bloom then picks
  * up and spreads.
  */
@@ -108,7 +108,7 @@ export function applyEntrance(
     Nothing to grow yet is emphatically *not* "finished". The first frame runs
     before the graph library has built any node objects, and reporting settled
     there meant the caller stopped driving the entrance a moment before every
-    node appeared — leaving all of them stuck at zero scale, permanently.
+    node appeared, leaving all of them stuck at zero scale, permanently.
   */
   if (objects.size === 0) return false
 
@@ -148,7 +148,7 @@ export function applyEntrance(
  * Builds the 3D object for a node: an emissive core so bloom has something to
  * catch and a soft outer shell for volume. Labels are HTML (components/graph/graph-labels.ts).
  *
- * Objects are cached per node id — `nodeThreeObject` is called on every graph
+ * Objects are cached per node id, `nodeThreeObject` is called on every graph
  * refresh, and rebuilding geometry each time would leak GPU memory.
  */
 export function createNodeObjectFactory(palette: GraphPalette) {
@@ -164,7 +164,7 @@ export function createNodeObjectFactory(palette: GraphPalette) {
     const radius = radiusForNode(node)
 
     // Transparent in both cases so section de-emphasis can actually fade a node
-    // out — without it only the glow dimmed and the sphere stayed put.
+    // out, without it only the glow dimmed and the sphere stayed put.
     const coreMaterial =
       theme === "light"
         ? // Unlit on paper: a shaded sphere catches specular highlights that
@@ -187,7 +187,7 @@ export function createNodeObjectFactory(palette: GraphPalette) {
 
     // Rim light and halo are dark-theme only. On the light theme a pale ring of
     // a dark ink is just a grey smudge, and one around every node was what made
-    // the whole graph look muddy — light mode reads as print, not film.
+    // the whole graph look muddy, light mode reads as print, not film.
     if (theme === "dark") {
       // Sits just proud of the surface so the rim traces the node's silhouette
       // rather than z-fighting with it.
@@ -217,8 +217,8 @@ export function createNodeObjectFactory(palette: GraphPalette) {
 
     group.userData.nodeId = node.id
     group.userData.kind = node.kind
-    // Which wave this node arrives in. Built from the middle outwards — the
-    // person, then where he's been, then what came out of it, then the tools —
+    // Which wave this node arrives in. Built from the middle outwards, the
+    // person, then where he's been, then what came out of it, then the tools,
     // so the graph assembles in the order the hierarchy reads.
     group.userData.appearOrder = APPEAR_ORDER[node.kind]
     // Entrance starts from nothing. applyEntrance drives this back to 1; if
@@ -228,7 +228,7 @@ export function createNodeObjectFactory(palette: GraphPalette) {
     return group
   }
 
-  // The cache doubles as the lookup for scroll choreography — the scene reads
+  // The cache doubles as the lookup for scroll choreography, the scene reads
   // world positions out of it to work out where a section's cluster sits.
   return { nodeObject, objects: cache }
 }
@@ -259,7 +259,7 @@ export function applySectionEmphasis(
       if (!material) return
 
       // The rim light fades through a uniform rather than material.opacity,
-      // which its shader ignores — without this branch a de-emphasised node
+      // which its shader ignores, without this branch a de-emphasised node
       // kept a bright outline while its body dimmed away underneath.
       const uniforms = (material as unknown as THREE.ShaderMaterial).uniforms
       if (uniforms?.uOpacity) {

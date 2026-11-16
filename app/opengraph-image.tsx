@@ -59,7 +59,7 @@ function edge(x1: number, y1: number, x2: number, y2: number) {
 export default async function OpengraphImage() {
   // Each face is subset to exactly the text it renders. Satori falls back
   // per-glyph across whatever fonts are registered, so a string with no font
-  // covering it gets assembled from several at once — which collapses the word
+  // covering it gets assembled from several at once, which collapses the word
   // spacing. Every block below therefore names a face loaded with its own text.
   const [body, serif, mono] = await Promise.all([
     googleFont("Manrope", 400, LINE),
@@ -105,7 +105,7 @@ export default async function OpengraphImage() {
             {edge(155, 345, 60, 430)}
             {edge(340, 120, 250, 60)}
 
-            {/* Tech — smallest and coolest, so they read as background detail. */}
+            {/* Tech, smallest and coolest, so they read as background detail. */}
             {dot(250, 60, 8, TECH)}
             {dot(95, 195, 8, TECH)}
             {dot(580, 90, 8, TECH)}
@@ -122,7 +122,7 @@ export default async function OpengraphImage() {
             {dot(500, 200, 18, ROLE)}
             {dot(200, 470, 18, ROLE)}
 
-            {/* Halo then core — plain circles, since satori has no blur. */}
+            {/* Halo then core, plain circles, since satori has no blur. */}
             {dot(330, 315, 54, SELF, 0.12)}
             {dot(330, 315, 30, SELF)}
           </svg>
