@@ -1,8 +1,10 @@
+import { links } from "@/lib/site"
+
 const LINKS = [
-  { label: "hkalaval@asu.edu", href: "mailto:hkalaval@asu.edu", primary: true },
-  { label: "GitHub", href: "https://github.com/HarianthK", external: true },
-  { label: "LinkedIn", href: "https://www.linkedin.com/in/harianthk/", external: true },
-  { label: "Résumé", href: "/resume.pdf", external: true },
+  { label: links.emailLabel, href: links.email, primary: true },
+  { label: "GitHub", href: links.github, external: true },
+  { label: "LinkedIn", href: links.linkedin, external: true },
+  { label: "Résumé", href: links.resume, external: true },
 ]
 
 /**
@@ -12,10 +14,10 @@ const LINKS = [
  */
 export function ContactSection() {
   return (
-    <section id="contact" className="relative px-6 py-32 md:px-14 md:py-40">
+    <section id="contact" className="relative px-6 py-20 md:px-14 md:py-28">
       <div className="mx-auto max-w-368">
         <p className="font-mono text-xs uppercase tracking-[0.3em] text-primary">
-          <span className="text-primary/50">06</span> Contact
+          <span className="text-muted-foreground">06</span> Contact
         </p>
 
         <div className="mt-10 grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)] lg:gap-20">
@@ -48,7 +50,7 @@ export function ContactSection() {
           </ul>
         </div>
 
-        <p className="mt-28 font-mono text-xs text-muted-foreground/50">
+        <p className="mt-28 font-mono text-xs text-muted-foreground">
           © {new Date().getFullYear()} Harianth Kalavala
         </p>
       </div>

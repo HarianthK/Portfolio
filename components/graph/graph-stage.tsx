@@ -97,12 +97,12 @@ export function GraphStage({ highlight = null, framing = "immersive", showReadou
             <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{shown.detail}</p>
           )}
           {shown.meta && (
-            <p className="mt-2 font-mono text-xs text-muted-foreground/80">{shown.meta}</p>
+            <p className="mt-2 font-mono text-xs text-muted-foreground">{shown.meta}</p>
           )}
           {/* Only label it pinned when the pinned node is the one on show —
               otherwise a hover preview would claim to be pinned. */}
           {pinned && shown.id === pinned.id && (
-            <p className="mt-3 font-mono text-[0.65rem] uppercase tracking-widest text-primary/70">
+            <p className="mt-3 font-mono text-[0.65rem] uppercase tracking-widest text-primary">
               pinned · press esc to dismiss
             </p>
           )}

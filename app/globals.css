@@ -150,106 +150,15 @@
 
   html {
     scroll-behavior: smooth;
+    /* Anchored sections stop below the fixed header, not under it. */
+    scroll-padding-top: 3.5rem;
   }
-}
 
-@keyframes float {
-  0%,
-  100% {
-    transform: translateY(0px);
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 3px;
+    border-radius: 2px;
   }
-  50% {
-    transform: translateY(-20px);
-  }
-}
-
-@keyframes pulse-glow {
-  0%,
-  100% {
-    opacity: 0.5;
-  }
-  50% {
-    opacity: 1;
-  }
-}
-
-/* Added new animations for enhanced visual effects */
-@keyframes gradient {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
-
-@keyframes shimmer {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(100%);
-  }
-}
-
-@keyframes glow-pulse {
-  0%,
-  100% {
-    box-shadow: 0 0 20px rgba(240, 180, 41, 0.28);
-  }
-  50% {
-    box-shadow: 0 0 40px rgba(240, 180, 41, 0.55);
-  }
-}
-
-@keyframes pulse-right {
-  from {
-    left: -12%;
-  }
-  to {
-    left: 112%;
-  }
-}
-
-@keyframes pulse-down {
-  from {
-    top: -12%;
-  }
-  to {
-    top: 112%;
-  }
-}
-
-.animate-float {
-  animation: float 6s ease-in-out infinite;
-}
-
-.animate-pulse-glow {
-  animation: pulse-glow 3s ease-in-out infinite;
-}
-
-/* Added new animation classes */
-.animate-gradient {
-  animation: gradient 8s ease infinite;
-}
-
-.animate-shimmer {
-  animation: shimmer 2s infinite;
-}
-
-.animate-glow-pulse {
-  animation: glow-pulse 2s ease-in-out infinite;
-}
-
-.animate-pulse-right {
-  animation: pulse-right linear infinite;
-}
-
-.animate-pulse-down {
-  animation: pulse-down linear infinite;
 }
 
 /*

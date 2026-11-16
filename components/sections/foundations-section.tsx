@@ -53,12 +53,12 @@ const EDUCATION = [
  */
 export function FoundationsSection() {
   return (
-    <section id="foundations" className="section-grid relative px-6 py-28 md:px-14 md:py-36">
+    <section id="foundations" className="section-grid relative px-6 py-20 md:px-14 md:py-28">
       <div className="mx-auto max-w-5xl">
         <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="font-mono text-xs uppercase tracking-[0.3em] text-primary">
-              <span className="text-primary/50">05</span> Foundations
+              <span className="text-muted-foreground">02</span> Foundations
             </p>
             <h2 className="mt-4 font-serif text-4xl leading-tight text-foreground md:text-5xl">
               Where the data instincts came from
@@ -81,7 +81,7 @@ export function FoundationsSection() {
             >
               <dt>
                 <p className="font-mono text-xs text-primary">{entry.period}</p>
-                <p className="mt-2 font-mono text-[0.7rem] uppercase tracking-wider text-muted-foreground/60">
+                <p className="mt-2 font-mono text-[0.7rem] uppercase tracking-wider text-muted-foreground">
                   {entry.place}
                 </p>
               </dt>

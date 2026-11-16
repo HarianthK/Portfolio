@@ -172,16 +172,16 @@ const PROJECTS: Project[] = [
 // everything to the same importance. See DOCS.md.
 export function BuiltSection() {
   return (
-    <section id="built" className="relative px-6 py-28 md:px-14 md:py-36">
+    <section id="built" className="relative px-6 py-20 md:px-14 md:py-28">
       <div className="mx-auto max-w-5xl">
         <p className="font-mono text-xs uppercase tracking-[0.3em] text-primary">
-          <span className="text-primary/50">04</span> Built
+          <span className="text-muted-foreground">03</span> Built
         </p>
         <h2 className="mt-4 max-w-lg font-serif text-4xl leading-tight text-foreground md:text-5xl">
           Outside the day job
         </h2>
 
-        <div className="mt-16 space-y-20">
+        <div className="mt-12 space-y-14">
           {PROJECTS.map((project, i) => {
             const hasFigure = Boolean(project.figure)
             // Alternate the figure's side so the eye keeps moving, but only when
@@ -192,7 +192,7 @@ export function BuiltSection() {
             <article
               key={project.name}
               className={cn(
-                "border-t border-border pt-10",
+                "border-t border-border pt-8",
                 hasFigure && "grid gap-8 md:gap-14",
                 hasFigure &&
                   (figureLeft
@@ -210,7 +210,7 @@ export function BuiltSection() {
 
                 <ul className="mt-6 flex flex-wrap gap-x-4 gap-y-2">
                   {project.stack.map((item) => (
-                    <li key={item} className="font-mono text-xs text-muted-foreground/70">
+                    <li key={item} className="font-mono text-xs text-muted-foreground">
                       {item}
                     </li>
                   ))}

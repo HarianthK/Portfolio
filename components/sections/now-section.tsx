@@ -8,10 +8,10 @@ import { FigureBlock } from "@/components/figure-block"
  */
 export function NowSection() {
   return (
-    <section id="now" className="section-grid relative px-6 py-28 md:px-14 md:py-36">
+    <section id="now" className="section-grid relative px-6 py-20 md:px-14 md:py-28">
       <div className="mx-auto max-w-6xl">
         <p className="font-mono text-xs uppercase tracking-[0.3em] text-primary">
-          <span className="text-primary/50">02</span> Now
+          <span className="text-muted-foreground">01</span> Now
         </p>
 
         <div className="mt-10 grid gap-14 lg:grid-cols-[minmax(0,20rem)_minmax(0,1fr)] lg:gap-20">
@@ -20,7 +20,7 @@ export function NowSection() {
             <h2 className="font-serif text-4xl leading-tight text-foreground">
               AI Engineer at XNode AI
             </h2>
-            <p className="mt-3 font-mono text-xs text-muted-foreground/70">
+            <p className="mt-3 font-mono text-xs text-muted-foreground">
               06/2025 – Present · Remote
             </p>
 
