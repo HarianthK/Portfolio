@@ -45,7 +45,12 @@ and the biggest one is usually coverage, which ages badly and says little.
 draw a line between two points. Deciding which line is prettier is the work, and
 it is checkable against the roads Arizona already designates as scenic.
 
-**Registry Points** shows dependencies removed rather than features shipped.
+**Registry Points** showed dependencies removed, 10 down from 53, until
+2026-11-15. That is housekeeping, not what the lookup does, so the entry now
+carries no figure. **trace-rays** lost "13 breakages caught" the same day for
+the same reason: it counted the test suite, not the pictures. A figure has to be
+about what the project does or how well it does it, and an entry with no such
+number goes without one.
 
 **CHIP-8** used to show that every program in the archive runs. It now shows the
 86 that were quietly running wrong, because six instructions have two accepted
@@ -132,7 +137,7 @@ A look is a palette plus optional effects. The palette is a
 `:root` and `.dark` use, so every component picks it up with no changes. Every
 look is dark (a choice, not a constraint; a light parchment Harry Potter would
 work): picking one switches the theme to dark and removes the light/dark switch
-from the corner pill (the pill is pinned right, so nothing else moves). The visitor's own theme is
+from the header (it is the last control there, so nothing else moves). The visitor's own theme is
 saved under `look-prev-theme` on the way in and restored when they pick Default.
 The graph follows the look through the `--node-*` tokens, re-read when `data-look`
 changes.
@@ -375,3 +380,43 @@ with it, as did a preloaded italic the page never set. Phones now load the
 explorer's live graph only on a tap, as the hero already did, so a phone that
 scrolls the whole page loads no three.js at all. Every Read more and View code
 names its project for screen readers, and the page declares its canonical URL.
+
+## Default look redesign, 2026-11-15
+
+A review of the live page as a stranger meets it found the first screen was
+mostly graph, with the name and one muted sentence at the bottom and no link to
+anything; there was no way around an eleven thousand pixel page; the 2023 story
+came before the current job and the earlier roles came after every project;
+and some small text was dimmed below AA contrast. The 2026-11-08 work had
+already fixed the last of those and put the graph beside the words, so this
+pass was rebuilt on top of it and keeps its copy, corrections, looks, labels
+and "Read more" cards.
+
+What it adds:
+
+- **Hero.** Words first on every screen: role and city, the name, the pitch,
+  then Get in touch and Résumé as buttons with GitHub and LinkedIn beside them,
+  then two facts, the current job and the degree. Both are stated in full
+  further down; the hero repeats them and adds none. A third fact, the upstream
+  pull request count, was tried and dropped as unnecessary. The graph sits
+  beside the words from lg and under them on phones, where it used to come
+  first and push the name below the fold.
+- **Header.** One fixed bar: the name, section links from lg up, the résumé,
+  the look picker and the theme switch. It replaces the corner pill, so there
+  is one set of controls. The bar sits above the hero, not over it, so the
+  graph's labels can no longer slide under the controls during the opening
+  camera move. The look menu opens under the bar's right edge.
+- **Skip link.** The first focusable thing on the page, pointing at `<main>`,
+  which takes focus without drawing a ring round the whole page.
+- **Order.** Hero, Now, Foundations, Built, Explore, Why, Contact. Who he is,
+  what he does now, where he has been, what he has made, then the graph to play
+  with and the personal note before the close. Section numbers follow.
+- **Focus.** Every focusable element gets the solid two pixel ring, not only
+  links, buttons and inputs.
+- **Spacing.** Section padding is five rem on phones and seven on desktops,
+  and the featured projects sit closer together.
+- **Removed.** Seven keyframe animations in globals.css that nothing used, and
+  the last em dashes, which were all in comments.
+
+Left alone on purpose: the palette, the typefaces, the graph, the looks and all
+copy. The site still opens in the dark theme whatever the system setting is.
