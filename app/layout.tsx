@@ -5,7 +5,7 @@ import { Analytics } from "@vercel/analytics/next"
 import { siteUrl } from "@/lib/site"
 import { ScrollProgress } from "@/components/scroll-progress"
 import { ThemeProvider } from "@/components/theme-provider"
-import { ThemeToggle } from "@/components/theme-toggle"
+import { SiteHeader } from "@/components/site-header"
 import "./globals.css"
 
 // Three faces, three jobs. The serif carries the human voice, the mono carries
@@ -71,11 +71,13 @@ export default function RootLayout({
       <body className="font-sans antialiased">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
           <ScrollProgress />
-          {/* The nav bar is gone with the single-page layout, so the theme
-              control lives on its own in the corner. */}
-          <div className="fixed right-4 top-4 z-50">
-            <ThemeToggle />
-          </div>
+          <a
+            href="#now"
+            className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[70] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:text-primary-foreground"
+          >
+            Skip to content
+          </a>
+          <SiteHeader />
           {children}
         </ThemeProvider>
         <Analytics />
