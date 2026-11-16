@@ -118,7 +118,7 @@ export function LookPicker() {
         id="look-menu"
         ref={menu}
         popover="auto"
-        className="fixed inset-auto right-4 top-16 m-0 rounded-lg border border-border bg-popover p-3 text-popover-foreground shadow-lg"
+        className="fixed inset-auto right-4 top-16 m-0 md:right-[max(3.5rem,calc((100vw-72rem)/2))] rounded-lg border border-border bg-popover p-3 text-popover-foreground shadow-lg"
       >
         <fieldset onKeyDown={(e) => (arrowed.current = e.key.startsWith("Arrow"))}>
           <legend className="mb-2 font-mono text-[0.65rem] uppercase tracking-[0.25em] text-muted-foreground">

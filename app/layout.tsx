@@ -5,15 +5,13 @@ import { Analytics } from "@vercel/analytics/next"
 import { siteUrl } from "@/lib/site"
 import { ScrollProgress } from "@/components/scroll-progress"
 import { ThemeProvider } from "@/components/theme-provider"
-import { CornerResume } from "@/components/corner-resume"
-import { ThemeToggle } from "@/components/theme-toggle"
-import { LookPicker } from "@/components/look-picker"
+import { SiteHeader } from "@/components/site-header"
 import { lookBootScript } from "@/lib/looks"
 import "./globals.css"
 
 // Three faces, three jobs. The serif carries the human voice, the mono carries
 // machine output (node labels, metrics, readouts), and Manrope stays out of the
-// way for body copy. Deliberately avoids Inter and Geist — both read as
+// way for body copy. Deliberately avoids Inter and Geist, both read as
 // framework defaults rather than a choice.
 const display = Instrument_Serif({
   subsets: ["latin"],
@@ -84,13 +82,13 @@ export default function RootLayout({
       <body className="font-sans antialiased">
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false} disableTransitionOnChange>
           <ScrollProgress />
-          {/* The nav bar is gone with the single-page layout, so the theme
-              control lives on its own in the corner. */}
-          <header className="fixed right-4 top-4 z-50 flex items-center rounded-full border border-border/60 bg-background/60 p-0.5 backdrop-blur-md">
-            <CornerResume />
-            <LookPicker />
-            <ThemeToggle />
-          </header>
+          <a
+            href="#main"
+            className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[70] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:text-primary-foreground"
+          >
+            Skip to content
+          </a>
+          <SiteHeader />
           {children}
         </ThemeProvider>
         <Analytics />
