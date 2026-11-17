@@ -176,9 +176,9 @@ html[data-look] main h2 {
   text-wrap: balance;
 }
 
-html[data-look="harry-potter"] main h2 {
-  font-family: var(--font-look-hp), var(--font-serif);
-  letter-spacing: -0.01em;
+/* A look's face replaces the display serif everywhere it is used, so no two serifs sit side by side. */
+html[data-look="harry-potter"] {
+  --font-display: var(--font-look-hp);
 }
 
 /* Forest at dusk: green-black, pale parchment, elven gold and leaf green. */
@@ -204,7 +204,7 @@ html[data-look="lord-of-the-rings"] {
   --grid-line: rgba(226, 192, 110, 0.05);
   --node-role: oklch(0.83 0.12 82);
   --node-project: oklch(0.66 0.09 140);
-  --node-tech: oklch(0.7 0.07 120);
+  --node-tech: oklch(0.72 0.03 90);
 }
 
 html[data-look="lord-of-the-rings"] body {
@@ -216,8 +216,8 @@ html[data-look="lord-of-the-rings"] :is(h1, h2) {
   text-shadow: 0 0 24px oklch(0.83 0.12 82 / 0.22);
 }
 
-html[data-look="lord-of-the-rings"] main h2 {
-  font-family: var(--font-look-lotr), var(--font-serif);
+html[data-look="lord-of-the-rings"] {
+  --font-display: var(--font-look-lotr);
 }
 
 /* Winter: cold slate, frost-white text, ice blue and one ember of fire. */
@@ -256,19 +256,23 @@ html[data-look="game-of-thrones"] :is(h1, h2) {
   text-shadow: 0 0 22px oklch(0.9 0.04 225 / 0.22);
 }
 
-html[data-look="game-of-thrones"] main h2 {
+/* Cinzel is all capitals, fine for headings but not for running text, so only headings take it. */
+html[data-look="game-of-thrones"] :is(h1, h2, h3, h4, header a).font-serif {
   font-family: var(--font-look-got), var(--font-serif);
   letter-spacing: 0.03em;
   line-height: 1.15;
   /* Capitals read larger and run wider, so the heading sizes step down by a fifth here. */
+  --text-xl: 1rem;
+  --text-3xl: 1.5rem;
   --text-4xl: 1.8rem;
+  --text-6xl: 3rem;
   --text-5xl: 2.4rem;
   --text-7xl: 3.6rem;
   --text-8xl: 4.8rem;
 }
 
 /* Every look is dark (the picker keeps and restores the visitor's own choice), so the light/dark
-   switch steps aside; it is the last control in the header, so nothing else moves. */
+   switch steps aside; it sits before the picker, so the button just clicked doesn't move. */
 html[data-look] .mode-toggle {
   display: none;
 }

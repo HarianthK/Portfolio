@@ -25,7 +25,7 @@ const store = {
 }
 
 export function LookPicker() {
-  const { resolvedTheme, setTheme } = useTheme()
+  const { theme, setTheme } = useTheme()
   const [look, setLook] = useState<LookId>("default")
   const [jump, setJump] = useState(false)
   const [motion, setMotion] = useState(0)
@@ -76,10 +76,10 @@ export function LookPicker() {
       prevTheme.current = null
       store.del(PREV_THEME_KEY)
     } else {
-      // Every look is drawn dark; remember the visitor's own choice on the way in.
-      if (look === "default" && resolvedTheme) {
-        prevTheme.current = resolvedTheme
-        store.set(PREV_THEME_KEY, resolvedTheme)
+      // Every look is drawn dark; remember the visitor's own choice ("system" included) on the way in.
+      if (look === "default" && theme) {
+        prevTheme.current = theme
+        store.set(PREV_THEME_KEY, theme)
       }
       root.setAttribute("data-look", next)
       store.set(LOOK_STORAGE_KEY, next)
@@ -103,7 +103,7 @@ export function LookPicker() {
         title={`Look: ${current.label}`}
         onPointerEnter={prefetch}
         onFocus={prefetch}
-        className="relative size-11 rounded-full text-muted-foreground hover:text-foreground"
+        className="relative size-11 rounded-full text-muted-foreground hover:bg-muted hover:text-foreground dark:hover:bg-muted"
       >
         <Sparkles className="h-[1.1rem] w-[1.1rem]" />
         {look !== "default" && (

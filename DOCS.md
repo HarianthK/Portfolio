@@ -160,7 +160,7 @@ To add a look:
 3. If it has motion, write the effect in `components/looks/` and register it in
    `LOADERS` in `components/look-picker.tsx`.
 4. For a heading face, declare it in `app/layout.tsx` with `preload: false` and a
-   `variable`, and set `font-family` in the look's block in `globals.css`.
+   `variable`, and point `--font-display` at it in the look's block in `globals.css`.
 
 Effects load lazily because the default visitor should download nothing for a
 theme they never chose. Each look has one entry file (`components/looks/star-wars.tsx`)
@@ -286,17 +286,24 @@ canvas that idles when nothing moves, pauses in a hidden tab and draws one still
 motion; dividers that draw in as each section scrolls into view; headings revealed once; and a
 pointer helper that ignores clicks on anything a visitor reads or uses.
 
+The kit re-measures the text column whenever anything inside `main` is added or resized, because the
+hero graph's canvas mounts after the look starts; measuring once left effects at full strength over
+the hero graph. Dividers are capped at 720px and centred, and stay invisible until their section has
+been seen. A look's face replaces `--font-display`, so every serif on the page switches together;
+Game of Thrones is the exception, since Cinzel is all capitals, and sets it on headings only. The
+light/dark switch sits before the look picker, so hiding it in a look never moves the picker.
+
 - Harry Potter: candlelit palette, IM Fell English headings, floating candles with dim wax, gold
   sparkles from the cursor and bursts on background clicks, gold ink dividers from a wax seal,
   headings that bleed in like ink, a parchment glow on hovered cards.
 - Lord of the Rings: forest palette, Cormorant Garamond headings (Uncial Antiqua turned "AI Engineer at"
   into "λI Ensineer αc", and even as a lone initial its A reads as a lambda), wandering elven lights and autumn
   leaves, a journey map down the left margin (dotted route, hills, trees and a gold ring that
-  travels down it with the scroll and flares once on reaching Contact, fading out beside sections whose text reaches the edge), a soft
+  travels down it with the scroll and flares once on reaching Contact, fading out beside sections whose text or graph comes within 92px of the edge), a soft
   light that follows the cursor, map-line dividers with a compass star, headings that glow in from
   fire to gold.
 - Game of Thrones: ice and fire. Cinzel headings, snow in three depths with gusts of wind that
-  turns into rising embers further down the page, frost at the screen's edges, longsword dividers
+  turns into rising embers further down the page, frost at the screen's edges (none on phones), longsword dividers
   (pommel, grip, crossguard, fullered blade) with a glint, embers on background clicks, headings
   that thaw from frost, and an ice-and-fire graph (ice roles, ember projects, steel tech). Past
   the hero, flakes over the text are drawn smaller than a full stop, and fire in the margins

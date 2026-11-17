@@ -55,8 +55,8 @@ function lightSprite() {
   return c
 }
 
-// The route's x at height y: a slow meander down the left margin, inside its first 120 px.
-const routeX = (y: number) => 62 + Math.sin(y / 140) * 16 + Math.sin(y / 53) * 5
+// The route's x at height y: a slow meander down the left margin, inside its first 80 px.
+const routeX = (y: number) => 44 + Math.sin(y / 140) * 10 + Math.sin(y / 53) * 3
 
 export default function LordOfTheRings() {
   useEffect(() => {
@@ -83,9 +83,9 @@ export default function LordOfTheRings() {
       last = now
 
       // A journey map in the left margin: a dotted route with hills and trees, and a gold ring that
-      // travels down it as the page scrolls. It fades out beside sections whose text reaches the edge.
+      // travels down it as the page scrolls. It fades out beside text or a graph that comes near it.
       const c = sky.column()
-      const target = c && c.margin >= 132 && c.margin < Infinity ? 1 : 0
+      const target = c && Math.min(c.margin, c.left) >= 92 && c.margin < Infinity ? 1 : 0
       mapAlpha = still ? target : mapAlpha + (target - mapAlpha) * Math.min(1, dt * 4)
       if (mapAlpha > 0.01) {
         ctx.globalAlpha = mapAlpha
@@ -102,7 +102,7 @@ export default function LordOfTheRings() {
         ctx.strokeStyle = "rgba(226, 192, 110, 0.32)"
         for (const k of marks) {
           const y = top + k.y * (bottom - top)
-          const x = routeX(y) + (k.y * 97 % 1 < 0.5 ? -26 : 26)
+          const x = routeX(y) + (k.y * 97 % 1 < 0.5 ? -18 : 18)
           ctx.beginPath()
           if (k.kind === "hill") {
             ctx.moveTo(x - 9, y + 4); ctx.lineTo(x - 3, y - 5); ctx.lineTo(x + 1, y + 1)

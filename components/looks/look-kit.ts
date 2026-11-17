@@ -59,14 +59,29 @@ export function fadeOverText(el: HTMLElement, alpha: number, onColumn?: (c: Retu
       : `linear-gradient(90deg, #000 ${c.left - 56}px, rgb(0 0 0 / ${alpha}) ${c.left - 8}px, rgb(0 0 0 / ${alpha}) ${c.right + 8}px, #000 ${c.right + 56}px)`
     if (next !== mask) el.style.maskImage = mask = next
   }
-  const ro = new ResizeObserver(() => {
-    spans = measure()
-    update()
+  let queued = 0
+  const remeasure = () => {
+    queued ||= requestAnimationFrame(() => {
+      queued = 0
+      spans = measure()
+      update()
+    })
+  }
+  const ro = new ResizeObserver(remeasure)
+  const main = document.querySelector("main") ?? document.body
+  ro.observe(main)
+  // The hero graph's canvas mounts after the look, and sizes itself later, so watch for both.
+  const mo = new MutationObserver(() => {
+    main.querySelectorAll("canvas").forEach((c) => ro.observe(c))
+    remeasure()
   })
-  ro.observe(document.querySelector("main") ?? document.body)
+  mo.observe(main, { childList: true, subtree: true })
+  main.querySelectorAll("canvas").forEach((c) => ro.observe(c))
   window.addEventListener("scroll", update, { passive: true })
   update()
   return () => {
+    cancelAnimationFrame(queued)
+    mo.disconnect()
     ro.disconnect()
     window.removeEventListener("scroll", update)
   }
@@ -144,6 +159,9 @@ export function decorate(prefix: string, make: (i: number) => HTMLElement, waitC
   const dividers = sections.map((section, i) => {
     const d = make(i)
     d.setAttribute("aria-hidden", "true")
+    d.dataset.divider = ""
+    // Capped and centred, so a wide screen doesn't get a full-width bar.
+    Object.assign(d.style, { maxWidth: "720px", marginInline: "auto" })
     if (still) d.classList.add(`${prefix}-lit`)
     section.append(d)
     return d
@@ -177,7 +195,10 @@ export function decorate(prefix: string, make: (i: number) => HTMLElement, waitC
     ;[...sections, ...waiting].forEach((el) => io.observe(el))
     window.addEventListener("scroll", onScroll, { passive: true })
   }
-  const unprint = addStyle(`@media print { .${waitClass} { opacity: 1 !important; } }`)
+  // An unlit divider shows nothing, not the stub of a hilt or star waiting for its section.
+  const unprint = addStyle(`@media print { .${waitClass} { opacity: 1 !important; } }
+[data-divider] { transition: opacity 0.4s; }
+[data-divider]:not(.${prefix}-lit) { opacity: 0; }`)
   return () => {
     io.disconnect()
     window.removeEventListener("scroll", onScroll)

@@ -45,7 +45,8 @@ function toHex(css: string): string {
 
 export function readGraphPalette(): GraphPalette {
   const root = document.documentElement
-  const theme: GraphTheme = root.classList.contains("light") ? "light" : "dark"
+  // Every look is drawn dark, even if a light class is left on <html>.
+  const theme: GraphTheme = !root.dataset.look && root.classList.contains("light") ? "light" : "dark"
   if (!root.dataset.look) return DEFAULT[theme]
   const style = getComputedStyle(root)
   const token = (name: string) => toHex(style.getPropertyValue(name).trim())

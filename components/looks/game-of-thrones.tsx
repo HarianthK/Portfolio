@@ -7,8 +7,9 @@ import { addStyle, canvasLayer, decorate, isLite, isStill, pointer, rand } from 
 // screen's edges, longsword dividers and headings that thaw in. See DOCS.md "Looks".
 const CSS = `
 .got-frost { position: fixed; inset: 0; pointer-events: none; z-index: -5; opacity: 0;
-  background: radial-gradient(ellipse 75% 70% at 50% 50%, transparent 72%, rgb(200 228 255 / 0.10) 88%, rgb(220 238 255 / 0.22));
-  box-shadow: inset 0 0 70px rgb(190 225 255 / 0.18); animation: got-creep 3s ease-out 0.3s forwards; }
+  background: radial-gradient(ellipse 75% 70% at 50% 50%, transparent 72%, rgb(200 228 255 / 0.05) 88%, rgb(220 238 255 / 0.11));
+  box-shadow: inset 0 0 70px rgb(190 225 255 / 0.09); animation: got-creep 3s ease-out 0.3s forwards; }
+@media (max-width: 639px) { .got-frost { display: none; } }
 @keyframes got-creep { to { opacity: 1; } }
 
 .got-blade { position: absolute; top: 0; left: 7%; right: 7%; height: 26px; transform: translateY(-50%);
@@ -23,7 +24,7 @@ const CSS = `
 .got-blade i { position: relative; flex: 1; height: 8px; overflow: hidden; transform: scaleX(0); transform-origin: left;
   clip-path: polygon(0 0, 96% 15%, 100% 50%, 96% 85%, 0 100%);
   background: linear-gradient(transparent 44%, rgb(40 50 62 / 0.55) 44% 56%, transparent 56%),
-    repeating-linear-gradient(100deg, #aeb8c3 0 9px, #98a3af 9px 15px, #b9c3cd 15px 22px, #a2adb8 22px 28px);
+    linear-gradient(#c9d2dc, #98a3af 50%, #7d8894);
   box-shadow: 0 0 10px rgb(170 210 255 / 0.3); transition: transform 1s cubic-bezier(0.25, 0.8, 0.25, 1); }
 .got-blade[data-side="right"] i { transform-origin: right; clip-path: polygon(4% 15%, 100% 0, 100% 100%, 4% 85%, 0 50%); }
 .got-blade i::after { content: ""; position: absolute; inset: 0; transform: translateX(-120%);

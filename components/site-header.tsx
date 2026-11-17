@@ -9,7 +9,7 @@ const NAV = [
   { label: "Contact", href: "#contact" },
 ]
 
-// One bar: the name, the way to each section, the résumé, the look picker and the theme switch.
+// One bar: the name, the way to each section, the résumé, the theme switch and the look picker.
 export function SiteHeader() {
   return (
     <header className="fixed inset-x-0 top-0 z-50 border-b border-border/60 bg-background/80 px-6 backdrop-blur-md md:px-14">
@@ -39,8 +39,8 @@ export function SiteHeader() {
           >
             Résumé
           </a>
-          <LookPicker />
           <ThemeToggle />
+          <LookPicker />
         </div>
       </div>
     </header>
