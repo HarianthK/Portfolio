@@ -38,6 +38,9 @@ html[data-look="harry-potter"] :is(#built article, #foundations dl > div):is(:ho
 }
 `
 
+// The narrowest side margin a candle fits in.
+const MIN_MARGIN = 56
+
 type Candle = { x: number; y: number; s: number; phase: number; bob: number }
 type Spark = { x: number; y: number; vx: number; vy: number; t: number; life: number; r: number; white: boolean }
 
@@ -52,13 +55,15 @@ export default function HarryPotter() {
       }, "hp-wait", "hp-show"),
     )
 
-    // Candles hang at fixed spots across the sky and bob; nearer ones are larger and brighter.
-    // The layer fades to a quarter over the text column, and the wax is never brighter than the text.
+    // Candles hang in the side margins and bob; nearer ones are larger and brighter.
+    // With no margin to hang in (phones), only the flames are drawn, across the width.
     let candles: Candle[] = []
     const sky = canvasLayer(-10, (ctx, w, h, now) => {
       const shift = window.scrollY * -0.04
+      const m = sky.column()?.page ?? 0
+      const wax = m >= MIN_MARGIN
       for (const c of candles) {
-        const x = c.x * w
+        const x = !wax ? c.x * w : c.x < 0.5 ? 14 + c.x * 2 * (m - 28) : w - 14 - (1 - c.x) * 2 * (m - 28)
         const y = c.y * h + Math.sin(now / 1900 + c.phase) * c.bob + shift * c.s
         const flick = 0.85 + 0.15 * Math.sin(now / 90 + c.phase * 7) * Math.sin(now / 230 + c.phase)
         ctx.globalAlpha = 0.3 + 0.35 * c.s
@@ -67,22 +72,24 @@ export default function HarryPotter() {
         glow.addColorStop(1, "rgba(255, 170, 80, 0)")
         ctx.fillStyle = glow
         ctx.fillRect(x - 50 * c.s, y - 72 * c.s, 100 * c.s, 100 * c.s)
-        const body = ctx.createLinearGradient(x - 4 * c.s, 0, x + 4 * c.s, 0)
-        body.addColorStop(0, "#a8987a")
-        body.addColorStop(0.5, "#d2c3a2")
-        body.addColorStop(1, "#968868")
-        ctx.fillStyle = body
-        ctx.fillRect(x - 4 * c.s, y - 10 * c.s, 8 * c.s, 40 * c.s)
-        ctx.fillStyle = "#3b2a1a"
-        ctx.fillRect(x - 0.6 * c.s, y - 14 * c.s, 1.2 * c.s, 4 * c.s)
+        if (wax) {
+          const body = ctx.createLinearGradient(x - 4 * c.s, 0, x + 4 * c.s, 0)
+          body.addColorStop(0, "#b39a68")
+          body.addColorStop(0.5, "#e6d3a3")
+          body.addColorStop(1, "#9c8455")
+          ctx.fillStyle = body
+          ctx.fillRect(x - 4 * c.s, y - 10 * c.s, 8 * c.s, 40 * c.s)
+          ctx.fillStyle = "#3b2a1a"
+          ctx.fillRect(x - 0.6 * c.s, y - 14 * c.s, 1.2 * c.s, 4 * c.s)
+        }
         ctx.fillStyle = "#ffe7a8"
         ctx.beginPath()
         ctx.ellipse(x, y - 19 * c.s, 2.6 * c.s * flick, 6 * c.s * flick, 0, 0, Math.PI * 2)
         ctx.fill()
       }
       ctx.globalAlpha = 1
-    }, { mask: 0.22, onResize: (w) => {
-      const n = isLite() ? 6 : 13
+    }, { mask: 0.22, onResize: () => {
+      const n = isLite() ? 6 : 10
       candles = Array.from({ length: n }, (_, i) => ({
         x: (i + rand(0.2, 0.8)) / n, y: rand(0.12, 0.78), s: rand(0.55, 1.15), phase: rand(0, 6), bob: rand(4, 12),
       }))

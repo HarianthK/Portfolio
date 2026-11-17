@@ -119,7 +119,7 @@ html[data-look="star-wars"] {
   --grid-line: rgba(140, 170, 255, 0.06);
   --node-role: oklch(0.86 0.16 90);
   --node-project: oklch(0.74 0.14 235);
-  --node-tech: oklch(0.6 0.05 240);
+  --node-tech: oklch(0.78 0.12 155);
 }
 
 html[data-look="star-wars"] body {
@@ -135,34 +135,34 @@ html[data-look="star-wars"] a:hover {
   text-shadow: 0 0 12px oklch(0.74 0.14 235 / 0.6);
 }
 
-/* Candlelit stone: warm near-black, parchment text, gold and a deep crimson. */
+/* Candles at night: deep plum, parchment text, gold and amethyst. */
 html[data-look="harry-potter"] {
   /* Background, primary and accent are copied as the swatch in lib/looks.ts. */
-  --background: oklch(0.15 0.022 45);
+  --background: oklch(0.15 0.035 305);
   --foreground: oklch(0.93 0.03 85);
-  --card: oklch(0.2 0.028 45);
+  --card: oklch(0.2 0.04 305);
   --card-foreground: oklch(0.93 0.03 85);
-  --popover: oklch(0.2 0.028 45);
+  --popover: oklch(0.2 0.04 305);
   --popover-foreground: oklch(0.93 0.03 85);
   --primary: oklch(0.82 0.13 85);
-  --primary-foreground: oklch(0.18 0.03 45);
-  --secondary: oklch(0.26 0.035 40);
+  --primary-foreground: oklch(0.18 0.035 305);
+  --secondary: oklch(0.26 0.045 305);
   --secondary-foreground: oklch(0.93 0.03 85);
-  --muted: oklch(0.26 0.035 40);
-  --muted-foreground: oklch(0.76 0.04 75);
-  --accent: oklch(0.58 0.17 25);
-  --accent-foreground: oklch(0.96 0.02 85);
-  --border: oklch(0.32 0.04 45);
-  --input: oklch(0.32 0.04 45);
+  --muted: oklch(0.26 0.045 305);
+  --muted-foreground: oklch(0.78 0.035 80);
+  --accent: oklch(0.74 0.12 305);
+  --accent-foreground: oklch(0.18 0.035 305);
+  --border: oklch(0.33 0.05 305);
+  --input: oklch(0.33 0.05 305);
   --ring: oklch(0.82 0.13 85);
   --grid-line: rgba(233, 196, 106, 0.05);
   --node-role: oklch(0.82 0.13 85);
-  --node-project: oklch(0.5 0.12 22);
-  --node-tech: oklch(0.72 0.08 60);
+  --node-project: oklch(0.7 0.14 305);
+  --node-tech: oklch(0.86 0.04 85);
 }
 
 html[data-look="harry-potter"] body {
-  background-image: radial-gradient(ellipse 70% 45% at 50% 0%, oklch(0.28 0.06 60 / 0.45), transparent 70%);
+  background-image: radial-gradient(ellipse 70% 45% at 50% 0%, oklch(0.3 0.08 300 / 0.45), transparent 70%);
   background-attachment: fixed;
 }
 

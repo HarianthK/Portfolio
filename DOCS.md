@@ -177,8 +177,9 @@ leaves the DOM and listener counts exactly as they were.
 
 Star Wars effects (`components/looks/star-wars-fx.tsx`):
 
-- Lightsaber dividers: a hilt and blade on the top edge of every section after
-  the hero, blue, green or gold in turn, alternating sides. An
+- Lightsaber dividers: a hilt and a 320 px blade centred on the top edge of
+  every section after the hero, blue and green in turn, pointing left and right
+  in turn. Five colours at full width read as neon tubes. An
   IntersectionObserver ignites it (a CSS scale transition) the first time the
   section comes into view, and it hums (an opacity flicker) only while visible.
 - Cursor trail: a short blue blade following the mouse, only when the device
@@ -201,8 +202,8 @@ Space battle (`components/looks/star-wars-battle.tsx`, ships in
 `star-wars-ships.ts`): a second fixed canvas behind the page (`z-index: -10`,
 `pointer-events: none`), above the starfield and below all content.
 
-- Every 15 to 30 seconds (random) a skirmish of a few seconds flies along one
-  smooth curve: one or two TIE fighters chased by one or two X-wings firing red
+- Every 15 to 30 seconds (random; the first after 8 to 15) a skirmish of a few
+  seconds flies along one smooth curve, one at a time: one or two TIE fighters chased by one or two X-wings firing red
   bolts, sometimes a trailing TIE firing green at the X-wings. Each ship follows
   the same curve a little later and weaves sideways, which reads as a chase.
   Half the time the lead TIE is hit and breaks up in a flash and sparks.
@@ -210,14 +211,18 @@ Space battle (`components/looks/star-wars-battle.tsx`, ships in
   the speed with TIEs on its tail. A Star Destroyer glides across the top of the
   far distance (70 seconds, very dim) first after 30 to 60 seconds, then every
   90 to 180 seconds.
-- Depth: each skirmish picks near, mid or far. Farther is smaller (X-wing 56,
-  39 or 25 px long), dimmer (opacity 0.6, 0.42, 0.28) and slower. Phones use
-  only mid and far at 0.6 size and fewer ships. Ships drift slightly with
-  scroll, like the starfield.
-- Readability: near and mid fights always keep to a side margin (near needs
-  200 px beside the 1152 px column, mid 110 px); only far fights (small, 0.35
-  opacity) cross the screen, and narrower screens get only those. The canvas is
-  also faded over the text column like the other looks' backgrounds (below).
+- Depth: each skirmish picks near, mid or far. Farther is smaller (X-wing 90,
+  64 or 45 px long), dimmer (opacity 0.9, 0.7, 0.35) and slower. Touch screens
+  get 0.6 size and fewer ships. Ships drift slightly with scroll, like the
+  starfield.
+- Readability: every fight flies up or down one side margin and never behind
+  the text. Near needs 200 px beside the 1152 px column, mid 170 px, far 100 px,
+  so a screen narrower than 1352 px (phones, most laptops) gets no fights, only
+  the destroyer; even faded to a quarter, ships crossing the column showed as
+  smudges behind paragraphs. No fight starts while the Explore panel is on
+  screen, because the panel is opaque, reaches into the margins and cut ships
+  in half. The canvas is also faded over the text column like the other looks'
+  backgrounds (below).
 - Frames run only while a ship, bolt or spark is in flight. A hidden tab drops
   the fight and skips its turn. Pixel ratio is capped at 2. Unmount clears both
   timers, the frame, the listeners and the canvas.
@@ -293,9 +298,13 @@ been seen. A look's face replaces `--font-display`, so every serif on the page s
 Game of Thrones is the exception, since Cinzel is all capitals, and sets it on headings only. The
 light/dark switch sits before the look picker, so hiding it in a look never moves the picker.
 
-- Harry Potter: candlelit palette, IM Fell English headings, floating candles with dim wax, gold
-  sparkles from the cursor and bursts on background clicks, gold ink dividers from a wax seal,
-  headings that bleed in like ink, a parchment glow on hovered cards.
+- Harry Potter: candles at night. A deep plum palette with gold and amethyst (the first palette,
+  warm near-black with gold and crimson, was hard to tell from Default, and its crimson accent sat
+  beside the red crosses in the Now diagram), IM Fell English headings, floating candles in the
+  side margins (from the kit's page margin; under 56px of margin, as on phones, only the flames
+  are drawn, since faded wax over text read as grey sticks), gold sparkles from the cursor and
+  bursts on background clicks, gold ink dividers from a wax seal, headings that bleed in like ink,
+  a parchment glow on hovered cards. Graph: gold roles, amethyst projects, parchment tools.
 - Lord of the Rings: forest palette, Cormorant Garamond headings (Uncial Antiqua turned "AI Engineer at"
   into "λI Ensineer αc", and even as a lone initial its A reads as a lambda), wandering elven lights and autumn
   leaves, a journey map down the left margin (dotted route, hills, trees and a gold ring that

@@ -4,7 +4,7 @@ import { useEffect } from "react"
 import { addStyle, canvasLayer, decorate, isStill, pointer } from "@/components/looks/look-kit"
 
 // Everything here is added to the page on mount and removed on unmount. See DOCS.md "Looks".
-const BLADES = ["#4cc3ff", "#ff3b3b", "#59f07a", "#ffcf4a", "#c06bff"]
+const BLADES = ["#4cc3ff", "#59f07a"]
 const TRAIL_MS = 140
 const BOLT_MS = 190
 const SPARK_MS = 280
@@ -15,13 +15,13 @@ type Bolt = { x0: number; y0: number; x1: number; y1: number; t: number }
 
 const CSS = `
 html[data-look="star-wars"] main > section:not(#hero) { overflow-x: clip; }
-.sw-saber { position: absolute; top: 0; left: 5%; right: 5%; height: 8px; display: flex; align-items: center;
+.sw-saber { position: absolute; top: 0; left: 5%; right: 5%; height: 8px; display: flex; align-items: center; justify-content: center;
   transform: translateY(-50%); pointer-events: none; z-index: 1; }
 .sw-saber[data-side="right"] { flex-direction: row-reverse; }
 .sw-saber::before { content: ""; flex: none; width: 26px; height: 7px; border-radius: 2px;
   background: linear-gradient(#a7afbd, #59606e 55%, #2c313b); }
-.sw-blade { flex: 1; height: 3px; border-radius: 3px; background: #fff; transform: scaleX(0); transform-origin: left;
-  box-shadow: 0 0 3px 1px var(--blade), 0 0 10px 2px var(--blade), 0 0 26px 5px color-mix(in oklab, var(--blade) 55%, transparent);
+.sw-blade { flex: 0 1 320px; height: 3px; border-radius: 3px; background: #fff; transform: scaleX(0); transform-origin: left;
+  box-shadow: 0 0 2px 1px var(--blade), 0 0 8px 1px var(--blade), 0 0 18px 2px color-mix(in oklab, var(--blade) 40%, transparent);
   transition: transform 0.75s cubic-bezier(0.2, 0.9, 0.25, 1); }
 .sw-saber[data-side="right"] .sw-blade { transform-origin: right; }
 .sw-lit .sw-blade { transform: scaleX(1); }

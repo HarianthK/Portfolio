@@ -21,6 +21,8 @@ const DEPTHS = [
 const RED = "#ff5a36"
 const GREEN = "#4dff6a"
 const BOLT_MS = 450
+// The narrowest side margin a far fight fits in.
+const MIN_MARGIN = 100
 
 const rand = (a: number, b: number) => a + Math.random() * (b - a)
 const pick = <T,>(xs: T[]) => xs[Math.floor(Math.random() * xs.length)]
@@ -48,7 +50,7 @@ export default function StarWarsBattle() {
     let w = 0
     let h = 0
     let frame = 0
-    // Several skirmishes can overlap: up to three on a wide screen, one on a phone.
+    // One skirmish at a time; the list form keeps the draw loop simple.
     let battles: Battle[] = []
     let sd: { t0: number; dur: number; y: number; size: number } | null = null
     let bolts: Bolt[] = []
@@ -69,20 +71,13 @@ export default function StarWarsBattle() {
 
     // Free width beside the 1152 px content column.
     const margin = () => (w - 1152) / 2
-    // Near and mid fights keep to a side margin; only small, dim far ones cross behind the text.
-    function makePath(far: boolean): Pt[] {
+    // Fights fly up or down one side margin, never behind the text.
+    function makePath(): Pt[] {
       const m = margin()
-      if (!far && m >= 170) {
-        const margin = m
-        const x0 = Math.random() < 0.5 ? 40 : w - margin + 40
-        const xs = () => rand(x0, x0 + margin - 80)
-        const ys = [-90, h * 0.33, h * 0.66, h + 90]
-        if (Math.random() < 0.5) ys.reverse()
-        return ys.map((y) => ({ x: xs(), y }))
-      }
-      const xs = [-90, w * 0.33, w * 0.66, w + 90]
-      if (Math.random() < 0.5) xs.reverse()
-      return xs.map((x) => ({ x, y: rand(h * 0.1, h * 0.9) }))
+      const x0 = Math.random() < 0.5 ? 40 : w - m + 40
+      const ys = [-90, h * 0.33, h * 0.66, h + 90]
+      if (Math.random() < 0.5) ys.reverse()
+      return ys.map((y) => ({ x: rand(x0, x0 + m - 80), y }))
     }
 
     function startBattle() {
@@ -107,7 +102,7 @@ export default function StarWarsBattle() {
         if (!small && Math.random() < 0.35) ships.push(ship("xwing", 1.05, -20, 10, RED))
         if (!small && Math.random() < 0.5) ships.push(ship("tie", 1.3, 0, 12, GREEN))
       }
-      const path = makePath(depth === DEPTHS[2] && (m < 110 || Math.random() < 0.5))
+      const path = makePath()
       let len = 0
       for (let i = 1; i < 4; i++) len += Math.hypot(path[i].x - path[i - 1].x, path[i].y - path[i - 1].y)
       battles.push({
@@ -238,9 +233,15 @@ export default function StarWarsBattle() {
       if (!frame && !document.hidden && (battles.length || sd || bolts.length || bits.length)) frame = requestAnimationFrame(tick)
     }
 
-    function scheduleBattle(ms = test ? 6000 : rand(4000, 10000)) {
+    // The opaque Explore panel reaches into the margins and would cut a ship in half.
+    function panelInView() {
+      const b = document.querySelector("#explorer .rounded-xl.border")?.getBoundingClientRect()
+      return Boolean(b && b.bottom > 0 && b.top < h)
+    }
+
+    function scheduleBattle(ms = test ? 6000 : rand(15000, 30000)) {
       battleTimer = window.setTimeout(() => {
-        if (!document.hidden && battles.length < (w < 640 ? 1 : 3)) {
+        if (!document.hidden && !battles.length && margin() >= MIN_MARGIN && !panelInView()) {
           scroll0 = window.scrollY
           startBattle()
         }
@@ -249,7 +250,7 @@ export default function StarWarsBattle() {
     }
 
     // A Star Destroyer glides through the far distance now and then.
-    function scheduleDestroyer(ms = rand(45000, 90000)) {
+    function scheduleDestroyer(ms = rand(90000, 180000)) {
       sdTimer = window.setTimeout(() => {
         if (!document.hidden && !sd) {
           const small = w < 640
@@ -273,8 +274,8 @@ export default function StarWarsBattle() {
     resize()
     window.addEventListener("resize", resize)
     document.addEventListener("visibilitychange", onVisibility)
-    scheduleBattle(test ? 600 : rand(2000, 5000))
-    scheduleDestroyer(test ? 300 : rand(10000, 25000))
+    scheduleBattle(test ? 600 : rand(8000, 15000))
+    scheduleDestroyer(test ? 300 : rand(30000, 60000))
 
     return () => {
       cancelAnimationFrame(frame)
