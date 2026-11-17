@@ -53,7 +53,7 @@ about what the project does or how well it does it, and an entry with no such
 number goes without one.
 
 **CHIP-8** used to show that every program in the archive runs. It now shows the
-86 that were quietly running wrong, because six instructions have two accepted
+88 that were quietly running wrong, because six instructions have two accepted
 readings and the emulator had been ignoring which one each program asked for.
 Coverage was the easier claim and the less honest one: an emulator that runs
 everything can still be computing the wrong answers, and that is exactly what
@@ -436,3 +436,13 @@ What it adds:
 
 Left alone on purpose: the palette, the typefaces, the graph, the looks and all
 copy. The site still opens in the dark theme whatever the system setting is.
+
+## Pre-merge review, 2026-11-16
+
+On phones the Explore section shows the still picture until "Explore it live"
+is tapped. Its caption said "Loading the graph" the whole time, and the filter
+chips above it changed nothing. The caption is now hidden while the picture
+waits for a tap, and picking a filter loads the live graph, since a filter is a
+request to use it. The chosen chip's amber text on its amber tint was 4.1:1 in
+the light theme, so there it uses the foreground colour. The Star Wars tool
+nodes went from grey-blue to saber green so the three families read apart.

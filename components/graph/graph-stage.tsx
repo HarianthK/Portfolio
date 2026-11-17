@@ -62,6 +62,15 @@ export function GraphStage({
       : fallbackShown
         ? "opacity-100"
         : "hidden"
+  // "Loading" would be untrue while the picture waits for a tap.
+  const captionClass = !tapToLoad || tapped ? "" : lite ? "[&_p]:hidden" : lite === null ? "max-md:[&_p]:hidden pointer-coarse:[&_p]:hidden" : ""
+
+  // A filter chip has nothing to act on in the still picture, so picking one loads the live graph.
+  useEffect(() => {
+    if (!highlight || !tapToLoad || !lite) return
+    setTapped(true)
+    setLoad(true)
+  }, [highlight, tapToLoad, lite])
 
   // Two of these are mounted at once. Without this both render continuously,
   // which measured at 15fps on a desktop; the off-screen one is pure waste.
@@ -117,7 +126,7 @@ export function GraphStage({
       {fallback && (
         <div
           aria-hidden
-          className={`pointer-events-none absolute inset-0 transition-opacity duration-500 motion-reduce:transition-none ${fallbackClass}`}
+          className={`pointer-events-none absolute inset-0 transition-opacity duration-500 motion-reduce:transition-none ${fallbackClass} ${captionClass}`}
         >
           {fallback}
         </div>
@@ -146,7 +155,7 @@ export function GraphStage({
             setTapped(true)
             setLoad(true)
           }}
-          className="absolute left-4 top-0 z-20 inline-flex min-h-11 items-center rounded-full border border-border bg-background/85 px-4 font-mono text-xs text-foreground backdrop-blur"
+          className="absolute left-6 top-3 z-20 inline-flex min-h-11 items-center rounded-full border border-border bg-background/85 px-4 font-mono text-xs text-foreground backdrop-blur"
         >
           Explore it live
         </button>

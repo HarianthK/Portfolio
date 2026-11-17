@@ -70,7 +70,7 @@ export function ExplorerSection({ fallback }: { fallback?: ReactNode }) {
               aria-pressed={active === i}
               className={`inline-flex min-h-11 items-center gap-2 rounded-full border px-4 font-mono text-xs transition-colors ${
                 active === i
-                  ? "border-primary bg-primary/15 text-primary"
+                  ? "border-primary bg-primary/15 text-foreground dark:text-primary"
                   : "border-border text-muted-foreground hover:border-primary/40 hover:text-foreground"
               }`}
             >

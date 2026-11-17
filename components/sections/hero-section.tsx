@@ -19,7 +19,7 @@ export function HeroSection() {
     >
       {/* From lg on the same left edge as every section below. */}
       <div className="relative flex flex-col justify-center px-6 pb-10 pt-12 md:px-14 lg:py-16 lg:pr-0 lg:pl-[max(3.5rem,calc((100cqw-72rem)/2))]">
-        <p className="font-mono text-xs uppercase tracking-[0.3em] text-primary">
+        <p className="font-mono text-xs uppercase tracking-[0.22em] text-primary min-[380px]:tracking-[0.3em]">
           AI Engineer · Phoenix, Arizona
         </p>
         <h1 className="mt-4 font-serif text-6xl leading-[0.9] text-foreground md:text-8xl">
